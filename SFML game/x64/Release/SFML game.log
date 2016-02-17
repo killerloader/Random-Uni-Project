@@ -1,0 +1,20 @@
+﻿  Main.cpp
+Main.cpp(20): warning C4305: '=': truncation from 'double' to 'float'
+Main.cpp(22): warning C4305: '=': truncation from 'double' to 'float'
+Main.cpp(47): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(48): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Main.cpp(68): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(84): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(94): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(108): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(111): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(116): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(122): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(177): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+  Generating code
+e:\sfml game\sfml game\main.cpp(209): warning C4172: returning address of local variable or temporary: test
+  4 of 551 functions ( 0.7%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    3 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  SFML game.vcxproj -> E:\SFML game\x64\Release\SFML game.exe
