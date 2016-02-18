@@ -1,9 +1,12 @@
 #pragma once
+#include <SFGUI/SFGUI.hpp>
+#include <SFGUI/Widgets.hpp>
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
 
-#define MapMakerMode false//create a define for setting if it is the mapmaker or not.
+
+#define MapMakerMode true//create a define for setting if it is the mapmaker or not.
 
 using namespace std;
 
@@ -18,6 +21,7 @@ class fileManager;
 
 struct WrapperClass
 {
+	sf::Event event;
 	int curmapID = 0;
 	void LimitVariable(int, int, int&);
 	sf::RenderWindow &RenderRef;

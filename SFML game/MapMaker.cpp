@@ -3,6 +3,52 @@
 MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 {
 	MapMakrView.setSize(sf::Vector2f(640, 480));
+	windowSFG = sfg::Window::Create();
+	windowSFG->SetPosition(sf::Vector2f(WCR.MapPtr->ViewWidth - 200, WCR.MapPtr->ViewHeight - 480));
+	windowSFG->SetTitle("Object Selector");
+	windowSFG->SetRequisition(sf::Vector2f(200, 200));
+
+	MapIDEntry = sfg::Entry::Create();
+	MapIDLabel = sfg::Label::Create();
+	MapIDLabel->SetText("Map ID: ");
+	MapIDEntry->SetMaximumLength(2);//Only allow 2 digit number max.
+
+	windowSFG->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
+	windowSFG->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
+
+	//setup block names
+	BlockNames.push_back("NULL");
+	BlockNames.push_back("Solid");
+	BlockNames.push_back("Bouncy Block");
+	BlockNames.push_back("Lava");
+	BlockNames.push_back("Finish block");
+
+	BlockNames.push_back("Save Map");
+	BlockNames.push_back("Load Map");
+	BlockNames.push_back("Clear Map");
+
+	box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	for (int i = 0; i < 7; i++)
+	{
+		blockButtons[i] = sfg::Button::Create(BlockNames[i+1]);
+		blockButtons[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, i+1));
+		//box->SetPosition(sf::Vector2f(0.f, 20.f * i));
+
+		box->Pack(blockButtons[i], false);
+	}
+	
+	box->Pack(MapIDLabel, false);
+	box->Pack(MapIDEntry, false);
+	//DrpDown = sfg::ComboBox::Create();
+	//DrpDown->SetRequisition(sf::Vector2f(100, 100));
+	//windowSFG->Add(DrpDown);
+	//DrpDown->Add(button1);
+	//DrpDown->Add(button2);
+	//box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	//box->Pack(DrpDown, false);
+	//windowSFG->Add(box);
+	windowSFG->Add(box);
+	desktop.Add(windowSFG);
 }
 
 MapMaker::~MapMaker()
@@ -10,8 +56,64 @@ MapMaker::~MapMaker()
 
 }
 
+void MapMaker::PollGUIEvents()
+{
+	desktop.HandleEvent(WCR.event);
+}
+
+void MapMaker::mouseEnterWindow(int)
+{
+	MouseOverWindow++;
+}
+
+void MapMaker::mouseLeaveWindow(int)
+{
+	MouseOverWindow--;
+}
+
+void MapMaker::ButtonPress(int test)
+{
+	//button1->SetLabel("Tagggggggg");
+	string Astr = BlockNames[test].toAnsiString();
+	cout << "Setting block to: " << Astr<< endl;
+	switch (test)
+	{
+	case 0:
+		break;
+	case 1:setBlock(1);
+		break;
+	case 2:setBlock(2);
+		break;
+	case 3:setBlock(3);
+		break;
+	case 4:setBlock(4);
+		break;
+	case 5:
+	{
+		unsigned int buf_number(0);
+		std::stringstream sstr(std::string(MapIDEntry->GetText()));
+		sstr >> buf_number;
+		SaveMap(buf_number);
+		break;
+	}
+	case 6:
+	{
+		unsigned int buf_number(0);
+		std::stringstream sstr(std::string(MapIDEntry->GetText()));
+		sstr >> buf_number;
+		LoadMap(buf_number);
+		break;
+	}
+	case 7:ClearMap();
+		break;
+	}
+}
+
 bool MapMaker::LoadMap(int MID)
 {
+	if (MID < 0 || MID>99)
+		return false;
+
 	//curmapID
 	stringstream MapName;
 	MapName << "L:\\Map[" << MID << "].txt";
@@ -31,11 +133,14 @@ bool MapMaker::LoadMap(int MID)
 		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
 			WCR.MapPtr->MapMatrix[i][ii] = FMuse.loadByte();
 	WCR.MapPtr->setupBorders();
+	cout << "Loaded MAP ID: " << MID << endl;
 	return true;
 }
 
 bool MapMaker::SaveMap(int MID)
 {
+	if (MID < 0 || MID>99)
+		return false;
 	stringstream MapName;
 	MapName << "L:\\Map[" << MID << "].txt";
 	fileManager FMuse(WCR);//Create a shortcut reference to file manager.
@@ -48,6 +153,8 @@ bool MapMaker::SaveMap(int MID)
 	for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
 			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii]);
+	cout << "Saved MAP ID: " << MID << endl;
+	return true;
 }
 
 void MapMaker::Draw()
@@ -63,34 +170,43 @@ void MapMaker::Draw()
 	PlaceRect.setSize(sf::Vector2f(32, 32));
 	PlaceRect.setPosition(PlaceX*32, PlaceY*32);
 	WCR.RenderRef.draw(PlaceRect);
+	sfgui.Display(WCR.RenderRef);
 }
+
 
 void MapMaker::Step()
 {
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+	if (MouseOverWindow == 0 && !pressedOffScreen)//Or just check if false?
 	{
-		int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
-		int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
-		WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock);
-	}
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		{
+			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
+			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
+			WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock);
+		}
 
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
-	{
-		int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
-		int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
-		WCR.MapPtr->SetObject(PlaceX, PlaceY, 0);
-	}
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+		{
+			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
+			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
+			WCR.MapPtr->SetObject(PlaceX, PlaceY, 0);
+		}
 
-	if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
-	{
-		int Newx = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32) * 32;
-		int Newy = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32) * 32;
-		WCR.LimitVariable(0, WCR.MapPtr->MapWidth*32 , Newx);
-		WCR.LimitVariable(0, WCR.MapPtr->MapWidth*32 , Newy);
-		WCR.PlrPtr->x = Newx;
-		WCR.PlrPtr->y = Newy;
-		WCR.PlrPtr->PlayerImage.setPosition(WCR.PlrPtr->x, WCR.PlrPtr->y);
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+		{
+			int Newx = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32) * 32;
+			int Newy = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32) * 32;
+			WCR.LimitVariable(0, WCR.MapPtr->MapWidth * 32, Newx);
+			WCR.LimitVariable(0, WCR.MapPtr->MapWidth * 32, Newy);
+			WCR.PlrPtr->x = Newx;
+			WCR.PlrPtr->y = Newy;
+			WCR.PlrPtr->PlayerImage.setPosition(WCR.PlrPtr->x, WCR.PlrPtr->y);
+		}
 	}
+	else if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		pressedOffScreen = true;
+	else
+		pressedOffScreen = false;
 	int ViewMoveSPD = 5;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 		MapMakrView.move(0, -ViewMoveSPD);
@@ -139,6 +255,17 @@ void MapMaker::Step()
 			WCR.MapPtr->setupBorders();
 		}
 	}
+	desktop.Update(clock.restart().asSeconds());
+}
+
+void MapMaker::ClearMap()
+{
+	//cout << "Enter a new map size, width: " << endl;
+	//cin >> WCR.MapPtr->MapWidth;
+	//cout << "Height: " << endl;
+	//cin >> WCR.MapPtr->MapHeight;
+	WCR.MapPtr->MapMatrix = vector<vector<int>>(WCR.MapPtr->MapWidth, vector<int>(WCR.MapPtr->MapHeight, 0));
+	WCR.MapPtr->setupBorders();
 }
 
 void MapMaker::setBlock(int BLK)

@@ -1,4 +1,7 @@
 #include "Main.h"
+/*
+TODO: Fix headers, do not include .h files in headers (or include one which only has predefinitions)
+*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
 {
@@ -54,7 +57,7 @@ void PlayerObject::StepPlayer()
 	AfterImage[AfterImage.size() - 1].setPosition(x, y);
 	AfterImage[AfterImage.size() - 1].setFillColor(sf::Color::White);
 	//after image step
-	int AlphaDec = 15;
+	int AlphaDec = 1;
 	for (int i = 0; i < AfterImage.size(); i++)
 	{
 		if(AfterImage[i].getFillColor().a- AlphaDec <=0)
@@ -201,17 +204,8 @@ enum Etest//Random pointless enum test
 	test2,//id = 1
 	test3//id = 2
 };
-
-char* test()
-{
-	char test[] = "test";
-
-	return test;
-}
-
 int main()
 {
-	cout << test() << endl;
 	//Setup window and window settings.
 	sf::RenderWindow window(sf::VideoMode(640, 480), "Unnamed project");
 	window.setFramerateLimit(60);
@@ -238,10 +232,13 @@ int main()
 	while (window.isOpen())
 	{
 		//Poll events, keyboard wont be placed in here.
-		sf::Event event;
-		while (window.pollEvent(event))
+		
+		while (window.pollEvent(WC.event))
 		{
-			if (event.type == sf::Event::Closed)
+			#if MapMakerMode//Don't poll GUI events if in mapmaker mode.
+				MapMkr.PollGUIEvents();
+			#endif
+			if (WC.event.type == sf::Event::Closed)
 				window.close();
 		}
 		//Get player controls.
@@ -254,7 +251,6 @@ int main()
 		#endif
 		//Clear the window so we can draw new stuff to it.
 		window.clear();
-		
 		MainMap.DrawMap(obj_Player.PlayerView);
 		MainMap.drawBorders();
 		obj_Player.DrawPlayer();
