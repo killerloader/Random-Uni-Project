@@ -13,7 +13,7 @@ Map::Map(WrapperClass &WCR_) : WCR(WCR_) {
 	SolidObj.setFillColor(sf::Color::Blue);
 	SolidObj.setSize(sf::Vector2f(32, 32));
 	//Fill map with null object ids.
-	MapMatrix = vector<vector<int>>(MapWidth, vector<int>(MapHeight, 0));//-1 is a null object id
+	MapMatrix = vector<vector<mapObject>>(MapWidth, vector<mapObject>(MapHeight));//-1 is a null object id
 	setupBorders();
 }
 
@@ -42,7 +42,7 @@ void Map::drawBorders()
 	}
 }
 
-void Map::SetObject(int x, int y, int ID)
+void Map::SetObject(int x, int y, int ID, int TID)
 {
 	//X and Y are grid cells not actual coords.
 	WCR.LimitVariable(0, MapWidth - 1, x);
@@ -52,7 +52,8 @@ void Map::SetObject(int x, int y, int ID)
 		|| y < floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
 		|| y > ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
 		return;
-	MapMatrix[x][y] = ID;
+	MapMatrix[x][y].objectType = ID;
+	MapMatrix[x][y].tileID = TID;
 }
 
 void Map::DrawMap(sf::View& ViewRef)
@@ -76,25 +77,10 @@ void Map::DrawMap(sf::View& ViewRef)
 	for (int i = MinX; i <= MaxX; i++)
 		for (int ii = MinY; ii <= MaxY; ii++)
 		{
-			if (MapMatrix[i][ii] != 0)//Solid here
+			if (MapMatrix[i][ii].tileID != 0)//Not empty space.
 			{
-				SolidObj.setPosition(i * CellSize, ii * CellSize);
-				switch (MapMatrix[i][ii])
-				{
-				case 1://Generic Solid
-					SolidObj.setFillColor(sf::Color::Blue);
-					break;
-				case 2://Bouncy object
-					SolidObj.setFillColor(sf::Color::Green);
-					break;
-				case 3://Death object
-					SolidObj.setFillColor(sf::Color::Red);
-					break;
-				case 4://Finish Line
-					SolidObj.setFillColor(sf::Color(255,128,64));
-					break;
-				}
-				WCR.RenderRef.draw(SolidObj);
+				WCR.MMPtr->GameSprites[MapMatrix[i][ii].tileID-1].setPosition(i * CellSize, ii * CellSize);
+				WCR.RenderRef.draw(WCR.MMPtr->GameSprites[MapMatrix[i][ii].tileID - 1]);
 			}
 		}
 }
@@ -122,9 +108,9 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 			bool IsTrue = false;
 			switch (CheckType)//Check for any
 			{
-			case -2:IsTrue = (MapMatrix[i][ii] != 0); break;
+			case -2:IsTrue = (MapMatrix[i][ii].objectType != 0); break;
 			case 0:break;//Nothing, don't search for empty space. Only search for map edge.
-			default:IsTrue = (MapMatrix[i][ii] == CheckType); break;
+			default:IsTrue = (MapMatrix[i][ii].objectType == CheckType); break;
 			}
 			if (IsTrue)//Object here
 			{
@@ -133,7 +119,7 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 				SolidBoundBox.top = ii * CellSize;
 				SolidBoundBox.width = CellSize; SolidBoundBox.height = CellSize;
 				if (CheckRect.intersects(SolidBoundBox))
-					return MapMatrix[i][ii];
+					return MapMatrix[i][ii].objectType;
 			}
 		}
 	return false;

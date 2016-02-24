@@ -10,11 +10,13 @@ using namespace std;
 #include "MapMaker.h"
 #include "fileManager.h"
 #include "Maps.h"
+#include "mapObject.h"
 
 struct PlayerObject;
 class MapMaker;
 struct Map;
 class fileManager;
+class mapObject;
 
 struct WrapperClass
 {

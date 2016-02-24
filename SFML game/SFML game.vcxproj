@@ -240,12 +240,14 @@
     <ClInclude Include="fileManager.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="MapMaker.h" />
+    <ClInclude Include="mapObject.h" />
     <ClInclude Include="Maps.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="fileManager.cpp" />
     <ClCompile Include="MapMaker.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="mapObject.cpp" />
     <ClCompile Include="Maps.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
