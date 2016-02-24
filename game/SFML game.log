@@ -1,0 +1,62 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(367,5): warning MSB8004: Intermediate Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Intermediate Directory.
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(368,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  fileManager.cpp
+  MapMaker.cpp
+MapMaker.cpp(7): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(173): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(174): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(199): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(200): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(210): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(211): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(219): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(231): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(232): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(238): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(239): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(245): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(246): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+MapMaker.cpp(249): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(250): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(260): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(263): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(266): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+MapMaker.cpp(269): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Main.cpp
+Main.cpp(23): warning C4305: '=': truncation from 'double' to 'float'
+Main.cpp(25): warning C4305: '=': truncation from 'double' to 'float'
+Main.cpp(50): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(51): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Main.cpp(61): warning C4018: '<': signed/unsigned mismatch
+Main.cpp(71): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(87): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(97): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(111): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(114): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(119): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(125): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(180): warning C4244: 'argument': conversion from 'float' to 'int', possible loss of data
+Main.cpp(196): warning C4018: '<': signed/unsigned mismatch
+  Maps.cpp
+Maps.cpp(22): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Maps.cpp(25): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Maps.cpp(26): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Maps.cpp(28): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Maps.cpp(29): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Maps.cpp(32): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Maps.cpp(33): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Maps.cpp(66): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+Maps.cpp(67): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+Maps.cpp(68): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+Maps.cpp(69): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+Maps.cpp(81): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+Maps.cpp(104): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+Maps.cpp(105): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+Maps.cpp(106): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+Maps.cpp(107): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+  Generating code
+  121 of 910 functions (13.3%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    16 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  SFML game.vcxproj -> L:\projects\Random-Uni-Project\\game\SFML game.exe

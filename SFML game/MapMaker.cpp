@@ -119,7 +119,7 @@ void MapMaker::ButtonPress(int test)
 {
 	//button1->SetLabel("Tagggggggg");
 	string Astr = BlockNames[test].toAnsiString();
-	cout << "Setting block to: " << Astr<< endl;
+	
 	switch (test)
 	{
 	case 0:
@@ -160,10 +160,14 @@ bool MapMaker::LoadMap(int MID)
 
 	//curmapID
 	stringstream MapName;
-	MapName << "Map[" << MID << "].txt";
+	MapName << "Maps/Map[" << MID << "].txt";
 	fileManager FMuse(WCR);//Create a shortcut reference to file manager.
 	if (!FMuse.openFile(true, MapName.str().c_str()))
+	{
+		cout << "Could not load map!" << endl;
 		return false;
+	}
+		
 	WCR.MapPtr->MapWidth = FMuse.load4Bytes();
 	WCR.MapPtr->MapHeight = FMuse.load4Bytes();
 	WCR.PlrPtr->x = FMuse.load4Bytes() * 32;
@@ -186,7 +190,7 @@ bool MapMaker::SaveMap(int MID)
 	if (MID < 0 || MID>99)
 		return false;
 	stringstream MapName;
-	MapName << "Map[" << MID << "].txt";
+	MapName << "Maps/Map[" << MID << "].txt";
 	fileManager FMuse(WCR);//Create a shortcut reference to file manager.
 	if (!FMuse.openFile(false, MapName.str().c_str()))
 		return false;
@@ -314,6 +318,7 @@ void MapMaker::ClearMap()
 
 void MapMaker::setBlock(int BLK)
 {
+	cout << "Setting block to: " << BLK << endl;
 	//0 = nothing, 2 = last object type
 	if (BLK >= 1 && BLK <= 4)
 		CurBlock = BLK;

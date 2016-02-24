@@ -5,8 +5,6 @@
 #include <iostream>
 #include <vector>
 
-//#define MapMakerMode false//create a define for setting if it is the mapmaker or not.
-
 using namespace std;
 
 #include "MapMaker.h"
