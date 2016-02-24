@@ -17,7 +17,7 @@ WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 }
 
 PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
-	PlayerView.setSize(sf::Vector2f(640, 480));
+	PlayerView.setSize(sf::Vector2f(1280, 960));
 	//vspeed, hspeed, gravity, haccel, hspeedmax, hfric;
 	hspeed = 0;
 	haccel = 0.4;
@@ -57,7 +57,7 @@ void PlayerObject::StepPlayer()
 	AfterImage[AfterImage.size() - 1].setPosition(x, y);
 	AfterImage[AfterImage.size() - 1].setFillColor(sf::Color::White);
 	//after image step
-	int AlphaDec = 1;
+	int AlphaDec = 15;
 	for (int i = 0; i < AfterImage.size(); i++)
 	{
 		if(AfterImage[i].getFillColor().a- AlphaDec <=0)
@@ -207,7 +207,7 @@ enum Etest//Random pointless enum test
 int main()
 {
 	//Setup window and window settings.
-	sf::RenderWindow window(sf::VideoMode(640, 480), "Unnamed project");
+	sf::RenderWindow window(sf::VideoMode(1280, 960), "Unnamed project");
 	window.setFramerateLimit(60);
 	window.setVerticalSyncEnabled(true);
 
@@ -220,7 +220,7 @@ int main()
 	//Initialize mapmaker if in mapmaker mode.
 	//#if MapMakerMode == true
 	MapMaker MapMkr(WC);
-	#if !MapMakerMode
+	#ifndef MapMakerMode
 	if (MapMkr.LoadMap(WC.curmapID))
 		cout << "Map load failed!" << endl;
 #endif
@@ -235,14 +235,14 @@ int main()
 		
 		while (window.pollEvent(WC.event))
 		{
-			#if MapMakerMode//Don't poll GUI events if in mapmaker mode.
+			#ifdef MapMakerMode//Don't poll GUI events if in mapmaker mode.
 				MapMkr.PollGUIEvents();
 			#endif
 			if (WC.event.type == sf::Event::Closed)
 				window.close();
 		}
 		//Get player controls.
-		#if !MapMakerMode//Don't poll player events if in mapmaker mode.
+		#ifndef MapMakerMode//Don't poll player events if in mapmaker mode.
 			obj_Player.StepPlayer();
 			window.setView(obj_Player.PlayerView);
 		#else
@@ -254,7 +254,7 @@ int main()
 		MainMap.DrawMap(obj_Player.PlayerView);
 		MainMap.drawBorders();
 		obj_Player.DrawPlayer();
-		#if MapMakerMode//Don't poll player events if in mapmaker mode.
+		#ifdef MapMakerMode//Don't poll player events if in mapmaker mode.
 		MapMkr.Draw();
 		#endif
 		//Display the window to the client.

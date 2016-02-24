@@ -14,6 +14,8 @@ public:
 	sfg::SFGUI sfgui;
 	sfg::Window::Ptr windowSFG;
 	sfg::Button::Ptr blockButtons[7];
+	sfg::Button::Ptr lvlIdMinus;
+	sfg::Button::Ptr lvlIdPlus;
 	sfg::Entry::Ptr MapIDEntry;
 	sfg::Label::Ptr MapIDLabel;
 
@@ -21,6 +23,7 @@ public:
 	bool pressedOffScreen = false;//if pressed off screen, don't place blocks until released and pressed again on screen.
 
 	sfg::Box::Ptr box;
+	sfg::Box::Ptr MapBox;
 	//sfg::Button::Ptr button2;
 	sfg::Desktop desktop;
 	//sfg::ComboBox::Ptr DrpDown;
@@ -28,7 +31,7 @@ public:
 	sf::Clock clock;
 
 	vector<sf::String> BlockNames;
-
+	void buttonPressChangeMapID(int);
 	void ButtonPress(int);
 	void mouseEnterWindow(int);
 	void mouseLeaveWindow(int);

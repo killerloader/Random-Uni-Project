@@ -2,13 +2,20 @@
 
 MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 {
-	MapMakrView.setSize(sf::Vector2f(640, 480));
+	MapMakrView.setSize(sf::Vector2f(1280, 960));
 	windowSFG = sfg::Window::Create();
-	windowSFG->SetPosition(sf::Vector2f(WCR.MapPtr->ViewWidth - 200, WCR.MapPtr->ViewHeight - 480));
+	windowSFG->SetPosition(sf::Vector2f(WCR.MapPtr->ViewWidth - 200, WCR.MapPtr->ViewHeight - 960));
 	windowSFG->SetTitle("Object Selector");
 	windowSFG->SetRequisition(sf::Vector2f(200, 200));
 
+	lvlIdMinus = sfg::Button::Create("-");
+	lvlIdPlus = sfg::Button::Create("+");
+
+	lvlIdMinus->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::buttonPressChangeMapID, this, 0));
+	lvlIdPlus->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::buttonPressChangeMapID, this, 1));
+
 	MapIDEntry = sfg::Entry::Create();
+	//MapIDEntry->SetRequisition(sf::Vector2f(64, 0));
 	MapIDLabel = sfg::Label::Create();
 	MapIDLabel->SetText("Map ID: ");
 	MapIDEntry->SetMaximumLength(2);//Only allow 2 digit number max.
@@ -28,6 +35,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	BlockNames.push_back("Clear Map");
 
 	box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	MapBox = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
 	for (int i = 0; i < 7; i++)
 	{
 		blockButtons[i] = sfg::Button::Create(BlockNames[i+1]);
@@ -38,7 +46,10 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	}
 	
 	box->Pack(MapIDLabel, false);
-	box->Pack(MapIDEntry, false);
+	MapBox->Pack(lvlIdMinus, false);
+	MapBox->Pack(MapIDEntry, true,true);
+	MapBox->Pack(lvlIdPlus, false);
+	box->Pack(MapBox, false);
 	//DrpDown = sfg::ComboBox::Create();
 	//DrpDown->SetRequisition(sf::Vector2f(100, 100));
 	//windowSFG->Add(DrpDown);
@@ -54,6 +65,39 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 MapMaker::~MapMaker()
 {
 
+}
+
+void MapMaker::buttonPressChangeMapID(int test)
+{
+	switch (test)
+	{
+	case 0://minus
+	{
+		int buf_number(0);
+		std::stringstream sstr(std::string(MapIDEntry->GetText()));
+		sstr >> buf_number;
+		buf_number--;
+		if (buf_number < 0)
+			buf_number = 0;
+		sstr.clear();
+		sstr << buf_number;
+		MapIDEntry->SetText(sstr.str());
+		break;
+	}
+	case 1://plus
+	{
+		int buf_number(0);
+		std::stringstream sstr(std::string(MapIDEntry->GetText()));
+		sstr >> buf_number;
+		buf_number++;
+		if (buf_number > 99)
+			buf_number = 99;
+		sstr.clear();
+		sstr << buf_number;
+		MapIDEntry->SetText(sstr.str());
+		break;
+	}
+	}
 }
 
 void MapMaker::PollGUIEvents()
@@ -116,7 +160,7 @@ bool MapMaker::LoadMap(int MID)
 
 	//curmapID
 	stringstream MapName;
-	MapName << "L:\\Map[" << MID << "].txt";
+	MapName << "Map[" << MID << "].txt";
 	fileManager FMuse(WCR);//Create a shortcut reference to file manager.
 	if (!FMuse.openFile(true, MapName.str().c_str()))
 		return false;
@@ -142,7 +186,7 @@ bool MapMaker::SaveMap(int MID)
 	if (MID < 0 || MID>99)
 		return false;
 	stringstream MapName;
-	MapName << "L:\\Map[" << MID << "].txt";
+	MapName << "Map[" << MID << "].txt";
 	fileManager FMuse(WCR);//Create a shortcut reference to file manager.
 	if (!FMuse.openFile(false, MapName.str().c_str()))
 		return false;

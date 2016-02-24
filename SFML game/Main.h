@@ -5,8 +5,7 @@
 #include <iostream>
 #include <vector>
 
-
-#define MapMakerMode true//create a define for setting if it is the mapmaker or not.
+//#define MapMakerMode false//create a define for setting if it is the mapmaker or not.
 
 using namespace std;
 

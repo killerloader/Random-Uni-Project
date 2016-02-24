@@ -5,9 +5,9 @@ Map::Map(WrapperClass &WCR_) : WCR(WCR_) {
 	CellSize = 32;
 	MapWidth = 100;
 	MapHeight = 100;
-	ViewWidth = 640;
+	ViewWidth = 1280;
 	ViewX = 0;
-	ViewHeight = 480;
+	ViewHeight = 960;
 	ViewY = 0;
 	SolidObj = sf::RectangleShape(sf::Vector2f(32, 32));
 	SolidObj.setFillColor(sf::Color::Blue);
@@ -57,7 +57,7 @@ void Map::SetObject(int x, int y, int ID)
 
 void Map::DrawMap(sf::View& ViewRef)
 {
-#if MapMakerMode == true
+#ifdef MapMakerMode
 	int MinX = floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
 	int MaxX = ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
 	int MinY = floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
