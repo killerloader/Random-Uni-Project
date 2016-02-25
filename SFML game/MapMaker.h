@@ -49,7 +49,8 @@ public:
 	//sfg::Box::Ptr box;
 	sf::Clock clock;
 
-	int curTile=1;
+	int curTile=0;
+	int curTileSet = 0;
 
 	vector<sf::String> BlockNames;
 	void pressTiles(int);

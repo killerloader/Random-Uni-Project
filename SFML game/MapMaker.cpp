@@ -58,6 +58,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 
 	box->Pack(MapIDLabel, false);
 	MapBox->Pack(lvlIdMinus, false);
+	MapIDEntry->SetText("0");
 	MapBox->Pack(MapIDEntry, true,true);
 	MapBox->Pack(lvlIdPlus, false);
 	box->Pack(MapBox, false);
@@ -314,7 +315,8 @@ void MapMaker::Draw()
 	PlaceRect.setOutlineColor(sf::Color::Red);
 	PlaceRect.setOutlineThickness(1);
 	PlaceRect.setSize(sf::Vector2f(32, 32));
-	PlaceRect.setPosition(PlaceX*32, PlaceY*32);
+	PlaceRect.setPosition(PlaceX * 32, PlaceY * 32);
+
 	WCR.RenderRef.draw(PlaceRect);
 
 	TileCanvas->Bind();
@@ -325,6 +327,20 @@ void MapMaker::Draw()
 	sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
 	sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
 	//if (TileCanvas->IsActiveWidget())
+
+	sf::RectangleShape TilesetSelectedRect;
+	TilesetSelectedRect.setFillColor(sf::Color::Transparent);
+	TilesetSelectedRect.setOutlineColor(sf::Color::Blue);
+	TilesetSelectedRect.setOutlineThickness(1);
+	TilesetSelectedRect.setSize(sf::Vector2f(32, 32));
+	TilesetSelectedRect.setPosition(curTile * 33, floor(curTile/3) * 33);
+	TileCanvas->Draw(TilesetSelectedRect);
+
+
+	/*
+	int curTile=0;
+	int curTileSet = 0;
+	*/
 	if (WindowIsHovered[1])//If over tile window
 		if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= 200 && mousePos.y <= 200)
 		{
