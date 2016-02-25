@@ -50,3 +50,6 @@ diamond inheritance tree was on exam. Inheritance works in a circle (not a loop)
 
 The destructor needs to be virtual when inherited (research)
 Needs to be protected if using polymorphism, still safe though to be public (probably)
+
+Vulcan (new opengl alternative)
+
