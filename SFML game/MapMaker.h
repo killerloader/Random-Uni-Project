@@ -25,6 +25,7 @@ public:
 	sfg::Box::Ptr MapBox;
 
 	//Tile Window
+	sfg::Canvas::Ptr TileCanvas;
 	sfg::Window::Ptr windowTiles;//Window to select drawn tile.
 	sfg::Box::Ptr TileBoxVert;
 	vector<sfg::Box::Ptr> TileBoxesHor;
@@ -33,6 +34,8 @@ public:
 	vector<sf::Texture> GameTextures;
 	vector<sf::Image> GameImages;
 	vector<sf::Sprite> GameSprites;
+
+	bool WindowIsHovered[2];
 
 	void loadTiles();
 	void updateTiles();

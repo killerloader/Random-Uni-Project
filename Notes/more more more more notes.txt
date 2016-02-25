@@ -1,0 +1,70 @@
+if using c functions such as malloc, then you must deallocate it with free instead of delete.
+Math c with c, and c++ with c++ functions.
+
+when allocating with new, it is called dynamically allocated memory (when it is on the heap)
+
+to check if a pointer is valid, you can just do
+
+if(pointer)
+
+this works because if a pointer is nullptr, then it equals 0, which is the same as 0.
+
+Should not include .h files in other .h files, instead only include in cpp files and forward declare the classes that will be used.
+(Technically pragma once (or ifndef) should stop it from running twice though)
+
+
+#define ADD(x, y) x + y
+will practically make a function
+
+#if 
+
+
+deep copy/ shallow copy of classes.
+when doing a shallow copy, everything is duplicated, however pointers point to the same things as the thing copying from.
+when doing a deep copy even pointers are duplicated, so that they point to different things.
+
+Function operation overloading:
+
+if function variable names are same as class variable names, you can refer to the class names as this->x, this->variable etc.
+
+good idea (when outside of sfml) to make a vector class making it easier to assign x/y values to an object.
+
+vector normalization for movement?
+
+power of two numbers is a good practice to use for array sizes, as cpu bases off it better.(Probably wont make much of a difference with arrays really)
+
+power of two textures is also good, as it makes it harder for the gpu to use other numbers.
+
+size textures depending on resolution and how close you're going to realistically see it.
+
+When assigning a string to a char array directly in the code, it is a static string, and it cannot be altered. No memory is actually created when assigning statically like this
+the string is in the memory, but it is in the memory of the program which got copied from the hdd. (Only if array is made by a pointer, as arrays are not really pointers but references)
+
+char Buffer1[] = "Hello"; Buffer1[1]='z'; // this should work, essentially copies
+char *Buffer1 = "Hello"; Buffer1[1]='z'; // this will not work
+
+int p = 100;
+printf("Player %d is alive\n", p);
+%d is for int.
+
+float f = 3.4;
+printf("Player %.03f is alive\n", f);//Makes sure atleast 3 zeros are printed.
+
+sprintf is similar to a string stream and will stream data into a buffer.
+
+scanf("%d", buffer); // reads into a buffer
+
+constants must be initialized on the same line as they are defined.
+cannot be changed.
+Pretty much same as a define
+
+Passing in consts to a function when something does not need to be changed. The actual argument doesn't need to be const when passed in. Its good practice.
+
+a static variable in a class is not connected to any instance/ object of that class, so it is different to access it.
+All instances of a class share the same static variable.
+to print them out, you need to do classname::staticVariable
+for example: Player::Health (even needs to be done within the class)
+
+for static functions, you cannot access class values, and you do not need to write static in the definition, only the declaration.
+
+using a const int reference in a function allows you to pass static values into a function without any copying.

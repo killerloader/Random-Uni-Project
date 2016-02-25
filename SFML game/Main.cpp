@@ -17,6 +17,8 @@ WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 }
 
 PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
+	PlayerTex.loadFromFile("Data/Sprites/Player.png");
+	PlayerImage.setTexture(PlayerTex);
 	PlayerView.setSize(sf::Vector2f(1280, 960));
 	//vspeed, hspeed, gravity, haccel, hspeedmax, hfric;
 	hspeed = 0;
@@ -31,7 +33,7 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	falling = true;
 	gravity = 0.5;//acceleration on vspeed
 	vspeed = 0;
-	PlayerImage.setSize(sf::Vector2f(32,32));
+	//PlayerImage.setSize(sf::Vector2f(32,32));
 	PlayerImage.setPosition(x, y);
 }
 
@@ -53,16 +55,16 @@ void PlayerObject::ContractDir(Edirection DIrr)
 
 void PlayerObject::StepPlayer()
 {
-	AfterImage.emplace_back(sf::Vector2f(32,32));
+	AfterImage.emplace_back(PlayerTex);
 	AfterImage[AfterImage.size() - 1].setPosition(x, y);
-	AfterImage[AfterImage.size() - 1].setFillColor(sf::Color::White);
+	//AfterImage[AfterImage.size() - 1].setFillColor(sf::Color::White);
 	//after image step
 	int AlphaDec = 15;
 	for (int i = 0; i < AfterImage.size(); i++)
 	{
-		if(AfterImage[i].getFillColor().a- AlphaDec <=0)
+		if(AfterImage[i].getColor().a- AlphaDec <=0)
 			AfterImage.erase(AfterImage.begin() + i);
-		AfterImage[i].setFillColor(sf::Color(230, 230, 230,AfterImage[i].getFillColor().a- AlphaDec));
+		AfterImage[i].setColor(sf::Color(255, 255, 255,AfterImage[i].getColor().a- AlphaDec));
 	}
 	PollControls();
 	//vspeed, hspeed, gravity, haccel, hspeedmax;

@@ -1,0 +1,8 @@
+- Stucts can be created with an initializer list. 
+structName structObj = {2,5,3};
+it will fill variables in the order that they are in, in the struct.
+
+Can assign structs to structs but will copy them.
+
+- In classes, everything is private by default.
+- GOod idea to keep vairable private.

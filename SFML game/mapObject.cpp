@@ -1,9 +1,10 @@
 #include "mapObject.h"
 
-mapObject::mapObject(int OID, int TID)
+mapObject::mapObject(int OID, int TID, int TSID)
 {
 	objectType = OID;
 	tileID = TID;
+	tileSetID = TSID;
 }
 
 mapObject::mapObject()

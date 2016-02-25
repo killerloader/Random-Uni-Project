@@ -1,0 +1,52 @@
+//Inheritance
+
+A base class is the parent.
+Derived classes are the children of the base class.
+
+to create a derived class from a class called "enemy" you do this:
+class Grunt : class enemy {
+}
+
+you do not need to redo any functions that are already in the base class.
+
+A derived class can use the base class' public and protected stuff. can't access base class private variables.
+Protected is the same as private, but derived classes can access the variables.
+
+Creating a derived object will call the constructor of both the derived and base class.
+
+a virtual function is put in the base class to allow the derived class to create their own version of the function.
+virtual only needs to be put in the class/ header.
+The function only gets overridden if it is in the derived class.
+Only needs to be declared as virtual in base.
+
+Can create a derived class in a base class pointer.
+Cannot do the opposite.
+
+Can cast a base pointer to a derived pointer to allow it to see the derived functions. Only if the baes pointer points to a derived object.
+
+pure virtual functions:
+virtual void printText() = 0
+They are declared the same as virtual functions but you need to put '=0' on the end.
+Do not put in base class, you only put it in your derived classes.
+A pure virtual function is a function which you are forced to overload in the base classes.
+(Forces programmer to override it)
+
+Both the derived and base class constructor get called.
+
+If we want to use an overloaded constructor from the base class instead of the default when creating the derived object, we need to do
+Goblin() : Monster(3)
+{
+}
+
+if in Monster there is
+Monster (int)
+overloaded from the default constructor.
+
+One class can inherit from multiple classes, having more than one parent.
+class Goblin : public Monster, Player
+(Not a great idea, but possible)
+
+diamond inheritance tree was on exam. Inheritance works in a circle (not a loop), but the base class inherits two of the top (research)
+
+The destructor needs to be virtual when inherited (research)
+Needs to be protected if using polymorphism, still safe though to be public (probably)

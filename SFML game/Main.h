@@ -33,10 +33,11 @@ struct WrapperClass
 
 struct PlayerObject
 {
-	vector<sf::RectangleShape> AfterImage;
+	vector<sf::Sprite> AfterImage;
 	WrapperClass &WCR;
 	sf::View PlayerView;
-	sf::RectangleShape PlayerImage;
+	sf::Texture PlayerTex;
+	sf::Sprite PlayerImage;
 	PlayerObject(WrapperClass &WCR_);
 	void PollControls();
 	void MovePlayer(float Xmove, float Ymove);

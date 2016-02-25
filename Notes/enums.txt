@@ -1,0 +1,53 @@
+enum (variable type)
+ 	can be used to store a new variable type. outside main.
+enum MonsterType
+{
+	Orc,
+	blah=4,//can set to a value, resets coutner, so blah2 will be 5.
+	blah2
+};
+
+int main()
+{
+	MonsterTypes MyMonster = Orc;
+}
+
+They can store only the values which you give it.
+Good practice to put E infront of enum name. (EMonsterType)
+Good practice to capitalize the names in the enum list, and put something after them.
+
+//
+
+Hash defining, like constants
+#define CAT 5
+
+Good practice as captials and underlines
+
+//explicit cast
+
+assigning a int to a float, (using a cast to remove a warning)
+int cat = 5;
+float dog = 4.0f
+dog = float(cat);
+
+//
+Casting a decimal to an integer always rounds down.
+
+//
+arguments are what you put in
+parameters are what you declare when programming the function
+
+//
+If you create a variable outside a code block and then create it inside the codeblock, it will use the first one until the second one is initialized, example:
+int cheese = 1;
+cout << cheese << endl;//1
+{
+cout << cheese << endl;//1
+int cheese = 2;
+cout << cheese << endl;//2
+}
+
+//Templates
+template <typename VAR> 
+A template is a placeholder for a variable, once the template has been used, it turns into the variable type assigned to it.
+Needs to be redone every time it is used (can be used multiple times in one function before needing to recreate the template.

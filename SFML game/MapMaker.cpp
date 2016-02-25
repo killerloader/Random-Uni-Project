@@ -1,7 +1,12 @@
 #include "MapMaker.h"
 
+
+
 MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 {
+
+	WindowIsHovered[0] = false;
+	WindowIsHovered[1] = false;
 	MapMakrView.setSize(sf::Vector2f(1280, 960));
 	windowSFG = sfg::Window::Create();
 	windowSFG->SetPosition(sf::Vector2f(WCR.MapPtr->ViewWidth - 200, WCR.MapPtr->ViewHeight - 960));
@@ -14,8 +19,8 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	MapIDLabel->SetText("Map ID: ");
 	MapIDEntry->SetMaximumLength(2);//Only allow 2 digit number max.
 
-	windowSFG->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
-	windowSFG->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
+	windowSFG->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 0));
+	windowSFG->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 0));
 
 	//setup block names
 	BlockNames.push_back("NULL");//FIrst object is ID 0 which is reserved for empty space.
@@ -62,6 +67,10 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	windowTiles->SetTitle("Tile Selector");
 	windowTiles->SetRequisition(sf::Vector2f(200, 200));
 
+	TileCanvas = sfg::Canvas::Create();
+	TileCanvas->SetRequisition(sf::Vector2f(200.0f, 200.0f));
+
+
 	windowTiles->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
 	windowTiles->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
 
@@ -96,9 +105,11 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	//box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
 	//box->Pack(DrpDown, false);
 	//windowSFG->Add(box);
+	
 	windowSFG->Add(box);
 	desktop.Add(windowSFG);
-	windowTiles->Add(TileBoxVert);
+	//windowTiles->Add(TileBoxVert);
+	windowTiles->Add(TileCanvas);
 	desktop.Add(windowTiles);
 }
 
@@ -136,12 +147,7 @@ void MapMaker::updateTiles()
 
 void MapMaker::loadTiles()
 {
-	loadTile("Data/Sprites/Tile1.png");
-	loadTile("Data/Sprites/Tile2.png");
-	loadTile("Data/Sprites/Tile3.png");
-	loadTile("Data/Sprites/Tile4.png");
-	loadTile("Data/Sprites/Tile5.png");
-	loadTile("Data/Sprites/Tile6.png");
+	loadTile("Data/Sprites/TileSheet1.png");
 }
 
 void MapMaker::buttonPressChangeMapID(int test)
@@ -182,13 +188,15 @@ void MapMaker::PollGUIEvents()
 	desktop.HandleEvent(WCR.event);
 }
 
-void MapMaker::mouseEnterWindow(int)
+void MapMaker::mouseEnterWindow(int WINID)
 {
+	WindowIsHovered[WINID] = true;
 	MouseOverWindow++;
 }
 
-void MapMaker::mouseLeaveWindow(int)
+void MapMaker::mouseLeaveWindow(int WINID)
 {
+	WindowIsHovered[WINID] = false;
 	MouseOverWindow--;
 }
 
@@ -308,6 +316,29 @@ void MapMaker::Draw()
 	PlaceRect.setSize(sf::Vector2f(32, 32));
 	PlaceRect.setPosition(PlaceX*32, PlaceY*32);
 	WCR.RenderRef.draw(PlaceRect);
+
+	TileCanvas->Bind();
+	TileCanvas->Clear(sf::Color(50, 50, 50));
+	//PlaceRect.setPosition(0, 0);
+	GameSprites[0].setPosition(0, 0);
+	TileCanvas->Draw(GameSprites[0]);
+	sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
+	sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
+	//if (TileCanvas->IsActiveWidget())
+	if (WindowIsHovered[1])//If over tile window
+		if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= 200 && mousePos.y <= 200)
+		{
+			PlaceX = floor(mousePos.x / 33);
+			PlaceY = floor(mousePos.y / 33);
+			PlaceRect.setPosition(PlaceX * 33, PlaceY * 33);
+			TileCanvas->Draw(PlaceRect);
+			//cout << sf::Vector2i(absolutePosition.x, absolutePosition.y).x << "_" << sf::Vector2i(absolutePosition.x, absolutePosition.y).y << endl;
+		}
+	
+	//cout << MouseOverWindow << "_" << WindowIsHovered[0] << "_" << WindowIsHovered[1] << endl;
+	TileCanvas->Display();
+	TileCanvas->Unbind();
+
 	sfgui.Display(WCR.RenderRef);
 }
 
@@ -345,6 +376,30 @@ void MapMaker::Step()
 		pressedOffScreen = true;
 	else
 		pressedOffScreen = false;
+	
+	if (WindowIsHovered[1])//If over tile window
+	{
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		{
+			/*
+			sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
+			sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
+			PlaceX = floor(mousePos.x / 33);
+			PlaceY = floor(mousePos.y / 33);
+			//cout << sf::Vector2i(absolutePosition.x, absolutePosition.y).x << "_" << sf::Vector2i(absolutePosition.x, absolutePosition.y).y << endl;
+			PlaceRect.setPosition(PlaceX * 33, PlaceY * 33);
+			*/
+			sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
+			sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
+			//if(TileCanvas->IsActiveWidget())
+				if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= 200 && mousePos.y <= 200)
+				{
+					
+				}
+			//WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile);
+		}
+	}
+
 	int ViewMoveSPD = 5;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 		MapMakrView.move(0, -ViewMoveSPD);

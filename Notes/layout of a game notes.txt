@@ -1,0 +1,6 @@
+From main, one main class (game class)
+game has a game loop which updates and then renders the game.
+
+double buffering -> draws to a second buffer then switches the buffer when done.
+
+shadertoy

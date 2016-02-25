@@ -1,0 +1,2 @@
+ctrl+space will bring up autocomplete if it is not up
+ctrl+shift+space brings up function parameters

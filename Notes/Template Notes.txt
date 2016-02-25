@@ -1,0 +1,2 @@
+- Templates cannot be used accross files, unless a whole function is initialized in the header file (instead of splitting up the declaration and definition in a header and source file)
+doing so will cause a linker error.

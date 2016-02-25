@@ -1,0 +1,43 @@
+.hpp is also a head file.
+(header ++)
+
+.cpp files always compiled.
+
+hungarian notation:
+bool bTest = 5;
+
+first letter of type at start of variable name, and camelcase
+
+n_varaible for class vars. bool n_bfunction for hungarian.
+
+can set char by going one letter at a time.
+
+
+
+
+
+----- pointers -----
+char arrays are already pointers so don't need &:
+
+char test[] = "test";
+char* test2 = test;
+cout << test2[1];
+
+also works for offsetting the array:
+
+char test[] = "test";
+char* test2 = &test[1];
+cout << test2[1];
+
+or just do
+
+char test[] = "test";
+char* test2 = test;
+test2 += 1;
+cout << test2[1];
+
+Pointers created on the heap instead of the stack. (new keyword)
+
+set a pointer to "nullptr" which just equals 0. RAM address 0 is only used for null ptrs.
+
+can either make a function accept a reference, and just put the variable in the arguments, or you can make a function accept a pointer, then pass a reference into the function.
