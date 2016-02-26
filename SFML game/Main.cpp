@@ -132,7 +132,7 @@ void PlayerObject::StepPlayer()
 			cout << "Map load failed!" << endl;
 	}
 	
-	PlayerView.setCenter(sf::Vector2f(x+16, y+16));
+	PlayerView.setCenter(sf::Vector2f((int)x+16, (int)y+16));
 }
 
 void PlayerObject::ResetMovement()
@@ -206,6 +206,7 @@ enum Etest//Random pointless enum test
 	test2,//id = 1
 	test3//id = 2
 };
+
 int main()
 {
 	//Setup window and window settings.

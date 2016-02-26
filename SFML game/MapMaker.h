@@ -1,8 +1,48 @@
 #pragma once
 #include "Main.h"
 #include <sstream>
+#include <string>
 
 struct WrapperClass;
+class MapMaker;
+
+struct TileSet
+{
+	TileSet(const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL)
+	{
+		xOffset=xOff;
+		yOffset=yOff;
+		GapW=xGap;
+		GapH=yGap;
+		CellsX=xCells;
+		CellsY=yCells;
+
+		TileSheetTex.loadFromFile(FileName);
+		TSL->AppendItem(FileName);
+		UpdateSprites();
+
+	}
+
+	void UpdateSprites()
+	{
+		TileSheetSprite.setTexture(TileSheetTex);
+
+		for (int i = 0; i < CellsX; i++)
+			for (int ii = 0; ii < CellsX; ii++)
+				Tiles.emplace_back(TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (32 + GapW) * ii, yOffset + (32 + GapH) * i), sf::Vector2i(32, 32)));
+	}
+
+	sf::Texture TileSheetTex;
+	vector<sf::Sprite> Tiles;
+	sf::Sprite TileSheetSprite;
+	string Name;
+	int xOffset;
+	int yOffset;
+	int GapW;
+	int GapH;
+	int CellsX;
+	int CellsY;
+};
 
 class MapMaker
 {
@@ -28,18 +68,21 @@ public:
 	sfg::Canvas::Ptr TileCanvas;
 	sfg::Window::Ptr windowTiles;//Window to select drawn tile.
 	sfg::Box::Ptr TileBoxVert;
-	vector<sfg::Box::Ptr> TileBoxesHor;
-	vector<sfg::Image::Ptr> TileImages;
+	//vector<sfg::Box::Ptr> TileBoxesHor;
+	//vector<sfg::Image::Ptr> TileImages;
+
+	sfg::ComboBox::Ptr TilesetList;
 	
-	vector<sf::Texture> GameTextures;
-	vector<sf::Image> GameImages;
-	vector<sf::Sprite> GameSprites;
+	vector<TileSet> TileSets;//Tilesets
+
+	//Tiles extracted from tile sheets;
 
 	bool WindowIsHovered[2];
 
 	void loadTiles();
 	void updateTiles();
 	void loadTile(const char*);
+	void changeTileSet();
 
 	int MouseOverWindow=0;
 	bool pressedOffScreen = false;//if pressed off screen, don't place blocks until released and pressed again on screen.
@@ -50,7 +93,7 @@ public:
 	sf::Clock clock;
 
 	int curTile=0;
-	int curTileSet = 0;
+	int curTileSet = 1;
 
 	vector<sf::String> BlockNames;
 	void pressTiles(int);

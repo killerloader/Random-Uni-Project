@@ -15,7 +15,7 @@ struct Map
 	int CellSize;
 	sf::RectangleShape MapBorders[4];
 	sf::RectangleShape SolidObj;
-	void SetObject(int, int, int, int);
+	void SetObject(int, int, int, int, int);
 	void setupBorders();
 	void drawBorders();
 	int CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int);

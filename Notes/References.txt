@@ -1,0 +1,25 @@
+references need to be defined when they are declared
+
+casting with a reference doesn't seem to change the memory at all, so casting a float to an int& will output a number way off the normal as it reads the memory wrong.
+
+Operator overloading:
+
+syntax:
+
+<return type> operator <operator-symbol> (<parameters>);
+
+for example:
+
+struct Point
+{
+	Point operator + (Point & oPoint)
+	{
+	}
+};
+
+When in a function you don't need to have two parameters.
+
+.find() function for strings searches for a substring from a positions, string::npos is returned if nothing is found.
+.rfind goes from the opp position.
+
+.substr() gets a substring from a position and length.

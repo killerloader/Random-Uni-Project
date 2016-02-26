@@ -23,7 +23,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	windowSFG->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 0));
 
 	//setup block names
-	BlockNames.push_back("NULL");//FIrst object is ID 0 which is reserved for empty space.
+	BlockNames.push_back("asdasd");//FIrst object is ID 0 which is reserved for empty space.
 	BlockNames.push_back("Solid");
 	BlockNames.push_back("Bouncy Block");
 	BlockNames.push_back("Lava");
@@ -33,19 +33,22 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	BlockNames.push_back("Load Map");
 	BlockNames.push_back("Clear Map");
 
+	
+
 	/*
 			BUG might be due to storing them in pointers, although its strange that it always breaks on the same part.
 	*/
 
 	box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
 	MapBox = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 9; i++)
 	{
-		blockButtons[i] = sfg::Button::Create(BlockNames[i+1]);
-		blockButtons[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, i+1));
+		blockButtons[i] = sfg::Button::Create(BlockNames[i]);
+		blockButtons[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, i));
 		//box->SetPosition(sf::Vector2f(0.f, 20.f * i));
 		box->Pack(blockButtons[i], false);
 	}
+	TilesetList = sfg::ComboBox::Create();
 
 	loadTiles();
 	updateTiles();
@@ -59,7 +62,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	box->Pack(MapIDLabel, false);
 	MapBox->Pack(lvlIdMinus, false);
 	MapIDEntry->SetText("0");
-	MapBox->Pack(MapIDEntry, true,true);
+	MapBox->Pack(MapIDEntry, true, true);
 	MapBox->Pack(lvlIdPlus, false);
 	box->Pack(MapBox, false);
 	
@@ -68,21 +71,24 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	windowTiles->SetTitle("Tile Selector");
 	windowTiles->SetRequisition(sf::Vector2f(200, 200));
 
+	TilesetList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::changeTileSet, this));
 	TileCanvas = sfg::Canvas::Create();
 	TileCanvas->SetRequisition(sf::Vector2f(200.0f, 200.0f));
 
+	//TileBoxVert
 
 	windowTiles->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
 	windowTiles->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
 
 	TileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	TileBoxVert->Pack(TilesetList, false, false);
+	TileBoxVert->Pack(TileCanvas);
+	//int upto_ = 0;
+	//int HorAmt_ = 5;
 
-	int upto_ = 0;
-	int HorAmt_ = 5;
-
-	TileBoxesHor.emplace_back();
-	TileBoxesHor[upto_] = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
-	TileBoxVert->Pack(TileBoxesHor[upto_], false);
+	//TileBoxesHor.emplace_back();
+	//TileBoxesHor[upto_] = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
+	/*TileBoxVert->Pack(TileBoxesHor[upto_], false);
 	upto_++;
 	
 	for (int i = 0; i < TileImages.size(); i++)
@@ -96,7 +102,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 		}
 		TileBoxesHor[upto_-1]->Pack(TileImages[i], false);
 		TileImages[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::pressTiles, this, i));
-	}
+	}*/
 
 	//DrpDown = sfg::ComboBox::Create();
 	//DrpDown->SetRequisition(sf::Vector2f(100, 100));
@@ -110,7 +116,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	windowSFG->Add(box);
 	desktop.Add(windowSFG);
 	//windowTiles->Add(TileBoxVert);
-	windowTiles->Add(TileCanvas);
+	windowTiles->Add(TileBoxVert);
 	desktop.Add(windowTiles);
 }
 
@@ -127,60 +133,66 @@ void MapMaker::pressTiles(int v)
 
 void MapMaker::loadTile(const char* chr)
 {
-	GameImages.emplace_back();
-	GameImages[GameImages.size()-1].loadFromFile(chr);
-	GameTextures.emplace_back();
-	GameTextures[GameTextures.size() - 1].loadFromImage(GameImages[GameImages.size() - 1]);
+	//GameImages.emplace_back();
+	//GameImages[GameImages.size()-1].loadFromFile(chr);
+	//GameTextures.emplace_back();
+	//GameTextures[GameTextures.size() - 1].loadFromFile(chr);
+}
+
+void MapMaker::changeTileSet()
+{
+	//cout << "Item " << TilesetList->GetSelectedItem() << " selected with text \"" << static_cast<std::string>(TilesetList->GetSelectedText()) << "\"" << endl;
+	curTileSet = TilesetList->GetSelectedItem();
+	//cout << curTileSet << endl;
+	windowTiles->SetRequisition(sf::Vector2f(TileSets[curTileSet].TileSheetSprite.getLocalBounds().width, TileSets[curTileSet].TileSheetSprite.getLocalBounds().height));
 }
 
 void MapMaker::updateTiles()
 {
-	for (int i = 0; i < GameTextures.size(); i++)
+	for (int i = 0; i < TileSets.size(); i++)
 	{
-		TileImages.emplace_back(sfg::Image::Create());
-		TileImages[i]->SetImage(GameImages[i]);
-	}
-	for (int i = 0; i < GameTextures.size(); i++)
-		GameSprites.emplace_back(GameTextures[i]);
-	//vector<sfg::Box::Ptr> TileBoxesHor;
-		
+		TileSets[i].UpdateSprites();
+	}		
 }
 
 void MapMaker::loadTiles()
 {
-	loadTile("Data/Sprites/TileSheet1.png");
+	TileSets.emplace_back("Data/Sprites/TileSheet1.png", 0, 0, 1, 1, 3, 3, TilesetList);
+	TileSets.emplace_back("Data/Sprites/TileSheet3.png", 2, 1, 2, 2, 18, 11, TilesetList);
+		//const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells
+	//loadTile("Data/Sprites/TileSheet3.png");//Load first tilesheet.
 }
 
 void MapMaker::buttonPressChangeMapID(int test)
 {
 	switch (test)
 	{
-	case 0://minus
-	{
-		int buf_number(0);
-		std::stringstream sstr(std::string(MapIDEntry->GetText()));
-		sstr >> buf_number;
-		buf_number--;
-		if (buf_number < 0)
-			buf_number = 0;
-		sstr.clear();
-		sstr << buf_number;
-		MapIDEntry->SetText(sstr.str());
-		break;
-	}
-	case 1://plus
-	{
-		int buf_number(0);
-		std::stringstream sstr(std::string(MapIDEntry->GetText()));
-		sstr >> buf_number;
-		buf_number++;
-		if (buf_number > 99)
-			buf_number = 99;
-		sstr.clear();
-		sstr << buf_number;
-		MapIDEntry->SetText(sstr.str());
-		break;
-	}
+		case 0://minus
+		{
+			int buf_number(0);
+			std::stringstream sstr(std::string(MapIDEntry->GetText()));
+			sstr >> buf_number;
+			buf_number--;
+			if (buf_number < 0)
+				buf_number = 0;
+			sstr.clear();
+			sstr << buf_number;
+			MapIDEntry->SetText(sstr.str());
+			break;
+		}
+		case 1://plus
+		{
+			int buf_number(0);
+			std::stringstream sstr(std::string(MapIDEntry->GetText()));
+			sstr >> buf_number;
+			buf_number++;
+			if (buf_number > 99)
+				buf_number = 99;
+			sstr.clear();
+			sstr << buf_number;
+			MapIDEntry->SetText(sstr.str());
+			break;
+		}
 	}
 }
 
@@ -208,7 +220,7 @@ void MapMaker::ButtonPress(int test)
 	
 	switch (test)
 	{
-	case 0:
+	case 0:setBlock(0);
 		break;
 	case 1:setBlock(1);
 		break;
@@ -220,7 +232,6 @@ void MapMaker::ButtonPress(int test)
 		break;
 	case 5://set tile
 	{
-		
 		break;
 	}
 	case 6:
@@ -272,7 +283,8 @@ bool MapMaker::LoadMap(int MID)
 		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
 		{
 			WCR.MapPtr->MapMatrix[i][ii].objectType = FMuse.loadByte();
-			WCR.MapPtr->MapMatrix[i][ii].tileID = FMuse.loadByte();
+			WCR.MapPtr->MapMatrix[i][ii].tileID = FMuse.loadByte()-1;
+			WCR.MapPtr->MapMatrix[i][ii].tileSetID = FMuse.loadByte();
 		}
 			
 	WCR.MapPtr->setupBorders();
@@ -297,9 +309,9 @@ bool MapMaker::SaveMap(int MID)
 		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
 		{
 			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].objectType);
-			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID);
+			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID+1);//+1 because -1 is reserved for nothing.
+			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileSetID);
 		}
-
 	cout << "Saved MAP ID: " << MID << endl;
 	return true;
 }
@@ -322,8 +334,8 @@ void MapMaker::Draw()
 	TileCanvas->Bind();
 	TileCanvas->Clear(sf::Color(50, 50, 50));
 	//PlaceRect.setPosition(0, 0);
-	GameSprites[0].setPosition(0, 0);
-	TileCanvas->Draw(GameSprites[0]);
+	TileSets[curTileSet].TileSheetSprite.setPosition(0, 0);
+	TileCanvas->Draw(TileSets[curTileSet].TileSheetSprite);
 	sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
 	sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
 	//if (TileCanvas->IsActiveWidget())
@@ -333,20 +345,21 @@ void MapMaker::Draw()
 	TilesetSelectedRect.setOutlineColor(sf::Color::Blue);
 	TilesetSelectedRect.setOutlineThickness(1);
 	TilesetSelectedRect.setSize(sf::Vector2f(32, 32));
-	TilesetSelectedRect.setPosition(curTile * 33, floor(curTile/3) * 33);
+	int TssR_x = TileSets[curTileSet].xOffset + curTile * (32 + TileSets[curTileSet].GapW) - (floor(curTile / TileSets[curTileSet].CellsX) * (32+ TileSets[curTileSet].GapW) * TileSets[curTileSet].CellsX);
+	int TssR_y = TileSets[curTileSet].yOffset + floor(curTile / TileSets[curTileSet].CellsX) * (32 + TileSets[curTileSet].GapH);
+	TilesetSelectedRect.setPosition(TssR_x, TssR_y);
 	TileCanvas->Draw(TilesetSelectedRect);
-
 
 	/*
 	int curTile=0;
 	int curTileSet = 0;
 	*/
 	if (WindowIsHovered[1])//If over tile window
-		if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= 200 && mousePos.y <= 200)
+		if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().width && mousePos.y <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().height)
 		{
-			PlaceX = floor(mousePos.x / 33);
-			PlaceY = floor(mousePos.y / 33);
-			PlaceRect.setPosition(PlaceX * 33, PlaceY * 33);
+			PlaceX = floor(mousePos.x / (32 + TileSets[curTileSet].GapW));// -TileSets[curTileSet].xOffset;
+			PlaceY = floor(mousePos.y / (32 + TileSets[curTileSet].GapH));// -TileSets[curTileSet].yOffset;
+			PlaceRect.setPosition(TileSets[curTileSet].xOffset + PlaceX * (32+ TileSets[curTileSet].GapW), TileSets[curTileSet].yOffset + PlaceY * (32+ TileSets[curTileSet].GapH));
 			TileCanvas->Draw(PlaceRect);
 			//cout << sf::Vector2i(absolutePosition.x, absolutePosition.y).x << "_" << sf::Vector2i(absolutePosition.x, absolutePosition.y).y << endl;
 		}
@@ -367,14 +380,15 @@ void MapMaker::Step()
 		{
 			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
-			WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile);
+			WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile, curTileSet);
+			//cout << CurBlock << "_" << curTile << "_" << curTileSet << endl;
 		}
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
 		{
 			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
-			WCR.MapPtr->SetObject(PlaceX, PlaceY, 0, 0);
+			WCR.MapPtr->SetObject(PlaceX, PlaceY, -1, -1, -1);
 		}
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
@@ -408,9 +422,11 @@ void MapMaker::Step()
 			sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
 			sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
 			//if(TileCanvas->IsActiveWidget())
-				if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= 200 && mousePos.y <= 200)
+			if (WindowIsHovered[1])//If over tile window
+				if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().width && mousePos.y <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().height)
 				{
-					
+					curTile = floor(mousePos.x/(32+TileSets[curTileSet].GapW))+ floor(mousePos.y/(32+TileSets[curTileSet].GapH))*TileSets[curTileSet].CellsX;
+					//curTileSet = 0;
 				}
 			//WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile);
 		}
@@ -429,7 +445,7 @@ void MapMaker::Step()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 		MapMakrView.move(0, ViewMoveSPD);
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
+	/*if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
 	{
 		char Command[11];
 		cout << "Please enter a command: " << endl;
@@ -463,7 +479,7 @@ void MapMaker::Step()
 			WCR.MapPtr->MapMatrix = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
 			WCR.MapPtr->setupBorders();
 		}
-	}
+	}*/
 	desktop.Update(clock.restart().asSeconds());
 }
 
@@ -481,7 +497,7 @@ void MapMaker::setBlock(int BLK)
 {
 	cout << "Setting block to: " << BLK << endl;
 	//0 = nothing, 2 = last object type
-	if (BLK >= 1 && BLK <= 4)
+	if (BLK >= 0 && BLK <= 4)
 		CurBlock = BLK;
 	else
 		cout << "This object ID does not exist!" << endl;

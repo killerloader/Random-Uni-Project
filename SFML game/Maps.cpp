@@ -42,7 +42,7 @@ void Map::drawBorders()
 	}
 }
 
-void Map::SetObject(int x, int y, int ID, int TID)
+void Map::SetObject(int x, int y, int ID, int TID, int TSID)
 {
 	//X and Y are grid cells not actual coords.
 	WCR.LimitVariable(0, MapWidth - 1, x);
@@ -54,6 +54,7 @@ void Map::SetObject(int x, int y, int ID, int TID)
 		return;
 	MapMatrix[x][y].objectType = ID;
 	MapMatrix[x][y].tileID = TID;
+	MapMatrix[x][y].tileSetID = TSID;
 }
 
 void Map::DrawMap(sf::View& ViewRef)
@@ -77,10 +78,11 @@ void Map::DrawMap(sf::View& ViewRef)
 	for (int i = MinX; i <= MaxX; i++)
 		for (int ii = MinY; ii <= MaxY; ii++)
 		{
-			if (MapMatrix[i][ii].tileID != 0)//Not empty space.
+			if (MapMatrix[i][ii].tileID != -1)//Not empty space.
 			{
-				WCR.MMPtr->GameSprites[MapMatrix[i][ii].tileID-1].setPosition(i * CellSize, ii * CellSize);
-				WCR.RenderRef.draw(WCR.MMPtr->GameSprites[MapMatrix[i][ii].tileID - 1]);
+				WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID].setPosition(i * CellSize, ii * CellSize);
+				//cout << MapMatrix[i][ii].tileID << endl;
+				WCR.RenderRef.draw(WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID]);
 			}
 		}
 }

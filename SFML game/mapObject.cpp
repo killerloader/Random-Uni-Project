@@ -10,7 +10,8 @@ mapObject::mapObject(int OID, int TID, int TSID)
 mapObject::mapObject()
 {
 	objectType = 0;
-	tileID = 0;
+	tileID = -1;
+	tileSetID = 0;
 }
 
 mapObject::~mapObject()
