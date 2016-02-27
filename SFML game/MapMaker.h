@@ -33,14 +33,14 @@ struct TileSet
 				for (int ii = 0; ii < CellsX; ii++)
 				{
 					Tiles[i + ii*CellsX].setTexture(TileSheetTex);
-					Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (32 + GapW) * ii, yOffset + (32 + GapH) * i), sf::Vector2i(32, 32)));
+					Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (32 + GapW) * i, yOffset + (32 + GapH) * ii), sf::Vector2i(32, 32)));
 				}
 					
 		}
 		else
 			for (int i = 0; i < CellsX; i++)
 				for (int ii = 0; ii < CellsX; ii++)
-					Tiles.emplace_back(TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (32 + GapW) * ii, yOffset + (32 + GapH) * i), sf::Vector2i(32, 32)));
+					Tiles.emplace_back(TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (32 + GapW) * i, yOffset + (32 + GapH) * ii), sf::Vector2i(32, 32)));
 	}
 
 	sf::Texture TileSheetTex;
