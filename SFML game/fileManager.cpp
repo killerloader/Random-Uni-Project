@@ -119,4 +119,5 @@ int fileManager::load4Bytes()
 fileManager::~fileManager()
 {
 	OStream.close();
+	IStream.close();
 }

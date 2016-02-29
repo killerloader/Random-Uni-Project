@@ -223,19 +223,77 @@ int main()
 	//Initialize mapmaker if in mapmaker mode.
 	//#if MapMakerMode == true
 	MapMaker MapMkr(WC);
-	#ifndef MapMakerMode
+#ifndef MapMakerMode
 	if (MapMkr.LoadMap(WC.curmapID))
 		cout << "Map load failed!" << endl;
 #endif
 	WC.MMPtr = &MapMkr;
 	//#endif
 
-	//Give certain classes/ structs access to the window context.
+#ifdef MapMakerMode//start server.
+	sf::TcpListener listener;
+	listener.setBlocking(false);
+	cout << "Attemtping to bind port..." << endl;
+	// bind the listener to a port
+	if (listener.listen(53000) != sf::Socket::Done)
+	{
+		// error...
+		cout << "Cannot bind port!" << endl;
+	}
+	else
+		cout << "Port bind successful!" << endl;
+
+	// accept a new connection
+	sf::TcpSocket client; 
+	client.setBlocking(false);
+	cout << "Listening for connection..." << endl;
+#else
+	cout << "Attempting to connect to server..." << endl;
+	sf::TcpSocket socket;
+	sf::Socket::Status status = socket.connect("127.0.0.1", 53000);
+	if (status != sf::Socket::Done)
+		cout << "Connection to server successful!" << endl;
+	else
+		cout << "Connection to server unsuccessful!" << endl;
+#endif
+	bool connected = false;
+
 	//Start the game loop.
 	while (window.isOpen())
 	{
+#ifdef MapMakerMode//start server.
+		if (!connected)
+		{
+			if (listener.accept(client) == sf::Socket::Done)
+			{
+				cout << "Connection found!" << endl;
+				connected = true;
+			}
+		}
+		else
+		{
+			sf::Packet recievedata;
+			if (client.receive(recievedata) == sf::Socket::Done)
+			{
+				sf::Int32 int32;
+				recievedata >> int32;
+				cout << "Received data: " << int32 << endl;
+			}
+		}
 		//Poll events, keyboard wont be placed in here.
-		
+#else
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
+		{
+			cout << "Send int to server: " << endl;
+			sf::Int32 dataSend_;
+			cin >> dataSend_;
+			sf::Packet testPack;
+			testPack << dataSend_;
+			socket.send(testPack);
+			cout << "Sent int to server: " << dataSend_ << endl;
+		}
+#endif
+
 		while (window.pollEvent(WC.event))
 		{
 			#ifdef MapMakerMode//Don't poll GUI events if in mapmaker mode.

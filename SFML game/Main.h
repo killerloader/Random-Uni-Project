@@ -2,6 +2,7 @@
 #include <SFGUI/SFGUI.hpp>
 #include <SFGUI/Widgets.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
 #include <iostream>
 #include <vector>
 
