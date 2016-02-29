@@ -251,7 +251,7 @@ int main()
 	cout << "Attempting to connect to server..." << endl;
 	sf::TcpSocket socket;
 	sf::Socket::Status status = socket.connect("127.0.0.1", 53000);
-	if (status != sf::Socket::Done)
+	if (status == sf::Socket::Done)
 		cout << "Connection to server successful!" << endl;
 	else
 		cout << "Connection to server unsuccessful!" << endl;

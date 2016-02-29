@@ -1,3 +1,16 @@
 SFML game.VC.opendb
 SFML game.sdf
 *.obj
+game/SFML game.exe
+game/SFML game.iobj
+game/SFML game.ipdb
+game/SFML game.log
+game/SFML game.pdb
+game/SFML game.tlog/CL.read.1.tlog
+game/SFML game.tlog/link.command.1.tlog
+game/SFML game.tlog/link.read.1.tlog
+game/SFML game_MapMaker.exe
+game/SFML game_MapMaker.iobj
+game/SFML game_MapMaker.ipdb
+game/SFML game_MapMaker.pdb
+game/vc140.pdb
