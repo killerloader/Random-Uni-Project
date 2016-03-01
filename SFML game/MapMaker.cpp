@@ -88,48 +88,18 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	TileCanvas = sfg::Canvas::Create();
 	TileCanvas->SetRequisition(sf::Vector2f(200.0f, 200.0f));
 
-	//TileBoxVert
-
 	windowTiles->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
 	windowTiles->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
 
 	TileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
 	TileBoxVert->Pack(TilesetList, false, false);
 	TileBoxVert->Pack(TileCanvas);
-	//int upto_ = 0;
-	//int HorAmt_ = 5;
 
-	//TileBoxesHor.emplace_back();
-	//TileBoxesHor[upto_] = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
-	/*TileBoxVert->Pack(TileBoxesHor[upto_], false);
-	upto_++;
-	
-	for (int i = 0; i < TileImages.size(); i++)
-	{
-		if (i - upto_*HorAmt_ >= 0)
-		{
-			TileBoxesHor.emplace_back();
-			TileBoxesHor[upto_] = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
-			TileBoxVert->Pack(TileBoxesHor[upto_], false);
-			upto_++;
-		}
-		TileBoxesHor[upto_-1]->Pack(TileImages[i], false);
-		TileImages[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::pressTiles, this, i));
-	}*/
-
-	//DrpDown = sfg::ComboBox::Create();
-	//DrpDown->SetRequisition(sf::Vector2f(100, 100));
-	//windowSFG->Add(DrpDown);
-	//DrpDown->Add(button1);
-	//DrpDown->Add(button2);
-	//box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
-	//box->Pack(DrpDown, false);
-	//windowSFG->Add(box);
 	windowSFG->Add(box);
 	desktop.Add(windowSFG);
-	//windowTiles->Add(TileBoxVert);
 	windowTiles->Add(TileBoxVert);
 	desktop.Add(windowTiles);
+	mmWindow.resetGLStates();
 #endif
 }
 
