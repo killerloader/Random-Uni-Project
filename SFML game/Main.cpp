@@ -379,9 +379,6 @@ int main()
 
 		while (window.pollEvent(WC.event))
 		{
-			#ifdef MapMakerMode//Don't poll GUI events if in mapmaker mode.
-				MapMkr.PollGUIEvents();
-			#endif
 			if (WC.event.type == sf::Event::Closed)
 				window.close();
 		}
@@ -394,13 +391,14 @@ int main()
 			window.setView(MapMkr.MapMakrView);
 		#endif
 		//Clear the window so we can draw new stuff to it.
+
 		window.clear();
 		MainMap.DrawMap(obj_Player.PlayerView);
 		MainMap.drawBorders();
 		obj_Player.DrawPlayer();
-		#ifdef MapMakerMode//Don't poll player events if in mapmaker mode.
+#ifdef MapMakerMode//Don't poll player events if in mapmaker mode.
 		MapMkr.Draw();
-		#endif
+#endif
 		//Display the window to the client.
 		window.display();
 	}

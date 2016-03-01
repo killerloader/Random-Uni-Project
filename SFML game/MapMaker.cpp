@@ -4,12 +4,23 @@
 
 MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 {
+	mmWindow.create(sf::VideoMode(640, 480), "Unnamed project");
+	mmWindow.setFramerateLimit(60);
+	mmWindow.setVerticalSyncEnabled(true);
+	mmView.setSize(sf::Vector2f(640, 480));
+	mmWindow.setView(mmView);
+	/*
+	sf::Font my_font;
+	my_font.loadFromFile("Data/Fonts/OptimusPrinceps.ttf");
+	desktop.GetEngine().GetResourceManager().AddFont("custom_font", my_font);
+
+	desktop.SetProperty<("", "Font", "OptimusPrinceps.ttf");*/
 
 	WindowIsHovered[0] = false;
 	WindowIsHovered[1] = false;
 	MapMakrView.setSize(sf::Vector2f(640, 480));
 	windowSFG = sfg::Window::Create();
-	windowSFG->SetPosition(sf::Vector2f(WCR.MapPtr->ViewWidth - 200, WCR.MapPtr->ViewHeight - 400));
+	windowSFG->SetPosition(sf::Vector2f(0, 0));
 	windowSFG->SetTitle("Main Menu");
 	windowSFG->SetRequisition(sf::Vector2f(200, 200));
 
@@ -67,7 +78,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	box->Pack(MapBox, false);
 	
 	windowTiles = sfg::Window::Create();
-	windowTiles->SetPosition(sf::Vector2f(WCR.MapPtr->ViewWidth - 200, WCR.MapPtr->ViewHeight - 200));
+	windowTiles->SetPosition(sf::Vector2f(0,0));
 	windowTiles->SetTitle("Tile Selector");
 	windowTiles->SetRequisition(sf::Vector2f(200, 200));
 
@@ -112,7 +123,6 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	//box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
 	//box->Pack(DrpDown, false);
 	//windowSFG->Add(box);
-	
 	windowSFG->Add(box);
 	desktop.Add(windowSFG);
 	//windowTiles->Add(TileBoxVert);
@@ -144,6 +154,7 @@ void MapMaker::changeTileSet()
 	//cout << "Item " << TilesetList->GetSelectedItem() << " selected with text \"" << static_cast<std::string>(TilesetList->GetSelectedText()) << "\"" << endl;
 	curTileSet = TilesetList->GetSelectedItem();
 	//cout << curTileSet << endl;
+	cout << TilesetList->GetSelectedText().toAnsiString() << endl;
 	windowTiles->SetRequisition(sf::Vector2f(TileSets[curTileSet].TileSheetSprite.getLocalBounds().width, TileSets[curTileSet].TileSheetSprite.getLocalBounds().height));
 }
 
@@ -199,7 +210,7 @@ void MapMaker::buttonPressChangeMapID(int test)
 
 void MapMaker::PollGUIEvents()
 {
-	desktop.HandleEvent(WCR.event);
+	desktop.HandleEvent(event);
 }
 
 void MapMaker::mouseEnterWindow(int WINID)
@@ -218,7 +229,6 @@ void MapMaker::ButtonPress(int test)
 {
 	//button1->SetLabel("Tagggggggg");
 	string Astr = BlockNames[test].toAnsiString();
-	
 	switch (test)
 	{
 	case 0:setBlock(0);
@@ -339,6 +349,7 @@ bool MapMaker::SaveMap(int MID)
 
 void MapMaker::Draw()
 {
+	mmWindow.clear();
 	int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 	int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
 	WCR.LimitVariable(0, WCR.MapPtr->MapWidth - 1, PlaceX);
@@ -351,14 +362,13 @@ void MapMaker::Draw()
 	PlaceRect.setPosition(PlaceX * 32, PlaceY * 32);
 
 	WCR.RenderRef.draw(PlaceRect);
-
 	TileCanvas->Bind();
 	TileCanvas->Clear(sf::Color(50, 50, 50));
 	//PlaceRect.setPosition(0, 0);
 	TileSets[curTileSet].TileSheetSprite.setPosition(0, 0);
 	TileCanvas->Draw(TileSets[curTileSet].TileSheetSprite);
 	sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
-	sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
+	sf::Vector2i mousePos = sf::Mouse::getPosition(mmWindow) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
 	//if (TileCanvas->IsActiveWidget())
 
 	sf::RectangleShape TilesetSelectedRect;
@@ -385,16 +395,27 @@ void MapMaker::Draw()
 			//cout << sf::Vector2i(absolutePosition.x, absolutePosition.y).x << "_" << sf::Vector2i(absolutePosition.x, absolutePosition.y).y << endl;
 		}
 	
-	//cout << MouseOverWindow << "_" << WindowIsHovered[0] << "_" << WindowIsHovered[1] << endl;
+	//cout << MouseOverWindow << "_" << WindowIsHovered[0] << "_" << WindowIsHovered[1] << endl
+
 	TileCanvas->Display();
 	TileCanvas->Unbind();
+	sfgui.Display(mmWindow);
 
-	sfgui.Display(WCR.RenderRef);
+	mmWindow.display();
+
+	
 }
 
 
 void MapMaker::Step()
 {
+	while (mmWindow.pollEvent(event))
+	{
+		PollGUIEvents();
+		if (event.type == sf::Event::Closed)
+			mmWindow.close();
+	}
+
 	if (MouseOverWindow == 0 && !pressedOffScreen && WCR.RenderRef.hasFocus())//Or just check if false?
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -430,7 +451,7 @@ void MapMaker::Step()
 	else
 		pressedOffScreen = false;
 	
-	if (WindowIsHovered[1] && WCR.RenderRef.hasFocus())//If over tile window
+	if (WindowIsHovered[1] && mmWindow.hasFocus())//If over tile window
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
@@ -443,7 +464,7 @@ void MapMaker::Step()
 			PlaceRect.setPosition(PlaceX * 33, PlaceY * 33);
 			*/
 			sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
-			sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
+			sf::Vector2i mousePos = sf::Mouse::getPosition(mmWindow) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
 			//if(TileCanvas->IsActiveWidget())
 			if (WindowIsHovered[1])//If over tile window
 				if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().width && mousePos.y <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().height)

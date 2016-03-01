@@ -65,6 +65,11 @@ public:
 	sfg::SFGUI sfgui;
 	sfg::Desktop desktop;
 
+	sf::View mmView;
+
+	sf::RenderWindow mmWindow;
+	sf::Event event;
+
 	//Main Window
 	sfg::Window::Ptr windowSFG;//Main window with all buttons
 	sfg::Button::Ptr blockButtons[7];
