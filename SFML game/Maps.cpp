@@ -42,6 +42,13 @@ void Map::drawBorders()
 	}
 }
 
+bool Map::isObject(int x, int y)
+{
+	if (MapMatrix[x][y].tileID != -1)//some tile here
+		return true;
+	return false;
+}
+
 void Map::SetObject(int x, int y, int ID, int TID, int TSID)
 {
 	//X and Y are grid cells not actual coords.
@@ -55,6 +62,13 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID)
 	MapMatrix[x][y].objectType = ID;
 	MapMatrix[x][y].tileID = TID;
 	MapMatrix[x][y].tileSetID = TSID;
+
+	if (WCR.connected)
+	{
+		sf::Packet mapData;
+		mapData << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID;
+		WCR.client.send(mapData);
+	}
 }
 
 void Map::DrawMap(sf::View& ViewRef)

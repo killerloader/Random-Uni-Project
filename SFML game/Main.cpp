@@ -1,6 +1,10 @@
 #include "Main.h"
 /*
-TODO: Fix headers, do not include .h files in headers (or include one which only has predefinitions)
+TODO: 
+	- Add 'OtherPlayer' class to draw players online.
+	- Accept more than one connection with a vector of sockets.
+
+	- Fix headers, do not include .h files in headers (or include one which only has predefinitions)
 */
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
@@ -66,7 +70,8 @@ void PlayerObject::StepPlayer()
 			AfterImage.erase(AfterImage.begin() + i);
 		AfterImage[i].setColor(sf::Color(255, 255, 255,AfterImage[i].getColor().a- AlphaDec));
 	}
-	PollControls();
+	if(WCR.RenderRef.hasFocus())
+		PollControls();
 	//vspeed, hspeed, gravity, haccel, hspeedmax;
 	if (hspeed != 0)
 	{
@@ -231,11 +236,11 @@ int main()
 	//#endif
 
 #ifdef MapMakerMode//start server.
-	sf::TcpListener listener;
-	listener.setBlocking(false);
+	
+	WC.listener.setBlocking(false);
 	cout << "Attemtping to bind port..." << endl;
 	// bind the listener to a port
-	if (listener.listen(53000) != sf::Socket::Done)
+	if (WC.listener.listen(53000) != sf::Socket::Done)
 	{
 		// error...
 		cout << "Cannot bind port!" << endl;
@@ -244,53 +249,107 @@ int main()
 		cout << "Port bind successful!" << endl;
 
 	// accept a new connection
-	sf::TcpSocket client; 
-	client.setBlocking(false);
+	
+	WC.client.setBlocking(false);
 	cout << "Listening for connection..." << endl;
 #else
+	bool online = false;
 	cout << "Attempting to connect to server..." << endl;
-	sf::TcpSocket socket;
-	sf::Socket::Status status = socket.connect("127.0.0.1", 53000);
-	if (status == sf::Socket::Done)
-		cout << "Connection to server successful!" << endl;
-	else
-		cout << "Connection to server unsuccessful!" << endl;
+	sf::TcpSocket socket; socket.setBlocking(false);
 #endif
-	bool connected = false;
+	
 
 	//Start the game loop.
 	while (window.isOpen())
 	{
 #ifdef MapMakerMode//start server.
-		if (!connected)
+		if (!WC.connected)
 		{
-			if (listener.accept(client) == sf::Socket::Done)
+			if (WC.listener.accept(WC.client) == sf::Socket::Done)
 			{
 				cout << "Connection found!" << endl;
-				connected = true;
+				WC.connected = true;
+
+				//Send map:
+				sf::Packet mapData;
+				mapData << (sf::Int32)0;
+				mapData << (sf::Int32)WC.MapPtr->MapWidth << (sf::Int32)WC.MapPtr->MapHeight << (sf::Int32)WC.PlrPtr->x << (sf::Int32)WC.PlrPtr->y;
+
+				for (int i = 0; i < WC.MapPtr->MapWidth; i++)
+					for (int ii = 0; ii < WC.MapPtr->MapHeight; ii++)
+						mapData << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].tileSetID;
+				WC.client.send(mapData);
+				cout << "Sent map data!" << endl;
 			}
 		}
 		else
 		{
 			sf::Packet recievedata;
-			if (client.receive(recievedata) == sf::Socket::Done)
+			sf::Socket::Status Status_ = WC.client.receive(recievedata);
+			if (Status_ == sf::Socket::Done)
 			{
 				sf::Int32 int32;
 				recievedata >> int32;
 				cout << "Received data: " << int32 << endl;
 			}
+			if (Status_ == sf::Socket::Disconnected)
+			{
+				cout << "Client has disconnected!" << endl;
+				WC.connected = false;
+			}
 		}
 		//Poll events, keyboard wont be placed in here.
 #else
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
+		if (!online)
 		{
-			cout << "Send int to server: " << endl;
-			sf::Int32 dataSend_;
-			cin >> dataSend_;
-			sf::Packet testPack;
-			testPack << dataSend_;
-			socket.send(testPack);
-			cout << "Sent int to server: " << dataSend_ << endl;
+			sf::Socket::Status status = socket.connect("127.0.0.1", 53000);
+			if (status == sf::Socket::Done)
+			{
+				online = true;
+				cout << "Connection to server successful!" << endl;
+			}
+		}
+		else
+		{
+			sf::Packet recievedata;
+			if (socket.receive(recievedata) == sf::Socket::Done)
+			{
+				sf::Int32 messageType;
+				recievedata >> messageType;
+				switch (messageType)
+				{
+				case 0://Receive map
+					sf::Int32 mapSizeX, mapSizeY, Px_, Py_;
+					recievedata >> mapSizeX >> mapSizeY >> Px_ >> Py_;
+					WC.MapPtr->MapWidth = mapSizeX;
+					WC.MapPtr->MapHeight = mapSizeY;
+					WC.PlrPtr->x = Px_;
+					WC.PlrPtr->y = Py_;
+					WC.PlrPtr->PlayerImage.setPosition(WC.PlrPtr->x, WC.PlrPtr->y);
+					WC.PlrPtr->xstart = WC.PlrPtr->x;
+					WC.PlrPtr->ystart = WC.PlrPtr->y;
+					//Error here, when different map size.
+					WC.MapPtr->MapMatrix = vector<vector<mapObject>>(WC.MapPtr->MapWidth, vector<mapObject>(WC.MapPtr->MapHeight));
+					for (int i = 0; i < mapSizeX; i++)
+						for (int ii = 0; ii < mapSizeY; ii++)
+						{
+							sf::Int32 objectT, tileID, tileSID;
+							recievedata >> objectT >> tileID >> tileSID;
+							WC.MapPtr->MapMatrix[i][ii].objectType = objectT;
+							WC.MapPtr->MapMatrix[i][ii].tileID = tileID;
+							WC.MapPtr->MapMatrix[i][ii].tileSetID = tileSID;
+						}
+					WC.MapPtr->setupBorders();
+					cout << "Loaded map from server!" << endl;
+					break;
+				case 1://Receive block change
+					//(int x, int y, int ID, int TID, int TSID)
+					sf::Int32 x, y, ID, TID, TSID;
+					recievedata >> x >> y >> ID >> TID >> TSID;
+					WC.MapPtr->SetObject(x, y, ID, TID, TSID);
+					break;
+				}
+			}
 		}
 #endif
 

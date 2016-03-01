@@ -19,4 +19,5 @@ struct Map
 	void setupBorders();
 	void drawBorders();
 	int CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int);
+	bool Map::isObject(int x, int y);
 };

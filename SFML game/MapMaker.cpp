@@ -159,6 +159,7 @@ void MapMaker::loadTiles()
 {
 	TileSets.emplace_back("Data/Sprites/TileSheet1.png", 0, 0, 1, 1, 3, 3, TilesetList);
 	TileSets.emplace_back("Data/Sprites/TileSheet3.png", 2, 1, 2, 2, 18, 11, TilesetList);
+	TileSets.emplace_back("Data/Sprites/TileSheet4.png", 20, 10, 2, 2, 30, 16, TilesetList);
 		//const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells
 	//loadTile("Data/Sprites/TileSheet3.png");//Load first tilesheet.
 }
@@ -357,8 +358,8 @@ void MapMaker::Draw()
 	if (WindowIsHovered[1])//If over tile window
 		if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().width && mousePos.y <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().height)
 		{
-			PlaceX = floor(mousePos.x / (32 + TileSets[curTileSet].GapW));// -TileSets[curTileSet].xOffset;
-			PlaceY = floor(mousePos.y / (32 + TileSets[curTileSet].GapH));// -TileSets[curTileSet].yOffset;
+			PlaceX = floor((mousePos.x - TileSets[curTileSet].xOffset) / (32 + TileSets[curTileSet].GapW));// -TileSets[curTileSet].xOffset;
+			PlaceY = floor((mousePos.y - TileSets[curTileSet].yOffset) / (32 + TileSets[curTileSet].GapH));// -TileSets[curTileSet].yOffset;
 			PlaceRect.setPosition(TileSets[curTileSet].xOffset + PlaceX * (32+ TileSets[curTileSet].GapW), TileSets[curTileSet].yOffset + PlaceY * (32+ TileSets[curTileSet].GapH));
 			TileCanvas->Draw(PlaceRect);
 			//cout << sf::Vector2i(absolutePosition.x, absolutePosition.y).x << "_" << sf::Vector2i(absolutePosition.x, absolutePosition.y).y << endl;
@@ -374,13 +375,14 @@ void MapMaker::Draw()
 
 void MapMaker::Step()
 {
-	if (MouseOverWindow == 0 && !pressedOffScreen)//Or just check if false?
+	if (MouseOverWindow == 0 && !pressedOffScreen && WCR.RenderRef.hasFocus())//Or just check if false?
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
 			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
-			WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile, curTileSet);
+			if(!WCR.MapPtr->isObject(PlaceX, PlaceY))//If no object already here
+				WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile, curTileSet);
 			//cout << CurBlock << "_" << curTile << "_" << curTileSet << endl;
 		}
 
@@ -388,7 +390,8 @@ void MapMaker::Step()
 		{
 			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
-			WCR.MapPtr->SetObject(PlaceX, PlaceY, -1, -1, -1);
+			if (WCR.MapPtr->isObject(PlaceX, PlaceY))//If object is here
+				WCR.MapPtr->SetObject(PlaceX, PlaceY, 0, -1, 0);
 		}
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
@@ -407,7 +410,7 @@ void MapMaker::Step()
 	else
 		pressedOffScreen = false;
 	
-	if (WindowIsHovered[1])//If over tile window
+	if (WindowIsHovered[1] && WCR.RenderRef.hasFocus())//If over tile window
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
@@ -425,25 +428,29 @@ void MapMaker::Step()
 			if (WindowIsHovered[1])//If over tile window
 				if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().width && mousePos.y <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().height)
 				{
-					curTile = floor(mousePos.x/(32+TileSets[curTileSet].GapW))+ floor(mousePos.y/(32+TileSets[curTileSet].GapH))*TileSets[curTileSet].CellsX;
+					curTile = floor((mousePos.x -TileSets[curTileSet].xOffset)/(32+TileSets[curTileSet].GapW))+ floor((mousePos.y - TileSets[curTileSet].yOffset) /(32+TileSets[curTileSet].GapH))*TileSets[curTileSet].CellsX;
 					//curTileSet = 0;
 				}
 			//WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile);
 		}
 	}
 
-	int ViewMoveSPD = 5;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-		MapMakrView.move(0, -ViewMoveSPD);
+	if (WCR.RenderRef.hasFocus())
+	{
+		int ViewMoveSPD = 5;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+			MapMakrView.move(0, -ViewMoveSPD);
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-		MapMakrView.move(-ViewMoveSPD, 0);
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+			MapMakrView.move(-ViewMoveSPD, 0);
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		MapMakrView.move(ViewMoveSPD, 0);
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+			MapMakrView.move(ViewMoveSPD, 0);
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-		MapMakrView.move(0, ViewMoveSPD);
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+			MapMakrView.move(0, ViewMoveSPD);
+	}
+
 
 	/*if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
 	{

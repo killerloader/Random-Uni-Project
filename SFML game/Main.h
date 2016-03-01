@@ -30,6 +30,9 @@ struct WrapperClass
 	MapMaker* MMPtr;
 	fileManager* FMPtr;
 	WrapperClass(sf::RenderWindow &RenderRef_);
+	sf::TcpListener listener;
+	sf::TcpSocket client;
+	bool connected = false;
 };
 
 struct PlayerObject
