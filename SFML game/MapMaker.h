@@ -1,7 +1,10 @@
 #pragma once
+#include <SFGUI/SFGUI.hpp>
+#include <SFGUI/Widgets.hpp>
 #include "Main.h"
 #include <sstream>
 #include <string>
+
 
 struct WrapperClass;
 class MapMaker;
@@ -18,7 +21,9 @@ struct TileSet
 		CellsY=yCells;
 
 		TileSheetTex.loadFromFile(FileName);
+#ifdef MapMakerMode
 		TSL->AppendItem(FileName);
+#endif
 		UpdateSprites();
 
 	}

@@ -1,6 +1,4 @@
 #pragma once
-#include <SFGUI/SFGUI.hpp>
-#include <SFGUI/Widgets.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Network.hpp>
 #include <iostream>
@@ -12,17 +10,20 @@ using namespace std;
 #include "fileManager.h"
 #include "Maps.h"
 #include "mapObject.h"
+#include "otherPlayer.h"
 
 struct PlayerObject;
 class MapMaker;
 struct Map;
 class fileManager;
 class mapObject;
+class otherPlayer;
 
 struct WrapperClass
 {
+	vector<otherPlayer> otherPlayers;
 	sf::Event event;
-	int curmapID = 0;
+	int curmapID;
 	void LimitVariable(int, int, int&);
 	sf::RenderWindow &RenderRef;
 	Map* MapPtr;//Maybe vector if more than one is loaded at a time?

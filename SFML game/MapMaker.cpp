@@ -4,6 +4,7 @@
 
 MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 {
+#ifdef MapMakerMode
 	mmWindow.create(sf::VideoMode(640, 480), "Unnamed project");
 	mmWindow.setFramerateLimit(60);
 	mmWindow.setVerticalSyncEnabled(true);
@@ -45,7 +46,6 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	BlockNames.push_back("Clear Map");
 
 	
-
 	/*
 			BUG might be due to storing them in pointers, although its strange that it always breaks on the same part.
 	*/
@@ -60,10 +60,12 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 		box->Pack(blockButtons[i], false);
 	}
 	TilesetList = sfg::ComboBox::Create();
+#endif
 
 	loadTiles();
 	updateTiles();
 
+#ifdef MapMakerMode
 	lvlIdMinus = sfg::Button::Create("-");
 	lvlIdPlus = sfg::Button::Create("+");
 
@@ -128,6 +130,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	//windowTiles->Add(TileBoxVert);
 	windowTiles->Add(TileBoxVert);
 	desktop.Add(windowTiles);
+#endif
 }
 
 MapMaker::~MapMaker()
@@ -349,7 +352,7 @@ bool MapMaker::SaveMap(int MID)
 
 void MapMaker::Draw()
 {
-	mmWindow.clear();
+	mmWindow.clear(sf::Color(0,0,0,0));
 	int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 	int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
 	WCR.LimitVariable(0, WCR.MapPtr->MapWidth - 1, PlaceX);
@@ -402,8 +405,6 @@ void MapMaker::Draw()
 	sfgui.Display(mmWindow);
 
 	mmWindow.display();
-
-	
 }
 
 

@@ -17,7 +17,7 @@ void WrapperClass::LimitVariable(int Min, int Max, int& Var)
 
 WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 {
-
+	curmapID = 0;
 }
 
 PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
@@ -70,7 +70,7 @@ void PlayerObject::StepPlayer()
 			AfterImage.erase(AfterImage.begin() + i);
 		AfterImage[i].setColor(sf::Color(255, 255, 255,AfterImage[i].getColor().a- AlphaDec));
 	}
-	if(WCR.RenderRef.hasFocus())
+	
 		PollControls();
 	//vspeed, hspeed, gravity, haccel, hspeedmax;
 	if (hspeed != 0)
@@ -148,7 +148,7 @@ void PlayerObject::ResetMovement()
 }
 
 void PlayerObject::PollControls() {
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && WCR.RenderRef.hasFocus())
 	{
 		//vspeed, hspeed, gravity, haccel, hspeedmax;
 		if (hspeed - haccel >= -hspeedmax)
@@ -156,7 +156,7 @@ void PlayerObject::PollControls() {
 		else
 			hspeed = -hspeedmax;
 	}
-	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && WCR.RenderRef.hasFocus())
 	{
 		//vspeed, hspeed, gravity, haccel, hspeedmax;
 		if (hspeed + haccel <= hspeedmax)
@@ -183,7 +183,7 @@ void PlayerObject::PollControls() {
 
 	}
 
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && WCR.RenderRef.hasFocus())
 		if (WCR.MapPtr->CheckCollision(BoundBox, x, y + 1, 1))
 		{
 			vspeed = -10;
@@ -229,7 +229,7 @@ int main()
 	//#if MapMakerMode == true
 	MapMaker MapMkr(WC);
 #ifndef MapMakerMode
-	if (MapMkr.LoadMap(WC.curmapID))
+	if (!MapMkr.LoadMap(WC.curmapID))
 		cout << "Map load failed!" << endl;
 #endif
 	WC.MMPtr = &MapMkr;
@@ -279,10 +279,23 @@ int main()
 
 			for (int i = 0; i < WC.MapPtr->MapWidth; i++)
 				for (int ii = 0; ii < WC.MapPtr->MapHeight; ii++)
+				{
 					mapData << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].tileSetID;
+				}
+					
 			WC.client->send(mapData);
 			cout << "Sent map data!" << endl;
+
+			//Send to other players
+			mapData.clear();
+			mapData << (sf::Int32)2 << (sf::Int32)0;
+			for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
+				if (WC.clients[i] != nullptr)//only send alive players
+					WC.clients[i]->send(mapData);
+			//---
+
 			int foundEmpty = -1;
+
 			for (int i = 0; i < WC.clients.size(); i++)
 				if (WC.clients[i] == nullptr)
 				{
@@ -370,7 +383,23 @@ int main()
 					WC.MapPtr->MapMatrix[x][y].objectType = ID;
 					WC.MapPtr->MapMatrix[x][y].tileID = TID;
 					WC.MapPtr->MapMatrix[x][y].tileSetID = TSID;
-					cout << x << "_" << y << "_" << ID << "_" << TID << "_" << TSID << endl;
+					break;
+				case 2://Other Player
+					sf::Int32 oPlayerMessage;
+					recievedata >> oPlayerMessage;
+					{
+						switch (oPlayerMessage)
+						{
+						case 0://create new player
+							WC.otherPlayers.emplace_back();
+							break;
+						case 1://remove player
+							break;
+						case 2://movement
+							//Just get all speeds and positions.
+							break;
+						}
+					}
 					break;
 				}
 			}
