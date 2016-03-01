@@ -14,3 +14,8 @@ game/SFML game_MapMaker.iobj
 game/SFML game_MapMaker.ipdb
 game/SFML game_MapMaker.pdb
 game/vc140.pdb
+.vs/SFML game/v14/.suo
+game/SFML game.tlog/CL.command.1.tlog
+game/SFML game.tlog/CL.write.1.tlog
+game/SFML game.tlog/SFML game.lastbuildstate
+game/SFML game.tlog/link.write.1.tlog
