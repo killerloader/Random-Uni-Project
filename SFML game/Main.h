@@ -31,7 +31,8 @@ struct WrapperClass
 	fileManager* FMPtr;
 	WrapperClass(sf::RenderWindow &RenderRef_);
 	sf::TcpListener listener;
-	sf::TcpSocket client;
+	sf::TcpSocket* client;
+	vector<sf::TcpSocket*> clients;
 	bool connected = false;
 };
 

@@ -23,7 +23,7 @@ WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	PlayerTex.loadFromFile("Data/Sprites/Player.png");
 	PlayerImage.setTexture(PlayerTex);
-	PlayerView.setSize(sf::Vector2f(1280, 960));
+	PlayerView.setSize(sf::Vector2f(640, 480));
 	//vspeed, hspeed, gravity, haccel, hspeedmax, hfric;
 	hspeed = 0;
 	haccel = 0.4;
@@ -215,7 +215,7 @@ enum Etest//Random pointless enum test
 int main()
 {
 	//Setup window and window settings.
-	sf::RenderWindow window(sf::VideoMode(1280, 960), "Unnamed project");
+	sf::RenderWindow window(sf::VideoMode(640, 480), "Unnamed project");
 	window.setFramerateLimit(60);
 	window.setVerticalSyncEnabled(true);
 
@@ -246,11 +246,16 @@ int main()
 		cout << "Cannot bind port!" << endl;
 	}
 	else
+	{
+		WC.connected = true;
 		cout << "Port bind successful!" << endl;
+	}
+		
 
 	// accept a new connection
-	
-	WC.client.setBlocking(false);
+	WC.client = new sf::TcpSocket;
+	WC.client->setBlocking(false);
+	//WC.client.setBlocking(false);
 	cout << "Listening for connection..." << endl;
 #else
 	bool online = false;
@@ -263,29 +268,44 @@ int main()
 	while (window.isOpen())
 	{
 #ifdef MapMakerMode//start server.
-		if (!WC.connected)
+		if (WC.listener.accept(*WC.client) == sf::Socket::Done)
 		{
-			if (WC.listener.accept(WC.client) == sf::Socket::Done)
-			{
-				cout << "Connection found!" << endl;
-				WC.connected = true;
+			cout << "Connection found!" << endl;
+			WC.connected = true;
+			//Send map:
+			sf::Packet mapData;
+			mapData << (sf::Int32)0;
+			mapData << (sf::Int32)WC.MapPtr->MapWidth << (sf::Int32)WC.MapPtr->MapHeight << (sf::Int32)WC.PlrPtr->x << (sf::Int32)WC.PlrPtr->y;
 
-				//Send map:
-				sf::Packet mapData;
-				mapData << (sf::Int32)0;
-				mapData << (sf::Int32)WC.MapPtr->MapWidth << (sf::Int32)WC.MapPtr->MapHeight << (sf::Int32)WC.PlrPtr->x << (sf::Int32)WC.PlrPtr->y;
+			for (int i = 0; i < WC.MapPtr->MapWidth; i++)
+				for (int ii = 0; ii < WC.MapPtr->MapHeight; ii++)
+					mapData << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].tileSetID;
+			WC.client->send(mapData);
+			cout << "Sent map data!" << endl;
+			int foundEmpty = -1;
+			for (int i = 0; i < WC.clients.size(); i++)
+				if (WC.clients[i] == nullptr)
+				{
+					foundEmpty = i;
+					break;
+				}
 
-				for (int i = 0; i < WC.MapPtr->MapWidth; i++)
-					for (int ii = 0; ii < WC.MapPtr->MapHeight; ii++)
-						mapData << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WC.MapPtr->MapMatrix[i][ii].tileSetID;
-				WC.client.send(mapData);
-				cout << "Sent map data!" << endl;
-			}
+			if (foundEmpty != -1)
+				WC.clients[foundEmpty] = WC.client;
+			else
+				WC.clients.push_back(WC.client);
+
+			//reset temp client.
+			WC.client = new sf::TcpSocket;
+			WC.client->setBlocking(false);
 		}
-		else
+
+		for (int i = 0; i < WC.clients.size(); i++)
 		{
+			if (WC.clients[i] == nullptr)
+				break;
 			sf::Packet recievedata;
-			sf::Socket::Status Status_ = WC.client.receive(recievedata);
+			sf::Socket::Status Status_ = WC.clients[i]->receive(recievedata);
 			if (Status_ == sf::Socket::Done)
 			{
 				sf::Int32 int32;
@@ -295,7 +315,8 @@ int main()
 			if (Status_ == sf::Socket::Disconnected)
 			{
 				cout << "Client has disconnected!" << endl;
-				WC.connected = false;
+				delete WC.clients[i];
+				WC.clients[i] = nullptr;
 			}
 		}
 		//Poll events, keyboard wont be placed in here.
@@ -346,7 +367,10 @@ int main()
 					//(int x, int y, int ID, int TID, int TSID)
 					sf::Int32 x, y, ID, TID, TSID;
 					recievedata >> x >> y >> ID >> TID >> TSID;
-					WC.MapPtr->SetObject(x, y, ID, TID, TSID);
+					WC.MapPtr->MapMatrix[x][y].objectType = ID;
+					WC.MapPtr->MapMatrix[x][y].tileID = TID;
+					WC.MapPtr->MapMatrix[x][y].tileSetID = TSID;
+					cout << x << "_" << y << "_" << ID << "_" << TID << "_" << TSID << endl;
 					break;
 				}
 			}

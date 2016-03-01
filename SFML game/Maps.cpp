@@ -5,9 +5,9 @@ Map::Map(WrapperClass &WCR_) : WCR(WCR_) {
 	CellSize = 32;
 	MapWidth = 100;
 	MapHeight = 100;
-	ViewWidth = 1280;
+	ViewWidth = 640;
 	ViewX = 0;
-	ViewHeight = 960;
+	ViewHeight = 480;
 	ViewY = 0;
 	SolidObj = sf::RectangleShape(sf::Vector2f(32, 32));
 	SolidObj.setFillColor(sf::Color::Blue);
@@ -44,6 +44,8 @@ void Map::drawBorders()
 
 bool Map::isObject(int x, int y)
 {
+	if (x<0 || y<0 || x >MapWidth - 1 || y >MapHeight - 1)
+		return true;
 	if (MapMatrix[x][y].tileID != -1)//some tile here
 		return true;
 	return false;
@@ -67,7 +69,9 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID)
 	{
 		sf::Packet mapData;
 		mapData << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID;
-		WCR.client.send(mapData);
+		for (int i = 0; i < WCR.clients.size(); i++)
+			if (WCR.clients[i] != nullptr)
+				WCR.clients[i]->send(mapData);
 	}
 }
 

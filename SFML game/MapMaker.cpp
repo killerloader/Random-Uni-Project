@@ -7,9 +7,9 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 
 	WindowIsHovered[0] = false;
 	WindowIsHovered[1] = false;
-	MapMakrView.setSize(sf::Vector2f(1280, 960));
+	MapMakrView.setSize(sf::Vector2f(640, 480));
 	windowSFG = sfg::Window::Create();
-	windowSFG->SetPosition(sf::Vector2f(WCR.MapPtr->ViewWidth - 200, WCR.MapPtr->ViewHeight - 960));
+	windowSFG->SetPosition(sf::Vector2f(WCR.MapPtr->ViewWidth - 200, WCR.MapPtr->ViewHeight - 400));
 	windowSFG->SetTitle("Main Menu");
 	windowSFG->SetRequisition(sf::Vector2f(200, 200));
 
@@ -270,7 +270,7 @@ bool MapMaker::LoadMap(int MID)
 		cout << "Could not load map!" << endl;
 		return false;
 	}
-		
+
 	WCR.MapPtr->MapWidth = FMuse.load4Bytes();
 	WCR.MapPtr->MapHeight = FMuse.load4Bytes();
 	WCR.PlrPtr->x = FMuse.load4Bytes() * 32;
@@ -280,16 +280,36 @@ bool MapMaker::LoadMap(int MID)
 	WCR.PlrPtr->ystart = WCR.PlrPtr->y;
 	//Error here, when different map size.
 	WCR.MapPtr->MapMatrix = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
+
 	for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
 		{
 			WCR.MapPtr->MapMatrix[i][ii].objectType = FMuse.loadByte();
-			WCR.MapPtr->MapMatrix[i][ii].tileID = FMuse.loadByte()-1;
+			WCR.MapPtr->MapMatrix[i][ii].tileID = FMuse.loadByte() - 1;
 			WCR.MapPtr->MapMatrix[i][ii].tileSetID = FMuse.loadByte();
 		}
-			
+
 	WCR.MapPtr->setupBorders();
 	cout << "Loaded MAP ID: " << MID << endl;
+
+#ifdef MapMakerMode//start server.
+	if (WCR.connected)
+	{
+		sf::Packet mapData;
+		mapData << (sf::Int32)0;
+		mapData << (sf::Int32)WCR.MapPtr->MapWidth << (sf::Int32)WCR.MapPtr->MapHeight << (sf::Int32)WCR.PlrPtr->x << (sf::Int32)WCR.PlrPtr->y;
+
+		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
+			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
+				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID;
+		for (int i = 0; i < WCR.clients.size(); i++)
+			if (WCR.clients[i] != nullptr)
+				WCR.clients[i]->send(mapData);
+		
+		cout << "Sent map data!" << endl;
+	}
+#endif
+
 	return true;
 }
 
