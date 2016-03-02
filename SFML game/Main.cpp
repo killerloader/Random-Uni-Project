@@ -17,6 +17,8 @@ void WrapperClass::LimitVariable(int Min, int Max, int& Var)
 
 WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 {
+	otherPlayers = vector<otherPlayer*>(256, nullptr);
+
 	curmapID = 0;
 }
 
@@ -59,6 +61,7 @@ void PlayerObject::ContractDir(Edirection DIrr)
 
 void PlayerObject::StepPlayer()
 {
+	//sendMovement();
 	AfterImage.emplace_back(PlayerTex);
 	AfterImage[AfterImage.size() - 1].setPosition(x, y);
 	//AfterImage[AfterImage.size() - 1].setFillColor(sf::Color::White);
@@ -198,6 +201,15 @@ void PlayerObject::MovePlayer(float Xmove, float Ymove)
 	PlayerImage.setPosition(x,y);
 }
 
+void PlayerObject::sendMovement()
+{
+	if (!WCR.online)
+		return;
+	sf::Packet sendData;
+	sendData << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)hspeed << (sf::Int32)vspeed;
+	WCR.socket.send(sendData);
+}
+
 void PlayerObject::DrawPlayer() {
 
 	for (int i = 0; i < AfterImage.size(); i++)
@@ -236,7 +248,6 @@ int main()
 	//#endif
 
 #ifdef MapMakerMode//start server.
-	
 	WC.listener.setBlocking(false);
 	cout << "Attemtping to bind port..." << endl;
 	// bind the listener to a port
@@ -250,17 +261,14 @@ int main()
 		WC.connected = true;
 		cout << "Port bind successful!" << endl;
 	}
-		
-
 	// accept a new connection
 	WC.client = new sf::TcpSocket;
 	WC.client->setBlocking(false);
 	//WC.client.setBlocking(false);
 	cout << "Listening for connection..." << endl;
 #else
-	bool online = false;
 	cout << "Attempting to connect to server..." << endl;
-	sf::TcpSocket socket; socket.setBlocking(false);
+	WC.socket.setBlocking(false);
 #endif
 	
 
@@ -286,14 +294,6 @@ int main()
 			WC.client->send(mapData);
 			cout << "Sent map data!" << endl;
 
-			//Send to other players
-			mapData.clear();
-			mapData << (sf::Int32)2 << (sf::Int32)0;
-			for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
-				if (WC.clients[i] != nullptr)//only send alive players
-					WC.clients[i]->send(mapData);
-			//---
-
 			int foundEmpty = -1;
 
 			for (int i = 0; i < WC.clients.size(); i++)
@@ -302,12 +302,32 @@ int main()
 					foundEmpty = i;
 					break;
 				}
-
 			if (foundEmpty != -1)
 				WC.clients[foundEmpty] = WC.client;
 			else
 				WC.clients.push_back(WC.client);
 
+			if (foundEmpty == -1)
+				foundEmpty = WC.clients.size()-1;
+
+			//Send to other players
+			mapData.clear();
+			mapData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)foundEmpty;
+			for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
+				if (WC.clients[i] != nullptr && i!= foundEmpty)//only send alive players
+					WC.clients[i]->send(mapData);
+			//---
+			//Send others to self
+			for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
+			{
+				if (WC.clients[i] == nullptr || i == foundEmpty)
+					continue;
+				mapData.clear();
+				mapData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)i;
+				WC.clients[foundEmpty]->send(mapData);
+			}
+			//---
+			
 			//reset temp client.
 			WC.client = new sf::TcpSocket;
 			WC.client->setBlocking(false);
@@ -321,9 +341,32 @@ int main()
 			sf::Socket::Status Status_ = WC.clients[i]->receive(recievedata);
 			if (Status_ == sf::Socket::Done)
 			{
-				sf::Int32 int32;
-				recievedata >> int32;
-				cout << "Received data: " << int32 << endl;
+				sf::Int32 messageType;
+				recievedata >> messageType;
+				switch (messageType)
+				{
+				case 2://PlayerMessage
+					sf::Int32 pMessageType;
+					recievedata >> pMessageType;
+					switch (pMessageType)
+					{
+					case 2://Movement
+						//Might be able to just send the packet back? although it may get deleted after use...
+						sf::Int32 x_, y_, hspeed_, vspeed_;
+						recievedata >> x_ >> y_ >> hspeed_ >> vspeed_;
+						sf::Packet sendData;
+						sendData << (sf::Int32)2 << (sf::Int32)2;
+						sendData << x_ << y_ << hspeed_ << vspeed_;
+						for (int ii = 0; ii < WC.clients.size(); ii++)
+						{
+							if (ii == i || WC.clients[ii] == nullptr)
+								continue;
+							WC.clients[ii]->send(sendData);
+						}
+						break;
+					}
+
+				}
 			}
 			if (Status_ == sf::Socket::Disconnected)
 			{
@@ -334,19 +377,19 @@ int main()
 		}
 		//Poll events, keyboard wont be placed in here.
 #else
-		if (!online)
+		if (!WC.online)
 		{
-			sf::Socket::Status status = socket.connect("127.0.0.1", 53000);
+			sf::Socket::Status status = WC.socket.connect("127.0.0.1", 53000);
 			if (status == sf::Socket::Done)
 			{
-				online = true;
+				WC.online = true;
 				cout << "Connection to server successful!" << endl;
 			}
 		}
 		else
 		{
 			sf::Packet recievedata;
-			if (socket.receive(recievedata) == sf::Socket::Done)
+			if (WC.socket.receive(recievedata) == sf::Socket::Done)
 			{
 				sf::Int32 messageType;
 				recievedata >> messageType;
@@ -391,13 +434,39 @@ int main()
 						switch (oPlayerMessage)
 						{
 						case 0://create new player
-							WC.otherPlayers.emplace_back();
+						{
+							sf::Int32 OPID;
+							recievedata >> OPID;
+							if(WC.otherPlayers[OPID] == nullptr)
+								WC.otherPlayers[OPID] = new otherPlayer(WC);
 							break;
+						}
 						case 1://remove player
+						{
+							sf::Int32 OPID;
+							recievedata >> OPID;
+							if (WC.otherPlayers[OPID] != nullptr)
+							{
+								delete WC.otherPlayers[OPID];
+								WC.otherPlayers[OPID] = nullptr;
+							}
 							break;
+						}
 						case 2://movement
+						{
 							//Just get all speeds and positions.
+							sf::Int32 OPID, x_, y_, hspeed_, vspeed_;;
+							recievedata >> OPID;
+							if (WC.otherPlayers[OPID] != nullptr)
+							{
+								recievedata >> x_ >> y_ >> hspeed_ >> vspeed_;
+								WC.otherPlayers[OPID]->x = x_;
+								WC.otherPlayers[OPID]->y = y_;
+								WC.otherPlayers[OPID]->hspeed = hspeed_;
+								WC.otherPlayers[OPID]->vspeed = vspeed_;
+							}
 							break;
+						}
 						}
 					}
 					break;
@@ -415,6 +484,10 @@ int main()
 		#ifndef MapMakerMode//Don't poll player events if in mapmaker mode.
 			obj_Player.StepPlayer();
 			window.setView(obj_Player.PlayerView);
+
+			for (int i = 0; i < WC.otherPlayers.size(); i++)
+				if (WC.otherPlayers[i] != nullptr)
+					WC.otherPlayers[i]->step();
 		#else
 			MapMkr.Step();
 			window.setView(MapMkr.MapMakrView);
@@ -427,6 +500,10 @@ int main()
 		obj_Player.DrawPlayer();
 #ifdef MapMakerMode//Don't poll player events if in mapmaker mode.
 		MapMkr.Draw();
+#else
+		for (int i = 0; i < WC.otherPlayers.size(); i++)
+			if (WC.otherPlayers[i] != nullptr)
+				WC.otherPlayers[i]->draw();
 #endif
 		//Display the window to the client.
 		window.display();

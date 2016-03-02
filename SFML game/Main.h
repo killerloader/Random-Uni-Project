@@ -21,7 +21,7 @@ class otherPlayer;
 
 struct WrapperClass
 {
-	vector<otherPlayer> otherPlayers;
+	vector<otherPlayer*> otherPlayers;
 	sf::Event event;
 	int curmapID;
 	void LimitVariable(int, int, int&);
@@ -34,7 +34,11 @@ struct WrapperClass
 	sf::TcpListener listener;
 	sf::TcpSocket* client;
 	vector<sf::TcpSocket*> clients;
+	sf::TcpSocket socket;
+	//vector<int> clientIds;
+	//bool idFree[256];
 	bool connected = false;
+	bool online = false;
 };
 
 struct PlayerObject
@@ -47,10 +51,11 @@ struct PlayerObject
 	PlayerObject(WrapperClass &WCR_);
 	void PollControls();
 	void MovePlayer(float Xmove, float Ymove);
-	float vspeed, hspeed, gravity, haccel, hspeedmax, hfric;
+	float vspeed, hspeed, gravity, haccel, hspeedmax, hfric, x, y, xstart, ystart, SPD;
 	void StepPlayer();
 	void DrawPlayer();
 	void ResetMovement();
+	void sendMovement();
 	enum Edirection
 	{
 		E_left,E_right,E_up,E_down
@@ -58,8 +63,5 @@ struct PlayerObject
 	void ContractDir(Edirection);
 	//Positioning of player
 	bool falling;
-	float x, y;
-	float xstart, ystart;
 	sf::Rect<int> BoundBox;
-	float SPD;
 };
