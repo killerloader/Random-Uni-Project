@@ -30,6 +30,7 @@ public:
 	sf::Rect<int> BoundBox;
 	bool falling;
 	float vspeed, hspeed, gravity, haccel, hspeedmax, hfric, x, y, xstart, ystart, SPD;
+	int vspeedMax;
 	int xdir_;
 
 	void ContractDir(Edirection);

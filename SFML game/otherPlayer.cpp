@@ -11,6 +11,7 @@ otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_)
 	BoundBox.width = 32;
 	BoundBox.height = 32;
 
+	vspeedMax = 16;
 	hspeed = 0;
 	haccel = 0.4;
 	hspeedmax = 5;
@@ -127,7 +128,10 @@ void otherPlayer::step()
 			else
 				MovePlayer(0, vspeed);
 		}
-		vspeed += gravity;
+		if (vspeed + gravity > vspeedMax)
+			vspeed = vspeedMax;
+		else
+			vspeed += gravity;
 	}
 	else
 	{

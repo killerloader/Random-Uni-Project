@@ -7,38 +7,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SFML game", "SFML game\SFML
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Deb(Game)|x64 = Deb(Game)|x64
-		Deb(Game)|x86 = Deb(Game)|x86
-		Deb(MM)|x64 = Deb(MM)|x64
-		Deb(MM)|x86 = Deb(MM)|x86
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Rel(MapMaker)|x64 = Rel(MapMaker)|x64
 		Rel(MapMaker)|x86 = Rel(MapMaker)|x86
 		Release(Game)|x64 = Release(Game)|x64
 		Release(Game)|x86 = Release(Game)|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Deb(Game)|x64.ActiveCfg = Debug|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Deb(Game)|x64.Build.0 = Debug|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Deb(Game)|x86.ActiveCfg = Debug|Win32
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Deb(Game)|x86.Build.0 = Debug|Win32
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Deb(MM)|x64.ActiveCfg = Debug|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Deb(MM)|x64.Build.0 = Debug|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Deb(MM)|x86.ActiveCfg = Debug|Win32
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Deb(MM)|x86.Build.0 = Debug|Win32
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Debug|x64.ActiveCfg = Debug|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Debug|x64.Build.0 = Debug|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Debug|x86.ActiveCfg = Debug|Win32
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Debug|x86.Build.0 = Debug|Win32
 		{4D93D78C-653C-49B2-945A-8E56139F6085}.Rel(MapMaker)|x64.ActiveCfg = Rel(MapMaker)|x64
 		{4D93D78C-653C-49B2-945A-8E56139F6085}.Rel(MapMaker)|x64.Build.0 = Rel(MapMaker)|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Rel(MapMaker)|x86.ActiveCfg = Debug|Win32
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Rel(MapMaker)|x86.Build.0 = Debug|Win32
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Release(Game)|x64.ActiveCfg = Rel(Game)|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Release(Game)|x64.Build.0 = Rel(Game)|x64
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Release(Game)|x86.ActiveCfg = Rel(Game)|Win32
-		{4D93D78C-653C-49B2-945A-8E56139F6085}.Release(Game)|x86.Build.0 = Rel(Game)|Win32
+		{4D93D78C-653C-49B2-945A-8E56139F6085}.Rel(MapMaker)|x86.ActiveCfg = Rel(MapMaker)|Win32
+		{4D93D78C-653C-49B2-945A-8E56139F6085}.Rel(MapMaker)|x86.Build.0 = Rel(MapMaker)|Win32
+		{4D93D78C-653C-49B2-945A-8E56139F6085}.Release(Game)|x64.ActiveCfg = Release|x64
+		{4D93D78C-653C-49B2-945A-8E56139F6085}.Release(Game)|x64.Build.0 = Release|x64
+		{4D93D78C-653C-49B2-945A-8E56139F6085}.Release(Game)|x86.ActiveCfg = Release|Win32
+		{4D93D78C-653C-49B2-945A-8E56139F6085}.Release(Game)|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

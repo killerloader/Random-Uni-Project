@@ -2,7 +2,7 @@
 #include "Main.h"
 #include <fstream>
 
-struct WrapperClass;
+class WrapperClass;
 
 class fileManager
 {

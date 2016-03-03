@@ -6,7 +6,7 @@
 #include <string>
 
 
-struct WrapperClass;
+class WrapperClass;
 class MapMaker;
 
 struct TileSet
