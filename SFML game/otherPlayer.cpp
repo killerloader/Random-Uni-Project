@@ -19,6 +19,7 @@ otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_)
 	falling = true;
 	gravity = 0.5;//acceleration on vspeed
 	vspeed = 0;
+	xdir_ = 0;
 }
 
 otherPlayer::~otherPlayer()
@@ -52,6 +53,42 @@ void otherPlayer::ContractDir(Edirection DIrr)
 void otherPlayer::step()
 {
 //vspeed, hspeed, gravity, haccel, hspeedmax;
+
+	if (xdir_ == -1)
+	{
+		//vspeed, hspeed, gravity, haccel, hspeedmax;
+		if (hspeed - haccel >= -hspeedmax)
+			hspeed -= haccel;
+		else
+			hspeed = -hspeedmax;
+	}
+	else if (xdir_ == 1)
+	{
+		//vspeed, hspeed, gravity, haccel, hspeedmax;
+		if (hspeed + haccel <= hspeedmax)
+			hspeed += haccel;
+		else
+			hspeed = hspeedmax;
+	}
+	else if (hspeed != 0)
+	{
+		if (hspeed > 0)
+		{
+			if (hspeed - hfric >= 0)
+				hspeed -= hfric;
+			else
+				hspeed = 0;
+		}
+		else
+		{
+			if (hspeed + hfric <= 0)
+				hspeed += hfric;
+			else
+				hspeed = 0;
+		}
+
+	}
+
 	if (hspeed != 0)
 	{
 		if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 1) == 1 || WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) == 1)

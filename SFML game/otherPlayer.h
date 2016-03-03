@@ -30,6 +30,7 @@ public:
 	sf::Rect<int> BoundBox;
 	bool falling;
 	float vspeed, hspeed, gravity, haccel, hspeedmax, hfric, x, y, xstart, ystart, SPD;
+	int xdir_;
 
 	void ContractDir(Edirection);
 	void MovePlayer(float Xmove, float Ymove);

@@ -52,10 +52,12 @@ struct PlayerObject
 	void PollControls();
 	void MovePlayer(float Xmove, float Ymove);
 	float vspeed, hspeed, gravity, haccel, hspeedmax, hfric, x, y, xstart, ystart, SPD;
+	float xDirOld, pressWOld;
 	void StepPlayer();
 	void DrawPlayer();
 	void ResetMovement();
-	void sendMovement();
+	void sendXChange();
+	void sendJump();
 	enum Edirection
 	{
 		E_left,E_right,E_up,E_down

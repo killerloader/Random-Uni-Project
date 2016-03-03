@@ -1,0 +1,4 @@
+opne with ios_base::binary
+use read() function and write() function
+
+can write and read whole class objects (just cast to (char*))

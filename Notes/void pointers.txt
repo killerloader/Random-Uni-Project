@@ -1,0 +1,13 @@
+void pointers: can point to anything.
+can't do 
+void* test = new void;
+this works:
+- cant set a void pointer to any other pointer.
+- Gives a way to pass anything into a function.
+- Need to cast type to use properly.
+- CAn be used to allocated all memory needed with
+void* base_memory = malloc(40000000);
+void* Graphics_Memory = (char*)base_memory
+int Graphics_size = 10000000
+void* Sound_Memory = (char*)base_memory + (char*)Graphics_size;
+int Graphics_size = 30000000;

@@ -1,0 +1,12 @@
+ios_base::out is the command argument for output files. (Asks for write permission)
+ios_base::in for read
+ios_base::_Nocreate will not create a new file if it doesnt exist
+ios_base::binary();
+ios_base::app - write to end of file instead of clearing file.
+
+must call file.close() at end. Can lock file after close?
+| to pass more than one ios_base.
+use is_open to check success.
+same as console, using >> will read to a space, .getline will get the whole line.
+
+seekg moves by characters.

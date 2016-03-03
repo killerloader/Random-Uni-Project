@@ -1,9 +1,12 @@
 #include "Main.h"
 /*
 TODO: 
-	- Add 'OtherPlayer' class to draw players online.
-	- Accept more than one connection with a vector of sockets.
-
+	- Add other players to server.
+	- Clear on client.
+	- Maximum fall speed.
+	- Port player class and wrapper class to own files.
+	- Colours for players.
+	- Server commands and 
 	- Fix headers, do not include .h files in headers (or include one which only has predefinitions)
 */
 
@@ -39,6 +42,8 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	falling = true;
 	gravity = 0.5;//acceleration on vspeed
 	vspeed = 0;
+	xDirOld = 0; 
+	pressWOld = false;
 	//PlayerImage.setSize(sf::Vector2f(32,32));
 	PlayerImage.setPosition(x, y);
 }
@@ -61,7 +66,6 @@ void PlayerObject::ContractDir(Edirection DIrr)
 
 void PlayerObject::StepPlayer()
 {
-	//sendMovement();
 	AfterImage.emplace_back(PlayerTex);
 	AfterImage[AfterImage.size() - 1].setPosition(x, y);
 	//AfterImage[AfterImage.size() - 1].setFillColor(sf::Color::White);
@@ -74,7 +78,7 @@ void PlayerObject::StepPlayer()
 		AfterImage[i].setColor(sf::Color(255, 255, 255,AfterImage[i].getColor().a- AlphaDec));
 	}
 	
-		PollControls();
+	PollControls();
 	//vspeed, hspeed, gravity, haccel, hspeedmax;
 	if (hspeed != 0)
 	{
@@ -185,13 +189,14 @@ void PlayerObject::PollControls() {
 			}
 
 	}
-
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && WCR.RenderRef.hasFocus())
 		if (WCR.MapPtr->CheckCollision(BoundBox, x, y + 1, 1))
 		{
 			vspeed = -10;
+			sendJump();
 			falling = true;
 		}
+	sendXChange();
 }
 
 void PlayerObject::MovePlayer(float Xmove, float Ymove)
@@ -201,13 +206,39 @@ void PlayerObject::MovePlayer(float Xmove, float Ymove)
 	PlayerImage.setPosition(x,y);
 }
 
-void PlayerObject::sendMovement()
+void PlayerObject::sendJump()
 {
 	if (!WCR.online)
 		return;
 	sf::Packet sendData;
-	sendData << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)hspeed << (sf::Int32)vspeed;
+	sendData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)x << (sf::Int32)y;
 	WCR.socket.send(sendData);
+}
+
+void PlayerObject::sendXChange()
+{
+	if (!WCR.online)
+		return;
+	/*
+	xDirOld = 0;
+	pressWOld = false;
+	*/
+	int xdir_ = 0;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && WCR.RenderRef.hasFocus())
+	{
+		xdir_ = -1;
+	}
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && WCR.RenderRef.hasFocus())
+	{
+		xdir_ = 1;
+	}
+	if (xdir_ != xDirOld)
+	{
+		xDirOld = xdir_;
+		sf::Packet sendData;
+		sendData << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)xdir_;
+		WCR.socket.send(sendData);
+	}
 }
 
 void PlayerObject::DrawPlayer() {
@@ -314,24 +345,80 @@ int main()
 			mapData.clear();
 			mapData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)foundEmpty;
 			for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
-				if (WC.clients[i] != nullptr && i!= foundEmpty)//only send alive players
+				if (WC.clients[i] != nullptr && i != foundEmpty)//only send alive players
+				{
 					WC.clients[i]->send(mapData);
+					//cout << "(1) Sending " << foundEmpty << " to " << i << endl;
+				}
 			//---
 			//Send others to self
+			//can only send one message? (Maybe limitation of receiving)
+			mapData.clear();
 			for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
 			{
 				if (WC.clients[i] == nullptr || i == foundEmpty)
 					continue;
-				mapData.clear();
+				//successfully sends but breaks.
+				
 				mapData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)i;
 				WC.clients[foundEmpty]->send(mapData);
-			}
+				//cout << "(2) Sending " << i << " to " << foundEmpty << endl;
+			}				
 			//---
 			
 			//reset temp client.
 			WC.client = new sf::TcpSocket;
 			WC.client->setBlocking(false);
 		}
+		/* - semi fixes problems with not loading other players, but also breaks other stuff.
+		
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::P) && WC.RenderRef.hasFocus())
+		{
+			for (int ii = 0; ii < WC.clients.size(); ii++)//hasn't been added to vector yet so this wont find self!
+			{
+				sf::Packet mapData;
+				mapData << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)ii;
+				for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
+					if (WC.clients[i] != nullptr && i != ii)//only send alive players
+					{
+						WC.clients[i]->send(mapData);
+						cout << "(1) Redelete " << ii << " to " << i << endl;
+					}
+
+				mapData.clear();
+				mapData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)ii;
+				for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
+					if (WC.clients[i] != nullptr && i != ii)//only send alive players
+					{
+						WC.clients[i]->send(mapData);
+						cout << "(1) ReSending " << ii << " to " << i << endl;
+					}
+				//---
+				//Send others to self
+				//can only send one message? (Maybe limitation of receiving)
+				for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
+				{
+					if (WC.clients[i] == nullptr || i == ii)
+						continue;
+
+					cout << "(2) Redelete " << i << " to " << ii << endl;
+					mapData.clear();
+					mapData << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)i;
+					WC.clients[ii]->send(mapData);
+				}
+
+				for (int i = 0; i < WC.clients.size(); i++)//hasn't been added to vector yet so this wont find self!
+				{
+					if (WC.clients[i] == nullptr || i == ii)
+						continue;
+
+					cout << "(2) ReSending " << i << " to " << ii << endl;
+					mapData.clear();
+					mapData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)i;
+					WC.clients[ii]->send(mapData);
+				}
+			}
+		}*/
 
 		for (int i = 0; i < WC.clients.size(); i++)
 		{
@@ -350,27 +437,54 @@ int main()
 					recievedata >> pMessageType;
 					switch (pMessageType)
 					{
-					case 2://Movement
-						//Might be able to just send the packet back? although it may get deleted after use...
+					case 0://Jump
+						   //Might be able to just send the packet back? although it may get deleted after use...
+					{
 						sf::Int32 x_, y_, hspeed_, vspeed_;
-						recievedata >> x_ >> y_ >> hspeed_ >> vspeed_;
-						sf::Packet sendData;
-						sendData << (sf::Int32)2 << (sf::Int32)2;
-						sendData << x_ << y_ << hspeed_ << vspeed_;
+						recievedata >> x_ >> y_;
 						for (int ii = 0; ii < WC.clients.size(); ii++)
 						{
 							if (ii == i || WC.clients[ii] == nullptr)
 								continue;
+							sf::Packet sendData;
+							sendData << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)i;
+							sendData << x_ << y_;
 							WC.clients[ii]->send(sendData);
 						}
 						break;
 					}
-
+					case 1://xdir change
+						   //Might be able to just send the packet back? although it may get deleted after use...
+					{
+						sf::Int32 x_, y_, xDIr;
+						recievedata >> x_ >> y_ >> xDIr;
+						for (int ii = 0; ii < WC.clients.size(); ii++)
+						{
+							if (ii == i || WC.clients[ii] == nullptr)
+								continue;
+							sf::Packet sendData;
+							sendData << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)i << (sf::Int32)xDIr;
+							sendData << x_ << y_;
+							WC.clients[ii]->send(sendData);
+							continue;//no point
+						}
+						break;
+					}
+					}
 				}
 			}
+			//Remove other player.
 			if (Status_ == sf::Socket::Disconnected)
 			{
 				cout << "Client has disconnected!" << endl;
+				sf::Packet sendData;
+				sendData << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)i;
+				for (int ii = 0; ii < WC.clients.size(); ii++)
+				{
+					if (ii == i || WC.clients[ii] == nullptr)
+						continue;
+					WC.clients[ii]->send(sendData);
+				}
 				delete WC.clients[i];
 				WC.clients[i] = nullptr;
 			}
@@ -379,7 +493,7 @@ int main()
 #else
 		if (!WC.online)
 		{
-			sf::Socket::Status status = WC.socket.connect("127.0.0.1", 53000);
+			sf::Socket::Status status = WC.socket.connect("10.17.24.161", 53000);
 			if (status == sf::Socket::Done)
 			{
 				WC.online = true;
@@ -389,7 +503,7 @@ int main()
 		else
 		{
 			sf::Packet recievedata;
-			if (WC.socket.receive(recievedata) == sf::Socket::Done)
+			if(WC.socket.receive(recievedata) == sf::Socket::Done)
 			{
 				sf::Int32 messageType;
 				recievedata >> messageType;
@@ -437,6 +551,7 @@ int main()
 						{
 							sf::Int32 OPID;
 							recievedata >> OPID;
+							cout << "Player created: " << OPID << endl;
 							if(WC.otherPlayers[OPID] == nullptr)
 								WC.otherPlayers[OPID] = new otherPlayer(WC);
 							break;
@@ -454,18 +569,42 @@ int main()
 						}
 						case 2://movement
 						{
-							//Just get all speeds and positions.
-							sf::Int32 OPID, x_, y_, hspeed_, vspeed_;;
-							recievedata >> OPID;
-							if (WC.otherPlayers[OPID] != nullptr)
+							//cout << "Player moved." << endl;
+							sf::Int32 PMEssage;
+							recievedata >> PMEssage;
+							switch (PMEssage)
 							{
-								recievedata >> x_ >> y_ >> hspeed_ >> vspeed_;
-								WC.otherPlayers[OPID]->x = x_;
-								WC.otherPlayers[OPID]->y = y_;
-								WC.otherPlayers[OPID]->hspeed = hspeed_;
-								WC.otherPlayers[OPID]->vspeed = vspeed_;
+							case 0:
+								//Just get all speeds and positions.
+							{
+								sf::Int32 OPID, x_, y_;
+								recievedata >> OPID;
+								//cout << OPID << "_" << WC.otherPlayers.size() << endl;
+								if (WC.otherPlayers[OPID] != nullptr)
+								{
+									WC.otherPlayers[OPID]->vspeed = -10;
+									WC.otherPlayers[OPID]->falling = true;
+									WC.otherPlayers[OPID]->PlayerImage.setPosition(WC.otherPlayers[OPID]->x, WC.otherPlayers[OPID]->y);
+								}
+								break;
 							}
-							break;
+							case 1:
+								//Just get all speeds and positions.
+							{
+								sf::Int32 OPID, x_, y_, xdirnew;
+								recievedata >> OPID;
+								//cout << OPID << "_" << WC.otherPlayers.size() << endl;
+								if (WC.otherPlayers[OPID] != nullptr)
+								{
+									recievedata >> xdirnew >> x_ >> y_;
+									WC.otherPlayers[OPID]->x = x_;
+									WC.otherPlayers[OPID]->y = y_;
+									WC.otherPlayers[OPID]->xdir_ = xdirnew;
+									WC.otherPlayers[OPID]->PlayerImage.setPosition(WC.otherPlayers[OPID]->x, WC.otherPlayers[OPID]->y);
+								}
+								break;
+							}
+							}
 						}
 						}
 					}
