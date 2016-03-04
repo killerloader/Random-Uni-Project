@@ -20,3 +20,7 @@ game/SFML game.tlog/CL.write.1.tlog
 game/SFML game.tlog/SFML game.lastbuildstate
 game/SFML game.tlog/link.write.1.tlog
 game/Data/Fonts/optimusprinceps.zip
+*.log
+*.tlog
+*.lastbuildstate
+*.pdb

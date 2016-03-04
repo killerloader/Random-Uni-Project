@@ -400,6 +400,7 @@ void MessagesHangle::ClientMessagesHandle()
 			}
 		}
 		WCR.online = false;
-		WCR.socket.disconnect();
+		WCR.socket.disconnect();//May be pointless, as already disconnected, hopefully doesn't create double delete error...
+		cout << "Disconnected from the server!" << endl;
 	}
 }

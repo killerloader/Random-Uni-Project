@@ -43,6 +43,8 @@ public:
 	sf::TcpSocket socket;
 	MessagesHangle MHandle;//Handle for messages for both client and server.
 
+	char* ConnectIp;//000.000.000.000\0 (16 characters including null terminator at max.
+
 	//vector<int> clientIds;
 	//bool idFree[256];
 	bool connected = false;

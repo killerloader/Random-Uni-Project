@@ -33,6 +33,15 @@
     <ClInclude Include="mapObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MessagesHangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="otherPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MapMaker.cpp">
@@ -48,6 +57,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mapObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MessagesHangle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="otherPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -73,13 +73,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(SolutionDir)\game</IntDir>
+    <IntDir>$(SolutionDir)\CompileFiles</IntDir>
     <OutDir>$(SolutionDir)\game</OutDir>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Rel(MapMaker)|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(SolutionDir)\game</IntDir>
+    <IntDir>$(SolutionDir)\CompileFiles</IntDir>
     <OutDir>$(SolutionDir)\game</OutDir>
     <TargetName>$(ProjectName)_MapMaker</TargetName>
   </PropertyGroup>
@@ -104,7 +104,7 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
       <AdditionalLibraryDirectories>L:/SFML32/lib;$(SolutionDir)\SFGUI STuff\SFGUI\lib;</AdditionalLibraryDirectories>
       <AdditionalDependencies>ws2_32.lib;gdi32.lib;winmm.lib;jpeg.lib;freetype.lib;opengl32.lib;sfgui-s.lib;sfml-network-s.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -124,9 +124,10 @@
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
       <AdditionalLibraryDirectories>L:/SFML32/lib;$(SolutionDir)\SFGUI STuff\SFGUI\lib;</AdditionalLibraryDirectories>
       <AdditionalDependencies>ws2_32.lib;gdi32.lib;winmm.lib;jpeg.lib;freetype.lib;opengl32.lib;sfgui-s.lib;sfml-network-s.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ProfileGuidedDatabase>$(SolutionDir)\CompileFiles\$(TargetName).pgd</ProfileGuidedDatabase>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

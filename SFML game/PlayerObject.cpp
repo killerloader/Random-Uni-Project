@@ -16,7 +16,7 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	vspeedMax = 16;
 	SPD = 5.f;
 	falling = true;
-	MyCol = sf::Color::Blue;
+	MyCol = sf::Color::White;
 	gravity = 0.5;//acceleration on vspeed
 	vspeed = 0;
 	xDirOld = 0;

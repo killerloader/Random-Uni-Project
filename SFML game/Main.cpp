@@ -5,9 +5,11 @@ TODO:
 	- Using player IDs, make commands which can be entered into the server to do stuff:
 		- Teleport, kick, etc...
 	- Clear on client.
-	- Colours for players.
 	- Fix headers, do not include .h files in headers (or include one which only has predefinitions)
 	- Add connections and listening to header.
+	- Names on client
+	- Commands on server
+	- Load IP from txt file.
 */
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
@@ -67,7 +69,17 @@ int main()
 	//WC.client.setBlocking(false);
 	cout << "Listening for connection..." << endl;
 #else
-	cout << "Attempting to connect to server..." << endl;
+	
+	WC.ConnectIp = new char[16];
+	fstream game; game.open("Connection.txt", ios_base::in);
+	strcpy(WC.ConnectIp, "127.0.0.1");
+
+	if (game.is_open())
+	{
+		game.getline(WC.ConnectIp, 16);
+	}
+
+	cout << "Attempting to connect to server with address: " << WC.ConnectIp << endl;
 	WC.socket.setBlocking(false);
 #endif
 	
@@ -80,8 +92,7 @@ int main()
 #else
 		if (!WC.online)
 		{
-			//"10.17.24.161"
-			sf::Socket::Status status = WC.socket.connect("10.17.24.161", 53000);
+			sf::Socket::Status status = WC.socket.connect(WC.ConnectIp, 53000);
 			if (status == sf::Socket::Done)
 			{
 				WC.online = true;

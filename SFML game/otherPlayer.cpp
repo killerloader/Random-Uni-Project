@@ -9,7 +9,7 @@ otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_)
 	PlayerImage.setTexture(WCR.PlrPtr->PlayerTex);
 	BoundBox.width = 46;
 	BoundBox.height = 35;
-	MyCol = sf::Color::Blue;
+	MyCol = sf::Color::White;
 	PID = -1;
 	vspeedMax = 16;
 	hspeed = 0;
