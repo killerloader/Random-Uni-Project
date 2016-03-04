@@ -93,7 +93,7 @@ void fileManager::save4Bytes(int B4Num)
 	ABytes[1] = (B4Num >> 16) & 0xFF;
 	ABytes[2] = (B4Num >> 8) & 0xFF;
 	ABytes[3] = B4Num & 0xFF;
-	cout << "Saving int (" << B4Num << ") as: (" << ABytes[0] << ", " << ABytes[1] << ", " << ABytes[2] << ", " << ABytes[3] << ")" << endl;
+	//cout << "Saving int (" << B4Num << ") as: (" << ABytes[0] << ", " << ABytes[1] << ", " << ABytes[2] << ", " << ABytes[3] << ")" << endl;
 	OStream.write(ABytes, 4);
 }
 
@@ -112,7 +112,7 @@ int fileManager::load4Bytes()
 	IStream.read(&b[1], 1);
 	IStream.read(&b[0], 1);
 	int Res = *(int *)b;
-	cout << "Reading int (" << Res << ") as: (" << b[3] << ", " << b[2] << ", " << b[1] << ", " << b[0] << ")" << endl;
+	//cout << "Reading int (" << Res << ") as: (" << b[3] << ", " << b[2] << ", " << b[1] << ", " << b[0] << ")" << endl;
 	return Res;
 }
 

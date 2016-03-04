@@ -10,6 +10,7 @@ TODO:
 	- Names on client
 	- Commands on server
 	- Load IP from txt file.
+	- Function to check player ID to see if it is within acceptable player id limits and that it is not a nullptr.
 */
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
@@ -28,11 +29,11 @@ WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 
 int main()
 {
-	//Setup window and window settings.
-	sf::RenderWindow window(sf::VideoMode(640, 480), "Unnamed project");
-	window.setFramerateLimit(60);
-	window.setVerticalSyncEnabled(true);
 
+
+
+	//Setup window and window settings.
+	sf::RenderWindow window;	
 	//Class Setup
 	WrapperClass WC(window);
 	PlayerObject obj_Player(WC);
@@ -42,12 +43,24 @@ int main()
 	//Initialize mapmaker if in mapmaker mode.
 	//#if MapMakerMode == true
 	MapMaker MapMkr(WC);
+
 #ifndef MapMakerMode
+	{
+		char tempChar[30];
+		cout << "Please enter your username (Max of 30 characters): " << endl;
+		cin.getline(tempChar, 30);
+		obj_Player.myName = new char[strlen(tempChar) + 1];
+		strcpy(obj_Player.myName, tempChar);
+	}
 	if (!MapMkr.LoadMap(WC.curmapID))
 		cout << "Map load failed!" << endl;
 #endif
 	WC.MMPtr = &MapMkr;
 	//#endif
+
+	window.create(sf::VideoMode(640, 480), "Unnamed project");
+	window.setFramerateLimit(60);
+	window.setVerticalSyncEnabled(true);
 
 #ifdef MapMakerMode//start server.
 	WC.listener.setBlocking(false);
@@ -69,7 +82,6 @@ int main()
 	//WC.client.setBlocking(false);
 	cout << "Listening for connection..." << endl;
 #else
-	
 	WC.ConnectIp = new char[16];
 	fstream game; game.open("Connection.txt", ios_base::in);
 	strcpy(WC.ConnectIp, "127.0.0.1");
@@ -97,6 +109,11 @@ int main()
 			{
 				WC.online = true;
 				cout << "Connection to server successful!" << endl;
+
+				sf::Packet namePacket;
+				sf::String nameSf = obj_Player.myName;
+				namePacket << (sf::Int32)2 << (sf::Int32)3 << nameSf;
+				WC.MHandle.sendData(namePacket, WC.socket);
 			}
 		}
 		else

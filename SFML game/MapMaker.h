@@ -78,17 +78,33 @@ public:
 	//Main Window
 	sfg::Window::Ptr windowSFG;//Main window with all buttons
 	sfg::Button::Ptr blockButtons[7];
+	sfg::ComboBox::Ptr ObjectTypeList;
+
 	sfg::Button::Ptr lvlIdMinus;
 	sfg::Button::Ptr lvlIdPlus;
 	sfg::Entry::Ptr MapIDEntry;
-	sfg::Label::Ptr MapIDLabel;
 	sfg::Box::Ptr box;
 	sfg::Box::Ptr MapBox;
+	sfg::Button::Ptr ConsoleButton;
+
+	//Console window
+	sfg::Window::Ptr CommandWindow;//Window to select drawn tile.
+	sfg::Box::Ptr CWTileBoxVert;
+	sfg::Entry::Ptr CommandEntry;
+	sfg::Button::Ptr SendCommand;
+	sfg::ScrolledWindow::Ptr CommandLog;
+	sfg::Box::Ptr CLogBoxVert;
+
+	void sendCommand();
+
 
 	//Tile Window
 	sfg::Canvas::Ptr TileCanvas;
 	sfg::Window::Ptr windowTiles;//Window to select drawn tile.
 	sfg::Box::Ptr TileBoxVert;
+	sfg::CheckButton::Ptr ShowObjectTypes;
+
+
 	//vector<sfg::Box::Ptr> TileBoxesHor;
 	//vector<sfg::Image::Ptr> TileImages;
 
@@ -104,6 +120,10 @@ public:
 	void updateTiles();
 	void loadTile(const char*);
 	void changeTileSet();
+	void changeObjectType();
+	void tickButtonPress(int);
+
+	bool viewObjectTypes = false;
 
 	int MouseOverWindow=0;
 	bool pressedOffScreen = false;//if pressed off screen, don't place blocks until released and pressed again on screen.

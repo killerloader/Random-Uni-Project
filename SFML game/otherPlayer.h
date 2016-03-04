@@ -35,6 +35,8 @@ public:
 	int vspeedMax;
 	int xdir_;
 
+	char* myName;
+
 	sf::Color MyCol = sf::Color();
 
 	void ContractDir(Edirection);

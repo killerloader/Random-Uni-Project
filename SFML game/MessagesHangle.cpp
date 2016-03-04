@@ -212,6 +212,24 @@ void MessagesHangle::ServerMessagesHandle()
 					WCR.otherPlayers[i]->PlayerImage.setPosition(WCR.otherPlayers[i]->x, WCR.otherPlayers[i]->y);
 					break;
 				}
+				case 3://name change (set)
+				{
+					sf::String OName_;
+					recievedata >> OName_;
+					for (int ii = 0; ii < WCR.clients.size(); ii++)
+					{
+						if (ii == i || WCR.clients[ii] == nullptr)
+							continue;
+						sf::Packet Data_;
+						Data_ << (sf::Int32)2 << (sf::Int32)5 << (sf::Int32)i << OName_;
+						sendData(Data_, ii);
+						continue;//no point
+					}
+					//Set Oplayer name.
+					WCR.otherPlayers[i]->myName = new char[strlen(OName_.toAnsiString().c_str()) + 1];
+					strcpy(WCR.otherPlayers[i]->myName, OName_.toAnsiString().c_str());
+					break;
+				}
 				}
 			}
 		}
@@ -295,22 +313,20 @@ void MessagesHangle::ClientMessagesHandle()
 					recievedata >> OPID >> OPX >> OPY;
 					cout << "Player created: " << OPID << endl;
 					if (WCR.otherPlayers[OPID] == nullptr)
-					{
-						WCR.otherPlayers[OPID] = new otherPlayer(WCR);
-						WCR.otherPlayers[OPID]->x = OPX;
-						WCR.otherPlayers[OPID]->y = OPY;
-					}
+						break;
+					WCR.otherPlayers[OPID] = new otherPlayer(WCR);
+					WCR.otherPlayers[OPID]->x = OPX;
+					WCR.otherPlayers[OPID]->y = OPY;
 					break;
 				}
 				case 1://remove player
 				{
 					sf::Int32 OPID;
 					recievedata >> OPID;
-					if (WCR.otherPlayers[OPID] != nullptr)
-					{
-						delete WCR.otherPlayers[OPID];
-						WCR.otherPlayers[OPID] = nullptr;
-					}
+					if (WCR.otherPlayers[OPID] == nullptr)
+						break;
+					delete WCR.otherPlayers[OPID];
+					WCR.otherPlayers[OPID] = nullptr;
 					break;
 				}
 				case 2://movement
@@ -324,42 +340,36 @@ void MessagesHangle::ClientMessagesHandle()
 					{
 						sf::Int32 OPID, x_, y_;
 						recievedata >> OPID;
-						//cout << OPID << "_" << WCR.otherPlayers.size() << endl;
-						if (WCR.otherPlayers[OPID] != nullptr)
-						{
-							WCR.otherPlayers[OPID]->vspeed = -10;
-							WCR.otherPlayers[OPID]->falling = true;
-							WCR.otherPlayers[OPID]->PlayerImage.setPosition(WCR.otherPlayers[OPID]->x, WCR.otherPlayers[OPID]->y);
-						}
+						if (WCR.otherPlayers[OPID] == nullptr)
+							break;
+						WCR.otherPlayers[OPID]->vspeed = -10;
+						WCR.otherPlayers[OPID]->falling = true;
+						WCR.otherPlayers[OPID]->PlayerImage.setPosition(WCR.otherPlayers[OPID]->x, WCR.otherPlayers[OPID]->y);
 						break;
 					}
 					case 1://Change x dir.
 					{
 						sf::Int32 OPID, x_, y_, xdirnew;
 						recievedata >> OPID;
-						//cout << OPID << "_" << WCR.otherPlayers.size() << endl;
-						if (WCR.otherPlayers[OPID] != nullptr)
-						{
-							recievedata >> xdirnew >> x_ >> y_;
-							WCR.otherPlayers[OPID]->x = x_;
-							WCR.otherPlayers[OPID]->y = y_;
-							WCR.otherPlayers[OPID]->xdir_ = xdirnew;
-							WCR.otherPlayers[OPID]->PlayerImage.setPosition(WCR.otherPlayers[OPID]->x, WCR.otherPlayers[OPID]->y);
-						}
+						if (WCR.otherPlayers[OPID] == nullptr)
+							break;
+						recievedata >> xdirnew >> x_ >> y_;
+						WCR.otherPlayers[OPID]->x = x_;
+						WCR.otherPlayers[OPID]->y = y_;
+						WCR.otherPlayers[OPID]->xdir_ = xdirnew;
+						WCR.otherPlayers[OPID]->PlayerImage.setPosition(WCR.otherPlayers[OPID]->x, WCR.otherPlayers[OPID]->y);
 						break;
 					}
 					case 2://Update x, y
 					{
 						sf::Int32 OPID, x_, y_;
 						recievedata >> OPID;
-						//cout << OPID << "_" << WCR.otherPlayers.size() << endl;
-						if (WCR.otherPlayers[OPID] != nullptr)
-						{
-							recievedata >> x_ >> y_;
-							WCR.otherPlayers[OPID]->x = x_;
-							WCR.otherPlayers[OPID]->y = y_;
-							WCR.otherPlayers[OPID]->PlayerImage.setPosition(WCR.otherPlayers[OPID]->x, WCR.otherPlayers[OPID]->y);
-						}
+						if (WCR.otherPlayers[OPID] == nullptr)
+							break;
+						recievedata >> x_ >> y_;
+						WCR.otherPlayers[OPID]->x = x_;
+						WCR.otherPlayers[OPID]->y = y_;
+						WCR.otherPlayers[OPID]->PlayerImage.setPosition(WCR.otherPlayers[OPID]->x, WCR.otherPlayers[OPID]->y);
 						break;
 					}
 					}
@@ -369,11 +379,10 @@ void MessagesHangle::ClientMessagesHandle()
 				{
 					sf::Int32 OPID, pr_, pg_, pb_;
 					recievedata >> OPID >> pr_ >> pg_ >> pb_;
-					if (WCR.otherPlayers[OPID] != nullptr)
-					{
-						WCR.otherPlayers[OPID]->MyCol = sf::Color(pr_, pg_, pb_, 255);
-						WCR.otherPlayers[OPID]->PlayerImage.setColor(WCR.otherPlayers[OPID]->MyCol);
-					}
+					if (WCR.otherPlayers[OPID] == nullptr)
+						break;
+					WCR.otherPlayers[OPID]->MyCol = sf::Color(pr_, pg_, pb_, 255);
+					WCR.otherPlayers[OPID]->PlayerImage.setColor(WCR.otherPlayers[OPID]->MyCol);
 					break;
 				}
 				case 4://Change my colour
@@ -382,6 +391,17 @@ void MessagesHangle::ClientMessagesHandle()
 					recievedata >> pr_ >> pg_ >> pb_;
 					WCR.PlrPtr->MyCol = sf::Color(pr_, pg_, pb_, 255);
 					WCR.PlrPtr->PlayerImage.setColor(WCR.PlrPtr->MyCol);
+					break;
+				}
+				case 5://name change (set)
+				{
+					sf::Int32 ID;
+					sf::String OName_;
+					recievedata >> ID >> OName_;
+					if (WCR.otherPlayers[ID] == nullptr)
+						break;
+					WCR.otherPlayers[ID]->myName = new char[strlen(OName_.toAnsiString().c_str()) + 1];
+					strcpy(WCR.otherPlayers[ID]->myName, OName_.toAnsiString().c_str());
 					break;
 				}
 				}

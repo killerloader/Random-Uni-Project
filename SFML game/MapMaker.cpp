@@ -20,45 +20,43 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	WindowIsHovered[0] = false;
 	WindowIsHovered[1] = false;
 	MapMakrView.setSize(sf::Vector2f(640, 480));
-	windowSFG = sfg::Window::Create();
+	windowSFG = sfg::Window::Create(sfg::Window::Style::TITLEBAR | sfg::Window::Style::BACKGROUND);
 	windowSFG->SetPosition(sf::Vector2f(0, 0));
 	windowSFG->SetTitle("Main Menu");
 	windowSFG->SetRequisition(sf::Vector2f(200, 200));
-
-	MapIDEntry = sfg::Entry::Create();
-	//MapIDEntry->SetRequisition(sf::Vector2f(64, 0));
-	MapIDLabel = sfg::Label::Create();
-	MapIDLabel->SetText("Map ID: ");
-	MapIDEntry->SetMaximumLength(2);//Only allow 2 digit number max.
 
 	windowSFG->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 0));
 	windowSFG->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 0));
 
 	//setup block names
-	BlockNames.push_back("asdasd");//FIrst object is ID 0 which is reserved for empty space.
+	/*BlockNames.push_back("asdasd");//FIrst object is ID 0 which is reserved for empty space.
 	BlockNames.push_back("Solid");
 	BlockNames.push_back("Bouncy Block");
 	BlockNames.push_back("Lava");
 	BlockNames.push_back("Finish block");
-	BlockNames.push_back("Select Tile");
+	BlockNames.push_back("Select Tile");*/
 	BlockNames.push_back("Save Map");
 	BlockNames.push_back("Load Map");
 	BlockNames.push_back("Clear Map");
+	BlockNames.push_back("Tile Selector");
 
+	box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+
+	ObjectTypeList = sfg::ComboBox::Create();
+
+	ObjectTypeList->AppendItem("Invisible");
+	ObjectTypeList->AppendItem("Solid");
+	ObjectTypeList->AppendItem("Bouncy");
+	ObjectTypeList->AppendItem("Death");
+	ObjectTypeList->AppendItem("Next Level");
+	ObjectTypeList->SelectItem(CurBlock);
+
+	ObjectTypeList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::changeObjectType, this));
 	
 	/*
 			BUG might be due to storing them in pointers, although its strange that it always breaks on the same part.
 	*/
 
-	box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
-	MapBox = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
-	for (int i = 0; i < 9; i++)
-	{
-		blockButtons[i] = sfg::Button::Create(BlockNames[i]);
-		blockButtons[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, i));
-		//box->SetPosition(sf::Vector2f(0.f, 20.f * i));
-		box->Pack(blockButtons[i], false);
-	}
 	TilesetList = sfg::ComboBox::Create();
 #endif
 
@@ -72,33 +70,108 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	lvlIdMinus->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::buttonPressChangeMapID, this, 0));
 	lvlIdPlus->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::buttonPressChangeMapID, this, 1));
 
-	box->Pack(MapIDLabel, false);
+	MapIDEntry = sfg::Entry::Create();
+	//MapIDEntry->SetRequisition(sf::Vector2f(64, 0));
+	MapIDEntry->SetMaximumLength(2);//Only allow 2 digit number max.
+	MapBox = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
+
+	
+
+
+	//First three are save/load/clear
+
+	box->Pack(sfg::Label::Create("--Map Management--"), false);
+	box->Pack(sfg::Separator::Create(), false);
 	MapBox->Pack(lvlIdMinus, false);
 	MapIDEntry->SetText("0");
 	MapBox->Pack(MapIDEntry, true, true);
 	MapBox->Pack(lvlIdPlus, false);
+
+	box->Pack(sfg::Label::Create("Map ID"), false);
 	box->Pack(MapBox, false);
-	
-	windowTiles = sfg::Window::Create();
-	windowTiles->SetPosition(sf::Vector2f(0,0));
+	for (int i = 0; i < 3; i++)
+	{
+		blockButtons[i] = sfg::Button::Create(BlockNames[i]);
+		blockButtons[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, i));
+		//box->SetPosition(sf::Vector2f(0.f, 20.f * i));
+		box->Pack(blockButtons[i], false);
+	}
+
+	box->Pack(sfg::Separator::Create(), false);
+	box->Pack(sfg::Label::Create("--Map Editing--"), false);
+	box->Pack(sfg::Separator::Create(), false);
+	box->Pack(sfg::Label::Create("Object Type"), false);
+	box->Pack(ObjectTypeList, false);
+
+	//Map editor things
+	for (int i = 3; i < BlockNames.size(); i++)
+	{
+		blockButtons[i] = sfg::Button::Create(BlockNames[i]);
+		blockButtons[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, i));
+		//box->SetPosition(sf::Vector2f(0.f, 20.f * i));
+		box->Pack(blockButtons[i], false);
+	}
+	//Editor Settings
+	ShowObjectTypes = sfg::CheckButton::Create("View Object Types");
+	ShowObjectTypes->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 0));
+	box->Pack(sfg::Separator::Create(), false);
+	box->Pack(sfg::Label::Create("--Settings--"), false);
+	box->Pack(sfg::Separator::Create(), false);
+	box->Pack(ShowObjectTypes, false);
+	ConsoleButton = sfg::Button::Create("Console");
+	ConsoleButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 100));
+	box->Pack(ConsoleButton, false);
+	//end
+	//Tile window
+	windowTiles = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
+	windowTiles->SetPosition(sf::Vector2f(200,0));
 	windowTiles->SetTitle("Tile Selector");
 	windowTiles->SetRequisition(sf::Vector2f(200, 200));
+	windowTiles->Show(false);
 
 	TilesetList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::changeTileSet, this));
 	TileCanvas = sfg::Canvas::Create();
 	TileCanvas->SetRequisition(sf::Vector2f(200.0f, 200.0f));
-
+	TilesetList->SelectItem(curTileSet);
 	windowTiles->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
 	windowTiles->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
 
 	TileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
 	TileBoxVert->Pack(TilesetList, false, false);
 	TileBoxVert->Pack(TileCanvas);
+	//end
+	//Command window
+	CommandWindow = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
+	CommandWindow->SetPosition(sf::Vector2f(200, 0));
+	CommandWindow->SetTitle("Command Console");
+	CommandWindow->SetRequisition(sf::Vector2f(200, 200));
+	CommandWindow->Show(false);
+	CWTileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);
+	CLogBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL);;
+	SendCommand = sfg::Button::Create("Send");
+	//CommandLog = sfg::ScrolledWindow::Create(); 
+	CommandEntry = sfg::Entry::Create();
+	SendCommand->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::sendCommand, this));
+	CWTileBoxVert->Pack(CommandEntry);
+	CWTileBoxVert->Pack(SendCommand);
+		
+
+	CommandWindow->Add(CWTileBoxVert);
+	/*
+	sfg::Window::Ptr CommandWindow;//Window to select drawn tile.
+	sfg::Box::Ptr CWTileBoxVert;
+	sfg::Entry::Ptr CommandEntry;
+	sfg::Button::Ptr SendCommand;
+	sfg::Notebook CommandLog;
+	*/
+	//end
+
 
 	windowSFG->Add(box);
 	desktop.Add(windowSFG);
 	windowTiles->Add(TileBoxVert);
 	desktop.Add(windowTiles);
+	desktop.Add(CommandWindow);
 	mmWindow.resetGLStates();
 #endif
 }
@@ -106,6 +179,41 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 MapMaker::~MapMaker()
 {
 
+}
+
+void MapMaker::sendCommand()
+{
+	cout << "Command entered: " << CommandEntry->GetText().toAnsiString() << endl;
+	CommandEntry->SetText("");
+}
+
+void MapMaker::tickButtonPress(int TID)
+{
+	switch (TID)
+	{
+	case 0://Show objects
+		viewObjectTypes = ShowObjectTypes->IsActive();//0 if not ticked, 1 if ticked.
+			//sfg::CheckButton::Widget::
+		//sfg::CheckButton::L
+		break;
+	}
+}
+
+void MapMaker::changeObjectType()
+{
+	switch (ObjectTypeList->GetSelectedItem())
+	{
+	case 0:setBlock(0);
+		break;
+	case 1:setBlock(1);
+		break;
+	case 2:setBlock(2);
+		break;
+	case 3:setBlock(3);
+		break;
+	case 4:setBlock(4);
+		break;
+	}
 }
 
 void MapMaker::pressTiles(int v)
@@ -127,7 +235,7 @@ void MapMaker::changeTileSet()
 	//cout << "Item " << TilesetList->GetSelectedItem() << " selected with text \"" << static_cast<std::string>(TilesetList->GetSelectedText()) << "\"" << endl;
 	curTileSet = TilesetList->GetSelectedItem();
 	//cout << curTileSet << endl;
-	cout << TilesetList->GetSelectedText().toAnsiString() << endl;
+	//cout << TilesetList->GetSelectedText().toAnsiString() << endl;
 	windowTiles->SetRequisition(sf::Vector2f(TileSets[curTileSet].TileSheetSprite.getLocalBounds().width, TileSets[curTileSet].TileSheetSprite.getLocalBounds().height));
 }
 
@@ -201,24 +309,12 @@ void MapMaker::mouseLeaveWindow(int WINID)
 void MapMaker::ButtonPress(int test)
 {
 	//button1->SetLabel("Tagggggggg");
-	string Astr = BlockNames[test].toAnsiString();
+	string Astr;
+	if(test<100)
+	Astr = BlockNames[test].toAnsiString();
 	switch (test)
 	{
-	case 0:setBlock(0);
-		break;
-	case 1:setBlock(1);
-		break;
-	case 2:setBlock(2);
-		break;
-	case 3:setBlock(3);
-		break;
-	case 4:setBlock(4);
-		break;
-	case 5://set tile
-	{
-		break;
-	}
-	case 6:
+	case 0:
 	{//add scope for buffer
 		unsigned int buf_number(0);
 		std::stringstream sstr(std::string(MapIDEntry->GetText()));
@@ -226,7 +322,7 @@ void MapMaker::ButtonPress(int test)
 		SaveMap(buf_number);
 		break;
 	}
-	case 7:
+	case 1:
 	{
 		unsigned int buf_number(0);
 		std::stringstream sstr(std::string(MapIDEntry->GetText()));
@@ -234,9 +330,24 @@ void MapMaker::ButtonPress(int test)
 		LoadMap(buf_number);
 		break;
 	}
-	case 8:ClearMap();
+	case 2:ClearMap();
+		break;
+	case 3://Tile Selector
+	{
+		if (windowTiles->IsLocallyVisible())
+			windowTiles->Show(false);
+		else
+			windowTiles->Show(true);
 		break;
 	}
+	case 100://Console
+		if (CommandWindow->IsLocallyVisible())
+			CommandWindow->Show(false);
+		else
+			CommandWindow->Show(true);
+		break;
+	}
+
 }
 
 bool MapMaker::LoadMap(int MID)

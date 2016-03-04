@@ -12,6 +12,7 @@ otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_)
 	MyCol = sf::Color::White;
 	PID = -1;
 	vspeedMax = 16;
+	myName = new char[5]{ "NULL" };
 	hspeed = 0;
 	haccel = 0.4;
 	hspeedmax = 5;

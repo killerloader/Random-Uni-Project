@@ -92,15 +92,32 @@ void Map::DrawMap(sf::View& ViewRef)
 	WCR.LimitVariable(0, MapWidth - 1, MaxX);
 	WCR.LimitVariable(0, MapHeight - 1, MinY);
 	WCR.LimitVariable(0, MapHeight - 1, MaxY);
-
+	sf::Drawable* DrawPtr;
 	for (int i = MinX; i <= MaxX; i++)
 		for (int ii = MinY; ii <= MaxY; ii++)
 		{
 			if (MapMatrix[i][ii].tileID != -1)//Not empty space.
 			{
 				WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID].setPosition(i * CellSize, ii * CellSize);
-				//cout << MapMatrix[i][ii].tileID << endl;
 				WCR.RenderRef.draw(WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID]);
+#ifdef MapMakerMode
+				if (WCR.MMPtr->viewObjectTypes)
+				{
+					sf::RectangleShape DrawRect;
+					DrawRect.setSize(sf::Vector2f(32, 32));
+					switch (MapMatrix[i][ii].objectType)
+					{
+					case 0:DrawRect.setFillColor(sf::Color::White); break;//Invis
+					case 1:DrawRect.setFillColor(sf::Color::Blue); break;//Solid
+					case 2:DrawRect.setFillColor(sf::Color::Green); break;//Bouncy
+					case 3:DrawRect.setFillColor(sf::Color::Red); break;//Death
+					case 4:DrawRect.setFillColor(sf::Color::Yellow); break;//Next Level
+					}
+					DrawRect.setFillColor(sf::Color(DrawRect.getFillColor().r, DrawRect.getFillColor().g, DrawRect.getFillColor().b, 100));
+					DrawRect.setPosition(i * CellSize, ii * CellSize);
+					WCR.RenderRef.draw(DrawRect);
+				}
+#endif
 			}
 		}
 }

@@ -25,13 +25,15 @@ public:
 	void ResetMovement();
 	void sendXChange();
 	void sendJump();
-	void sendPos();
+	void sendPos();//Positioning of player
 	enum Edirection
 	{
 		E_left, E_right, E_up, E_down
 	};
 	void ContractDir(Edirection);
-	//Positioning of player
+	
+	char* myName;
+
 	bool falling;
 	int vspeedMax;
 	sf::Color MyCol = sf::Color();
