@@ -1,2 +1,54 @@
+- Can have multiple templates per function.
+- One template can only be used with one datatype.
+- Can specify type in triangular brackets, example: Add<int>(5, 7); this forces it to use ints.
+- The compiler replaces the template with each type that you use the function with, so it will increase the compile code a lot when using it with lots of different types.
+- Do more than one in templates:
+template<typename a, typename b, typename c>
+
+can use templates like functions:
+
+template<typename A, int B> //B is a non-type
+int Add(A a)
+{
+return a + B; //use B like normal variable
+}
+void main(){
+int result = Add<int, 20>(10); //works!
+}
+
+In this example it forces it to use an int. (Not really a point)
+
+to overload a template function you need to do
+
+template<> MyFunction(char* a, char* b)
+{
+}
+
+- Because created by preprocessor, declaration and definition need to be in the same location.
 - Templates cannot be used accross files, unless a whole function is initialized in the header file (instead of splitting up the declaration and definition in a header and source file)
 doing so will cause a linker error.
+
+- Template classes are similar.
+- Template before class declaration.
+- The generic types can be used within the class.
+- Entierly in .h file.
+- Dont do nested template classes, it can be done but it gets confusing and messy.
+- This is how vectors were made! As the <> is the type specifier for the vector template class.
+
+Example: Wrapper around a array:
+
+template<typename T>
+class arrayWrapper
+{
+public:
+	T& getObject(int Index)
+	{
+		return m_Array[Index];
+	}
+	void setObject(int Index, T& Obj)
+	{
+		m_Array[Index)] = Obj;
+	}
+private:
+	T m_Array[10];
+};

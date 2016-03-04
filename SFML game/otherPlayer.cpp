@@ -6,11 +6,11 @@
 
 otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_)
 {
-	PlayerImage.setSize(sf::Vector2f(32, 32));
-	PlayerImage.setFillColor(sf::Color::Blue);
-	BoundBox.width = 32;
-	BoundBox.height = 32;
-
+	PlayerImage.setTexture(WCR.PlrPtr->PlayerTex);
+	BoundBox.width = 46;
+	BoundBox.height = 35;
+	MyCol = sf::Color::Blue;
+	PID = -1;
 	vspeedMax = 16;
 	hspeed = 0;
 	haccel = 0.4;
@@ -54,6 +54,20 @@ void otherPlayer::ContractDir(Edirection DIrr)
 void otherPlayer::step()
 {
 //vspeed, hspeed, gravity, haccel, hspeedmax;
+
+	AfterImage.emplace_back(PlayerImage);
+
+	//AfterImage[AfterImage.size() - 1].setPosition(x, y);
+	//AfterImage[AfterImage.size() - 1].setColor(MyCol);
+	//AfterImage[AfterImage.size() - 1].setFillColor(sf::Color::White);
+	//after image step
+	int AlphaDec = 15;
+	for (int i = 0; i < AfterImage.size(); i++)
+	{
+		if (AfterImage[i].getColor().a - AlphaDec <= 0)
+			AfterImage.erase(AfterImage.begin() + i);
+		AfterImage[i].setColor(sf::Color(AfterImage[i].getColor().r, AfterImage[i].getColor().g, AfterImage[i].getColor().b, AfterImage[i].getColor().a - AlphaDec));
+	}
 
 	if (xdir_ == -1)
 	{
@@ -147,5 +161,7 @@ void otherPlayer::step()
 
 void otherPlayer::draw()
 {
+	for (int i = 0; i < AfterImage.size(); i++)
+		WCR.RenderRef.draw(AfterImage[i]);
 	WCR.RenderRef.draw(PlayerImage);
 }

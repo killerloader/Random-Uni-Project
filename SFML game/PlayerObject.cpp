@@ -11,11 +11,12 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	hfric = 0.3;//How fast you slow down if you release all keys
 	x = 300.f;
 	y = 300.f;
-	BoundBox.width = 32;
-	BoundBox.height = 32;
+	BoundBox.width = 46;
+	BoundBox.height = 35;
 	vspeedMax = 16;
 	SPD = 5.f;
 	falling = true;
+	MyCol = sf::Color::Blue;
 	gravity = 0.5;//acceleration on vspeed
 	vspeed = 0;
 	xDirOld = 0;
@@ -42,16 +43,15 @@ void PlayerObject::ContractDir(Edirection DIrr)
 
 void PlayerObject::StepPlayer()
 {
-	AfterImage.emplace_back(PlayerTex);
-	AfterImage[AfterImage.size() - 1].setPosition(x, y);
-	//AfterImage[AfterImage.size() - 1].setFillColor(sf::Color::White);
+	AfterImage.emplace_back(PlayerImage);
+	//AfterImage[AfterImage.size() - 1].setPosition(x, y);
 	//after image step
 	int AlphaDec = 15;
 	for (int i = 0; i < AfterImage.size(); i++)
 	{
 		if (AfterImage[i].getColor().a - AlphaDec <= 0)
 			AfterImage.erase(AfterImage.begin() + i);
-		AfterImage[i].setColor(sf::Color(255, 255, 255, AfterImage[i].getColor().a - AlphaDec));
+		AfterImage[i].setColor(sf::Color(MyCol.r, MyCol.g, MyCol.b, AfterImage[i].getColor().a - AlphaDec));
 	}
 
 	PollControls();
@@ -113,6 +113,7 @@ void PlayerObject::StepPlayer()
 	{
 		x = xstart;
 		y = ystart;
+		sendPos();
 		PlayerImage.setPosition(x, y);
 	}
 	if (WCR.MapPtr->CheckCollision(BoundBox, x, y, 4) == 4)//Next Level Block
@@ -148,7 +149,7 @@ void PlayerObject::PollControls() {
 		if (hspeed + haccel <= hspeedmax)
 			hspeed += haccel;
 		else
-			hspeed = hspeedmax;
+			hspeed = hspeedmax; 
 	}
 	else if (hspeed != 0)
 	{
@@ -191,7 +192,16 @@ void PlayerObject::sendJump()
 		return;
 	sf::Packet sendData;
 	sendData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)x << (sf::Int32)y;
-	WCR.socket.send(sendData);
+	WCR.MHandle.sendData(sendData, WCR.socket);
+}
+
+void PlayerObject::sendPos()
+{
+	if (!WCR.online)
+		return;
+	sf::Packet sendData;
+	sendData << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)x << (sf::Int32)y;
+	WCR.MHandle.sendData(sendData, WCR.socket);
 }
 
 void PlayerObject::sendXChange()
@@ -216,7 +226,7 @@ void PlayerObject::sendXChange()
 		xDirOld = xdir_;
 		sf::Packet sendData;
 		sendData << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)xdir_;
-		WCR.socket.send(sendData);
+		WCR.MHandle.sendData(sendData, WCR.socket);
 	}
 }
 

@@ -25,6 +25,7 @@ public:
 	void ResetMovement();
 	void sendXChange();
 	void sendJump();
+	void sendPos();
 	enum Edirection
 	{
 		E_left, E_right, E_up, E_down
@@ -33,5 +34,6 @@ public:
 	//Positioning of player
 	bool falling;
 	int vspeedMax;
+	sf::Color MyCol = sf::Color();
 	sf::Rect<int> BoundBox;
 };

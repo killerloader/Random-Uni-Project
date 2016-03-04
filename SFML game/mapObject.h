@@ -12,4 +12,3 @@ public:
 	int tileID;
 	int tileSetID;
 };
-

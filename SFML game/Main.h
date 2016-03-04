@@ -12,17 +12,21 @@ using namespace std;
 #include "mapObject.h"
 #include "otherPlayer.h"
 #include "PlayerObject.h"
+#include "MessagesHangle.h"
 
+/* Should not be needed as headers are above!
 class PlayerObject;
 class MapMaker;
 struct Map;
 class fileManager;
 class mapObject;
 class otherPlayer;
+*/
 
 class WrapperClass
 {
 public:
+	
 	vector<otherPlayer*> otherPlayers;
 	sf::Event event;
 	int curmapID;
@@ -37,6 +41,8 @@ public:
 	sf::TcpSocket* client;
 	vector<sf::TcpSocket*> clients;
 	sf::TcpSocket socket;
+	MessagesHangle MHandle;//Handle for messages for both client and server.
+
 	//vector<int> clientIds;
 	//bool idFree[256];
 	bool connected = false;
