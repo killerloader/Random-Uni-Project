@@ -176,14 +176,14 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 				if (CheckRect.intersects(SolidBoundBox))
 				{
 					if (!MapMatrix[i][ii].pixelPerfect)
-					{
 						return MapMatrix[i][ii].objectType;
-					}
 					else
 					{
 						//get image and player box overlap
 						int Left_ = X - i * 32;
 						int Top_ = Y - ii * 32;
+						int SLeft_ = Left_;
+						int STop_ = Top_;
 						int Wid_ = CheckRect.width;
 						int Hei_ = CheckRect.height;
 
@@ -206,8 +206,8 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 
 						for (int f = Wid_; f >= Left_; f--)//<= ??
 							for (int ff = Hei_; ff >= Top_; ff--)//<= ??
-								if (WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].CollisionMaps[MapMatrix[i][ii].tileID].getPixel(f, ff).a != 0)
-									return true;
+								if (WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].CollisionMaps[MapMatrix[i][ii].tileID].getPixel(f, ff).a != 0 && WCR.PlrPtr->PlayerMask.getPixel(f - SLeft_, ff - STop_).a != 0)
+									return MapMatrix[i][ii].objectType;
 					}
 					
 				}

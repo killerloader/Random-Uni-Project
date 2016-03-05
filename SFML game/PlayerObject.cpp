@@ -2,8 +2,11 @@
 
 PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	PlayerTex.loadFromFile("Data/Sprites/Player.png");
+	int Pw_(46), Ph_(35);
 	PlayerImage.setTexture(PlayerTex);
 	PlayerView.setSize(sf::Vector2f(640, 480));
+	PlayerMask.create(Pw_, Ph_, sf::Color(255, 255, 255, 0));
+	PlayerMask.copy(PlayerTex.copyToImage(), 0, 0);//, sf::IntRect(0, 0, Pw_, Ph_), true);
 	//vspeed, hspeed, gravity, haccel, hspeedmax, hfric;
 	hspeed = 0;
 	haccel = 0.4;
@@ -69,7 +72,7 @@ void PlayerObject::StepPlayer()
 			bool fixed = false;
 			if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) != 1)
 			{
-				for (int i = 1; i <= 8; i++)
+				for (int i = 1; i <= 16; i++)
 					if (!WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y - i, 1))
 					{
 						fixed = true;

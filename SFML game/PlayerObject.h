@@ -15,6 +15,7 @@ public:
 	sf::View PlayerView;
 	sf::Texture PlayerTex;
 	sf::Sprite PlayerImage;
+	sf::Image PlayerMask;
 	PlayerObject(WrapperClass &WCR_);
 	void PollControls();
 	void MovePlayer(float Xmove, float Ymove);

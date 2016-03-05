@@ -428,7 +428,7 @@ bool MapMaker::LoadMap(int MID)
 
 		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
-				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID;
+				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID << WCR.MapPtr->MapMatrix[i][ii].pixelPerfect;
 		for (int i = 0; i < WCR.clients.size(); i++)
 			if (WCR.clients[i] != nullptr)
 				WCR.clients[i]->send(mapData);
