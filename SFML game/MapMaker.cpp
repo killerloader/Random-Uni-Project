@@ -406,16 +406,21 @@ bool MapMaker::LoadMap(int MID)
 	WCR.PlrPtr->ystart = WCR.PlrPtr->y;
 	//Error here, when different map size.
 	WCR.MapPtr->MapMatrix = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
+	
+	FMuse.loadByte();//R
+	FMuse.loadByte();//G
+	FMuse.loadByte();//B
 
-	for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
-		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
-		{
-			WCR.MapPtr->MapMatrix[i][ii].objectType = FMuse.loadByte();
-			WCR.MapPtr->MapMatrix[i][ii].tileID = FMuse.loadByte() - 1;
-			WCR.MapPtr->MapMatrix[i][ii].tileSetID = FMuse.loadByte();
-			WCR.MapPtr->MapMatrix[i][ii].pixelPerfect = FMuse.loadByte();
-		}
-
+	int Blocks_ = FMuse.load4Bytes();
+	for (int i = 0; i < Blocks_; i++)
+	{
+		int BlockX = FMuse.load4Bytes();
+		int BlockY = FMuse.load4Bytes();
+		WCR.MapPtr->MapMatrix[BlockX][BlockY].objectType = FMuse.loadByte();
+		WCR.MapPtr->MapMatrix[BlockX][BlockY].tileID = FMuse.loadByte() - 1;
+		WCR.MapPtr->MapMatrix[BlockX][BlockY].tileSetID = FMuse.loadByte();
+		WCR.MapPtr->MapMatrix[BlockX][BlockY].pixelPerfect = FMuse.loadByte();
+	}
 	WCR.MapPtr->setupBorders();
 	cout << "Loaded MAP ID: " << MID << endl;
 
@@ -451,14 +456,31 @@ bool MapMaker::SaveMap(int MID)
 	FMuse.save4Bytes(WCR.MapPtr->MapHeight);
 	FMuse.save4Bytes(round(WCR.PlrPtr->x / 32));
 	FMuse.save4Bytes(round(WCR.PlrPtr->y / 32));
+	//Placeholder for new map files, as they will have RGB
+	FMuse.saveByte(255);//R
+	FMuse.saveByte(255);//G
+	FMuse.saveByte(255);//B
+	
+	int count_ = 0;
 	for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
 		{
-			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].objectType);
-			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID+1);//+1 because -1 is reserved for nothing.
-			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileSetID);
-			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].pixelPerfect);
+			if (WCR.MapPtr->MapMatrix[i][ii].tileID != -1)
+				count_++;
 		}
+	FMuse.save4Bytes(count_);//Map Blocks to save
+	for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
+		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
+			if (WCR.MapPtr->MapMatrix[i][ii].tileID != -1)
+			{
+				FMuse.save4Bytes(i);
+				FMuse.save4Bytes(ii);
+				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].objectType);
+				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID + 1);//+1 because -1 is reserved for nothing.
+				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileSetID);
+				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].pixelPerfect);
+			}
+
 	cout << "Saved MAP ID: " << MID << endl;
 	return true;
 }
