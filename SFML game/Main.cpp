@@ -142,7 +142,7 @@ int main()
 				WC.otherPlayers[i]->step();
 		//Clear the window so we can draw new stuff to it.
 
-		window.clear();
+		window.clear(sf::Color(98,195,227));
 		MainMap.DrawMap(obj_Player.PlayerView);
 		MainMap.drawBorders();
 		obj_Player.DrawPlayer();

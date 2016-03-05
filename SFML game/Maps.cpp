@@ -51,7 +51,7 @@ bool Map::isObject(int x, int y)
 	return false;
 }
 
-void Map::SetObject(int x, int y, int ID, int TID, int TSID)
+void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP)
 {
 	//X and Y are grid cells not actual coords.
 	WCR.LimitVariable(0, MapWidth - 1, x);
@@ -64,11 +64,12 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID)
 	MapMatrix[x][y].objectType = ID;
 	MapMatrix[x][y].tileID = TID;
 	MapMatrix[x][y].tileSetID = TSID;
+	MapMatrix[x][y].pixelPerfect = PP;
 
 	if (WCR.connected)
 	{
 		sf::Packet mapData;
-		mapData << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID;
+		mapData << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << PP;
 		for (int i = 0; i < WCR.clients.size(); i++)
 			if (WCR.clients[i] != nullptr)
 				WCR.clients[i]->send(mapData);

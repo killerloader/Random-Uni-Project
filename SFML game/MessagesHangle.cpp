@@ -74,7 +74,7 @@ void MessagesHangle::ServerMessagesHandle()
 		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
 			{
-				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID;
+				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID << WCR.MapPtr->MapMatrix[i][ii].pixelPerfect;
 			}
 
 		sendData(mapData, foundEmpty);
@@ -307,10 +307,12 @@ void MessagesHangle::ClientMessagesHandle()
 				for (int ii = 0; ii < mapSizeY; ii++)
 				{
 					sf::Int32 objectT, tileID, tileSID;
-					recievedata >> objectT >> tileID >> tileSID;
+					bool TPP;
+					recievedata >> objectT >> tileID >> tileSID >> TPP;
 					WCR.MapPtr->MapMatrix[i][ii].objectType = objectT;
 					WCR.MapPtr->MapMatrix[i][ii].tileID = tileID;
 					WCR.MapPtr->MapMatrix[i][ii].tileSetID = tileSID;
+					WCR.MapPtr->MapMatrix[i][ii].pixelPerfect = TPP;
 				}
 			WCR.MapPtr->setupBorders();
 			cout << "Loaded map from server!" << endl;
@@ -318,10 +320,12 @@ void MessagesHangle::ClientMessagesHandle()
 		case 1://Receive block change
 			   //(int x, int y, int ID, int TID, int TSID)
 			sf::Int32 x, y, ID, TID, TSID;
-			recievedata >> x >> y >> ID >> TID >> TSID;
+			bool TPP;
+			recievedata >> x >> y >> ID >> TID >> TSID >> TPP;
 			WCR.MapPtr->MapMatrix[x][y].objectType = ID;
 			WCR.MapPtr->MapMatrix[x][y].tileID = TID;
 			WCR.MapPtr->MapMatrix[x][y].tileSetID = TSID;
+			WCR.MapPtr->MapMatrix[x][y].pixelPerfect = TPP;
 			break;
 		case 2://Other Player
 			sf::Int32 oPlayerMessage;

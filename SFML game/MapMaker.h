@@ -146,6 +146,7 @@ public:
 	sfg::Box::Ptr box;
 	sfg::Box::Ptr MapBox;
 	sfg::Button::Ptr ConsoleButton;
+	sfg::CheckButton::Ptr PixelPerfectToggle;
 
 	//Console window
 	sfg::Window::Ptr CommandWindow;//Window to select drawn tile.
@@ -184,6 +185,7 @@ public:
 	void tickButtonPress(int);
 
 	bool viewObjectTypes = false;
+	bool pixelPerfectBlocks = false;
 
 	int MouseOverWindow=0;
 	bool pressedOffScreen = false;//if pressed off screen, don't place blocks until released and pressed again on screen.

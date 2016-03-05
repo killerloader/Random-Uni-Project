@@ -112,6 +112,11 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 		//box->SetPosition(sf::Vector2f(0.f, 20.f * i));
 		box->Pack(blockButtons[i], false);
 	}
+
+	PixelPerfectToggle = sfg::CheckButton::Create("Precise Collision");
+	PixelPerfectToggle->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 1));
+
+	box->Pack(PixelPerfectToggle, false);
 	//Editor Settings
 	ShowObjectTypes = sfg::CheckButton::Create("View Object Types");
 	ShowObjectTypes->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 0));
@@ -225,6 +230,9 @@ void MapMaker::tickButtonPress(int TID)
 			//sfg::CheckButton::Widget::
 		//sfg::CheckButton::L
 		break;
+	case 1:
+		pixelPerfectBlocks = PixelPerfectToggle->IsActive();
+		break;
 	}
 }
 
@@ -273,6 +281,7 @@ void MapMaker::loadTiles()
 {
 	//const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, bool isMapTileSet = true, int cellSizeX = 32, int cellSizeY = 32
 	TileSets.emplace_back("Data/Sprites/TileSheet1.png", 0, 0, 1, 1, 3, 3, TilesetList);
+	TileSets.emplace_back("Data/Sprites/TileSheet2.png", 0, 0, 0, 0, 10, 15, TilesetList);
 	TileSets.emplace_back("Data/Sprites/TileSheet3.png", 2, 1, 2, 2, 18, 11, TilesetList);
 	TileSets.emplace_back("Data/Sprites/TileSheet4.png", 20, 10, 2, 2, 30, 16, TilesetList);
 		//const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells
@@ -404,6 +413,7 @@ bool MapMaker::LoadMap(int MID)
 			WCR.MapPtr->MapMatrix[i][ii].objectType = FMuse.loadByte();
 			WCR.MapPtr->MapMatrix[i][ii].tileID = FMuse.loadByte() - 1;
 			WCR.MapPtr->MapMatrix[i][ii].tileSetID = FMuse.loadByte();
+			WCR.MapPtr->MapMatrix[i][ii].pixelPerfect = FMuse.loadByte();
 		}
 
 	WCR.MapPtr->setupBorders();
@@ -447,6 +457,7 @@ bool MapMaker::SaveMap(int MID)
 			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].objectType);
 			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID+1);//+1 because -1 is reserved for nothing.
 			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileSetID);
+			FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].pixelPerfect);
 		}
 	cout << "Saved MAP ID: " << MID << endl;
 	return true;
@@ -525,6 +536,22 @@ void MapMaker::Step()
 
 	}
 
+	static bool LCtrlPressed_ = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && WCR.RenderRef.hasFocus())
+	{
+		PixelPerfectToggle->SetActive(true);
+		pixelPerfectBlocks = true;
+		LCtrlPressed_ = true;
+	}
+	else
+		if (LCtrlPressed_)
+		{
+			PixelPerfectToggle->SetActive(false);
+			pixelPerfectBlocks = false;
+			LCtrlPressed_ = false;
+		}
+
+
 	if (MouseOverWindow == 0 && !pressedOffScreen && WCR.RenderRef.hasFocus())//Or just check if false?
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
@@ -532,7 +559,7 @@ void MapMaker::Step()
 			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
 			if(!WCR.MapPtr->isObject(PlaceX, PlaceY))//If no object already here
-				WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile, curTileSet);
+				WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile, curTileSet, pixelPerfectBlocks);
 			//cout << CurBlock << "_" << curTile << "_" << curTileSet << endl;
 		}
 
