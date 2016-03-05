@@ -132,7 +132,7 @@ void otherPlayer::step()
 			bool fixed = false;
 			if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) != 1)
 			{
-				for (int i = 1; i <= 16; i++)
+				for (int i = 1; i <= 8; i++)
 					if (!WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y - i, 1))
 					{
 						fixed = true;

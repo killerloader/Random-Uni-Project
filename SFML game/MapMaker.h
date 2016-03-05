@@ -11,45 +11,104 @@ class MapMaker;
 
 struct TileSet
 {
-	TileSet(const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL)
+	TileSet(const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, bool isMapTileSet = true, int cellSizeX = 32, int cellSizeY = 32)
 	{
-		xOffset=xOff;
-		yOffset=yOff;
-		GapW=xGap;
-		GapH=yGap;
-		CellsX=xCells;
-		CellsY=yCells;
-
-		TileSheetTex.loadFromFile(FileName);
+		xOffset = xOff;
+		yOffset = yOff;
+		GapW = xGap;
+		GapH = yGap;
+		CellsX = xCells;
+		CellsY = yCells;
+		CSizeX = cellSizeX;
+		CSizeY = cellSizeY;
+		TileSheetTex = new sf::Texture;
+		if (!TileSheetTex->loadFromFile(FileName))
+			cout << "Could not load image" << endl;
 #ifdef MapMakerMode
-		TSL->AppendItem(FileName);
+		if(isMapTileSet)
+			TSL->AppendItem(FileName);
 #endif
 		UpdateSprites();
+		//UpdateSprites();
+		//CreateCollisionMaps();
+	}
 
+	TileSet(sf::Texture* TexPtr, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, bool isMapTileSet = true, const char* TSName = " ", int cellSizeX = 32, int cellSizeY = 32)
+	{
+		xOffset = xOff;
+		yOffset = yOff;
+		GapW = xGap;
+		GapH = yGap;
+		CellsX = xCells;
+		CellsY = yCells;
+		CSizeX = cellSizeX;
+		CSizeY = cellSizeY;
+		TileSheetTex = TexPtr;
+#ifdef MapMakerMode
+		if(isMapTileSet)
+			TSL->AppendItem(TSName);
+#endif
 	}
 
 	void UpdateSprites()
 	{
-		TileSheetSprite.setTexture(TileSheetTex);
+		TileSheetSprite.setTexture(*TileSheetTex);
 
 		if (Tiles.size() != 0)
 		{
 			for (int i = 0; i < CellsX; i++)
-				for (int ii = 0; ii < CellsX; ii++)
+				for (int ii = 0; ii < CellsY; ii++)
 				{
-					Tiles[i + ii*CellsX].setTexture(TileSheetTex);
-					Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (32 + GapW) * i, yOffset + (32 + GapH) * ii), sf::Vector2i(32, 32)));
+					//Tiles[i + ii*CellsX].setTexture(*TileSheetTex);
+					//Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
+					Tiles[i + ii*CellsX].setTexture(ImgTex[i + ii*CellsX]);
+					Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(0,0), sf::Vector2i(CSizeX, CSizeY)));
+					
 				}
 					
 		}
 		else
 			for (int i = 0; i < CellsX; i++)
-				for (int ii = 0; ii < CellsX; ii++)
-					Tiles.emplace_back(TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (32 + GapW) * i, yOffset + (32 + GapH) * ii), sf::Vector2i(32, 32)));
+				for (int ii = 0; ii < CellsY; ii++)
+					Tiles.emplace_back(*TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
 	}
 
-	sf::Texture TileSheetTex;
+	void CreateCollisionMaps()
+	{
+		cout << "Creating pixel perfect collision map for tileset!" << endl;
+		//sf::RenderTexture TempRenderTextures;
+		//TempRenderTextures.create(32, 32);
+		if(CollisionMaps.size()==0)
+			for (int i = 0; i < CellsX; i++)
+				for (int ii = 0; ii < CellsY; ii++)
+				{
+					CollisionMaps.emplace_back();
+					ImgTex.emplace_back();
+				}
+					
+		for (int i = 0; i < CellsX; i++)
+			for (int ii = 0; ii < CellsY; ii++)
+			{
+				//cout << "test" << endl;
+				//TempRenderTextures.clear();
+				//Tiles[i + ii*CellsX].setPosition(0, 0);
+				//TempRenderTextures.draw(Tiles[i + ii*CellsX]);
+				//TempRenderTextures.display();
+				//Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
+				
+				CollisionMaps[i + ii*CellsX].create(32, 32, sf::Color(255,255,255,0));
+				CollisionMaps[i + ii*CellsX].copy(TileSheetTex->copyToImage(), 0,0, sf::IntRect(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii, 32, 32), true);
+				ImgTex[i + ii*CellsX].loadFromImage(CollisionMaps[i + ii*CellsX]);
+				//sf::Image test((*TileSheetTex).copyToImage(), 0, 0, sf::IntRect(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii, 32, 32), true);
+				//CollisionMaps[CollisionMaps.size() - 1] = TempRenderTextures.getTexture().copyToImage();
+			}
+		//TempRenderTextures.clear();
+	}
+
+	vector<sf::Image> CollisionMaps;
+	sf::Texture* TileSheetTex;
 	vector<sf::Sprite> Tiles;
+	vector<sf::Texture> ImgTex;
 	sf::Sprite TileSheetSprite;
 	string Name;
 	int xOffset;
@@ -58,6 +117,7 @@ struct TileSet
 	int GapH;
 	int CellsX;
 	int CellsY;
+	int CSizeX, CSizeY;
 };
 
 class MapMaker

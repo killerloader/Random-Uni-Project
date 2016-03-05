@@ -112,6 +112,7 @@ void Map::DrawMap(sf::View& ViewRef)
 					case 2:DrawRect.setFillColor(sf::Color::Green); break;//Bouncy
 					case 3:DrawRect.setFillColor(sf::Color::Red); break;//Death
 					case 4:DrawRect.setFillColor(sf::Color::Yellow); break;//Next Level
+					case 5:DrawRect.setFillColor(sf::Color::Cyan); break;//Ice
 					}
 					DrawRect.setFillColor(sf::Color(DrawRect.getFillColor().r, DrawRect.getFillColor().g, DrawRect.getFillColor().b, 100));
 					DrawRect.setPosition(i * CellSize, ii * CellSize);
@@ -122,8 +123,23 @@ void Map::DrawMap(sf::View& ViewRef)
 		}
 }
 
+namespace mmath
+{
+	int max(int v1, int v2)
+	{
+		return (v1 > v2) ? v1 : v2;
+	}
+
+	int min(int v1, int v2)
+	{
+		return (v1 < v2) ? v1 : v2;
+	}
+}
+
+
 int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 {
+	
 	int Xmin = floor(X / CellSize);
 	int Xmax = floor((X + CheckRect.width) / CellSize);
 	int Ymin = floor(Y / CellSize);
@@ -146,6 +162,7 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 			switch (CheckType)//Check for any
 			{
 			case -2:IsTrue = (MapMatrix[i][ii].objectType != 0); break;
+			case 1:IsTrue = (MapMatrix[i][ii].objectType == 1 || MapMatrix[i][ii].objectType == 5); break;//solids
 			case 0:break;//Nothing, don't search for empty space. Only search for map edge.
 			default:IsTrue = (MapMatrix[i][ii].objectType == CheckType); break;
 			}
@@ -156,7 +173,44 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 				SolidBoundBox.top = ii * CellSize;
 				SolidBoundBox.width = CellSize; SolidBoundBox.height = CellSize;
 				if (CheckRect.intersects(SolidBoundBox))
-					return MapMatrix[i][ii].objectType;
+				{
+					if (!MapMatrix[i][ii].pixelPerfect)
+					{
+						return MapMatrix[i][ii].objectType;
+					}
+					else
+					{
+						//get image and player box overlap
+						int Left_ = X - i * 32;
+						int Top_ = Y - ii * 32;
+						int Wid_ = CheckRect.width;
+						int Hei_ = CheckRect.height;
+
+						if (Left_ < 0)
+						{
+							Wid_ += Left_;
+							Left_ = 0;
+						}
+
+						if (Top_ < 0)
+						{
+							Hei_ += Top_;
+							Top_ = 0;
+						}
+
+						if (Wid_ > 31)
+							Wid_ = 31;
+						if (Hei_ > 31)
+							Hei_ = 31;
+
+						for (int f = Wid_; f >= Left_; f--)//<= ??
+							for (int ff = Hei_; ff >= Top_; ff--)//<= ??
+								if (WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].CollisionMaps[MapMatrix[i][ii].tileID].getPixel(f, ff).a != 0)
+									return true;
+					}
+					
+				}
+					
 			}
 		}
 	return false;

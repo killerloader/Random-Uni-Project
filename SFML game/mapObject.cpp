@@ -1,10 +1,11 @@
 #include "mapObject.h"
 
-mapObject::mapObject(int OID, int TID, int TSID)
+mapObject::mapObject(int OID, int TID, int TSID, bool PP = false)
 {
 	objectType = OID;
 	tileID = TID;
 	tileSetID = TSID;
+	pixelPerfect = PP;
 }
 
 mapObject::mapObject()

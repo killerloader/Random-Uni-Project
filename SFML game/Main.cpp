@@ -1,18 +1,18 @@
 #include "Main.h"
 /*
 TODO: 
-	- Give player's IDs that show above their head.
-	- Using player IDs, make commands which can be entered into the server to do stuff:
-		- Teleport, kick, etc...
 	- Clear on client.
 	- Fix headers, do not include .h files in headers (or include one which only has predefinitions)
 	- Add connections and listening to header.
-	- Names on client
 	- Commands on server
 	- Function to check player ID to see if it is within acceptable player id limits and that it is not a nullptr.
 	- Animation for players
 	- Allow other players to have permissions to edit the world, by command, or just give everyone permission with a tickbox (sends permission when they login or on command)
-*/
+	- Add precise option for server to make pixel perfect blocks
+	- Save pixel perfect blocks to map
+	- Save blocks to map instead of whole array.
+	- Send blocks to players instead of whole array.
+	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
 {
@@ -31,9 +31,6 @@ WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 
 int main()
 {
-
-
-
 	//Setup window and window settings.
 	sf::RenderWindow window;	
 	//Class Setup

@@ -49,6 +49,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	ObjectTypeList->AppendItem("Bouncy");
 	ObjectTypeList->AppendItem("Death");
 	ObjectTypeList->AppendItem("Next Level");
+	ObjectTypeList->AppendItem("Slippery");
 	ObjectTypeList->SelectItem(CurBlock);
 
 	ObjectTypeList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::changeObjectType, this));
@@ -184,6 +185,34 @@ MapMaker::~MapMaker()
 void MapMaker::sendCommand()
 {
 	cout << "Command entered: " << CommandEntry->GetText().toAnsiString() << endl;
+	stringstream Command;
+	char* WholeStr = new char[CommandEntry->GetText().toAnsiString().size()+1];
+	strcpy(WholeStr, CommandEntry->GetText().toAnsiString().c_str());
+	for (int i = 0; i < strlen(WholeStr); i++)
+	{
+		if (WholeStr[i] > 65 && WholeStr[i] < 90)
+			WholeStr[i] += 32;
+		//-32
+	}
+	Command << WholeStr;
+	string baseCommand;
+	if (Command >> baseCommand)
+	{
+		//Kick
+		if (baseCommand == "kick")
+		{
+			int PID;
+			if (Command >> PID)
+				if (PID >= 0 && PID < WCR.clients.size())
+					if (WCR.clients[PID] != nullptr)
+					{
+						WCR.MHandle.deletePlayer(PID);
+						cout << "Player with ID: " << PID << " has been kicked from the server!" << endl;
+					}
+		}
+
+		//Teleport
+	}
 	CommandEntry->SetText("");
 }
 
@@ -201,19 +230,7 @@ void MapMaker::tickButtonPress(int TID)
 
 void MapMaker::changeObjectType()
 {
-	switch (ObjectTypeList->GetSelectedItem())
-	{
-	case 0:setBlock(0);
-		break;
-	case 1:setBlock(1);
-		break;
-	case 2:setBlock(2);
-		break;
-	case 3:setBlock(3);
-		break;
-	case 4:setBlock(4);
-		break;
-	}
+	setBlock(ObjectTypeList->GetSelectedItem());
 }
 
 void MapMaker::pressTiles(int v)
@@ -243,12 +260,18 @@ void MapMaker::updateTiles()
 {
 	for (int i = 0; i < TileSets.size(); i++)
 	{
+		TileSets[i].CreateCollisionMaps();
+	}
+	for (int i = 0; i < TileSets.size(); i++)
+	{
 		TileSets[i].UpdateSprites();
-	}		
+	}
+	
 }
 
 void MapMaker::loadTiles()
 {
+	//const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, bool isMapTileSet = true, int cellSizeX = 32, int cellSizeY = 32
 	TileSets.emplace_back("Data/Sprites/TileSheet1.png", 0, 0, 1, 1, 3, 3, TilesetList);
 	TileSets.emplace_back("Data/Sprites/TileSheet3.png", 2, 1, 2, 2, 18, 11, TilesetList);
 	TileSets.emplace_back("Data/Sprites/TileSheet4.png", 20, 10, 2, 2, 30, 16, TilesetList);
@@ -391,7 +414,7 @@ bool MapMaker::LoadMap(int MID)
 	{
 		sf::Packet mapData;
 		mapData << (sf::Int32)0;
-		mapData << (sf::Int32)WCR.MapPtr->MapWidth << (sf::Int32)WCR.MapPtr->MapHeight << (sf::Int32)WCR.PlrPtr->x << (sf::Int32)WCR.PlrPtr->y;
+		mapData << (sf::Int32)WCR.MapPtr->MapWidth << (sf::Int32)WCR.MapPtr->MapHeight << WCR.PlrPtr->x << WCR.PlrPtr->y;
 
 		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
@@ -399,8 +422,6 @@ bool MapMaker::LoadMap(int MID)
 		for (int i = 0; i < WCR.clients.size(); i++)
 			if (WCR.clients[i] != nullptr)
 				WCR.clients[i]->send(mapData);
-		
-		cout << "Sent map data!" << endl;
 	}
 #endif
 
@@ -496,6 +517,12 @@ void MapMaker::Step()
 		PollGUIEvents();
 		if (event.type == sf::Event::Closed)
 			mmWindow.close();
+		if (event.type == sf::Event::Closed)
+		{
+			mmView.setSize(mmWindow.getSize().x, mmWindow.getSize().y);
+			mmWindow.setSize(sf::Vector2u(floorf(mmWindow.getSize().x / 2) * 2, floorf(mmWindow.getSize().y / 2) * 2));
+		}
+
 	}
 
 	if (MouseOverWindow == 0 && !pressedOffScreen && WCR.RenderRef.hasFocus())//Or just check if false?
@@ -573,43 +600,6 @@ void MapMaker::Step()
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 			MapMakrView.move(0, ViewMoveSPD);
 	}
-
-
-	/*if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
-	{
-		char Command[11];
-		cout << "Please enter a command: " << endl;
-		cin >> Command;
-		if (strcmp(Command, "save") == 0)
-		{
-			cout << "Enter a map ID: " << endl;
-			int Input;
-			cin >> Input;
-			SaveMap(Input);
-		}
-		if (strcmp(Command, "load") == 0)
-		{
-			cout << "Enter a map ID: " << endl;
-			int Input;
-			cin >> Input;
-			LoadMap(Input);
-		}
-		if (strcmp(Command, "setblock") == 0)
-		{
-			int BlockID = 1;
-			cin >> BlockID;
-			setBlock(BlockID);
-		}
-		if (strcmp(Command, "clear") == 0)
-		{
-			cout << "Enter a new map size, width: " << endl;
-			cin >> WCR.MapPtr->MapWidth;
-			cout << "Height: " << endl;
-			cin >> WCR.MapPtr->MapHeight;
-			WCR.MapPtr->MapMatrix = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
-			WCR.MapPtr->setupBorders();
-		}
-	}*/
 	desktop.Update(clock.restart().asSeconds());
 }
 
@@ -621,13 +611,29 @@ void MapMaker::ClearMap()
 	//cin >> WCR.MapPtr->MapHeight;
 	WCR.MapPtr->MapMatrix = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
 	WCR.MapPtr->setupBorders();
+
+#ifdef MapMakerMode//start server.
+	if (WCR.connected)
+	{
+		sf::Packet mapData;
+		mapData << (sf::Int32)0;
+		mapData << (sf::Int32)WCR.MapPtr->MapWidth << (sf::Int32)WCR.MapPtr->MapHeight << WCR.PlrPtr->x << WCR.PlrPtr->y;
+
+		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
+			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
+				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID;
+		for (int i = 0; i < WCR.clients.size(); i++)
+			if (WCR.clients[i] != nullptr)
+				WCR.clients[i]->send(mapData);
+	}
+#endif
+
 }
 
 void MapMaker::setBlock(int BLK)
 {
 	cout << "Setting block to: " << BLK << endl;
-	//0 = nothing, 2 = last object type
-	if (BLK >= 0 && BLK <= 4)
+	if (BLK >= 0 && BLK <= 5)
 		CurBlock = BLK;
 	else
 		cout << "This object ID does not exist!" << endl;
