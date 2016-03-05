@@ -1,7 +1,6 @@
 #include "Main.h"
 /*
 TODO: 
-	- Clear on client.
 	- Fix headers, do not include .h files in headers (or include one which only has predefinitions)
 	- Add connections and listening to header.
 	- Commands on server
@@ -12,6 +11,9 @@ TODO:
 	- Save pixel perfect blocks to map
 	- Save blocks to map instead of whole array.
 	- Send blocks to players instead of whole array.
+	- Clearing should not send all data again, but just ask the client to clear their screen.
+	- Colour picker for map when in server.
+	- Other players using map maker but without server options.
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
