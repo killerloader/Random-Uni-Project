@@ -13,6 +13,7 @@ using namespace std;
 #include "otherPlayer.h"
 #include "PlayerObject.h"
 #include "MessagesHangle.h"
+#include "Animation.h"
 
 /* Should not be needed as headers are above!
 class PlayerObject;
@@ -37,6 +38,8 @@ public:
 	MapMaker* MMPtr;
 	fileManager* FMPtr;
 	WrapperClass(sf::RenderWindow &RenderRef_);
+	sf::Font MainFont;
+	
 	sf::TcpListener listener;
 	sf::TcpSocket* client;
 	vector<sf::TcpSocket*> clients;

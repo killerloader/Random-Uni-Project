@@ -9,8 +9,9 @@ TODO:
 	- Add connections and listening to header.
 	- Names on client
 	- Commands on server
-	- Load IP from txt file.
 	- Function to check player ID to see if it is within acceptable player id limits and that it is not a nullptr.
+	- Animation for players
+	- Allow other players to have permissions to edit the world, by command, or just give everyone permission with a tickbox (sends permission when they login or on command)
 */
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
@@ -23,6 +24,7 @@ void WrapperClass::LimitVariable(int Min, int Max, int& Var)
 
 WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_), MHandle(*this)
 {
+	MainFont.loadFromFile("Data\\Fonts\\ARLRDBD.TTF");
 	otherPlayers = vector<otherPlayer*>(256, nullptr);
 	curmapID = 0;
 }
@@ -49,8 +51,7 @@ int main()
 		char tempChar[30];
 		cout << "Please enter your username (Max of 30 characters): " << endl;
 		cin.getline(tempChar, 30);
-		obj_Player.myName = new char[strlen(tempChar) + 1];
-		strcpy(obj_Player.myName, tempChar);
+		obj_Player.ChangeName(tempChar);
 	}
 	if (!MapMkr.LoadMap(WC.curmapID))
 		cout << "Map load failed!" << endl;
@@ -124,6 +125,12 @@ int main()
 		{
 			if (WC.event.type == sf::Event::Closed)
 				window.close();
+			if (WC.event.type == sf::Event::Resized)
+			{
+				MapMkr.MapMakrView.setSize(window.getSize().x, window.getSize().y);
+				obj_Player.PlayerView.setSize(window.getSize().x, window.getSize().y);
+				window.setSize(sf::Vector2u(floorf(window.getSize().x/2)*2, floorf(window.getSize().y / 2) * 2));
+			}
 		}
 		//Get player controls.
 		#ifndef MapMakerMode//Don't poll player events if in mapmaker mode.

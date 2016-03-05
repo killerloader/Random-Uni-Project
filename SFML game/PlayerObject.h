@@ -18,7 +18,7 @@ public:
 	PlayerObject(WrapperClass &WCR_);
 	void PollControls();
 	void MovePlayer(float Xmove, float Ymove);
-	float vspeed, hspeed, gravity, haccel, hspeedmax, hfric, x, y, xstart, ystart, SPD;
+	float vspeed, hspeed, gravity, haccel, haccelSlip, hspeedmax, hfric, x, y, xstart, ystart, SPD, hfricSlip;
 	float xDirOld, pressWOld;
 	void StepPlayer();
 	void DrawPlayer();
@@ -31,8 +31,11 @@ public:
 		E_left, E_right, E_up, E_down
 	};
 	void ContractDir(Edirection);
-	
+	void ChangeName(const char* NewName);
+
 	char* myName;
+	sf::Text NameText;
+
 
 	bool falling;
 	int vspeedMax;

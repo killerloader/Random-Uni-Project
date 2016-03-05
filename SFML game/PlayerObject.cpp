@@ -7,10 +7,16 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	//vspeed, hspeed, gravity, haccel, hspeedmax, hfric;
 	hspeed = 0;
 	haccel = 0.4;
+	haccelSlip = 0.2;
 	hspeedmax = 5;
 	hfric = 0.3;//How fast you slow down if you release all keys
+	hfricSlip = 0.05;
 	x = 300.f;
 	y = 300.f;
+	myName = new char[5]{ "NULL" };
+	NameText.setString(myName);
+	NameText.setFont(WCR.MainFont);
+	NameText.setCharacterSize(12);
 	BoundBox.width = 46;
 	BoundBox.height = 35;
 	vspeedMax = 16;
@@ -37,7 +43,7 @@ void PlayerObject::ContractDir(Edirection DIrr)
 	case E_right:Xdir = 1; break;
 	}
 
-	while (WCR.MapPtr->CheckCollision(BoundBox, x + Xdir, y + Ydir, 1) != 1 && WCR.MapPtr->CheckCollision(BoundBox, x + Xdir, y + Ydir, 0) != 1)//only solid objects
+	while (!WCR.MapPtr->CheckCollision(BoundBox, x + Xdir, y + Ydir, 1) && !WCR.MapPtr->CheckCollision(BoundBox, x + Xdir, y + Ydir, 0))//only solid objects
 		MovePlayer(Xdir, Ydir);
 }
 
@@ -58,13 +64,28 @@ void PlayerObject::StepPlayer()
 	//vspeed, hspeed, gravity, haccel, hspeedmax;
 	if (hspeed != 0)
 	{
-		if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 1) == 1 || WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) == 1)
+		if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 1) || WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) == 1)
 		{
-			if (hspeed > 0)
-				ContractDir(E_right);
-			if (hspeed < 0)
-				ContractDir(E_left);
-			hspeed = 0;
+			bool fixed = false;
+			if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) != 1)
+			{
+				for (int i = 1; i <= 16; i++)
+					if (!WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y - i, 1))
+					{
+						fixed = true;
+						MovePlayer(hspeed, -i);
+						break;
+					}
+			}
+			if (!fixed)
+			{
+				if (hspeed > 0)
+					ContractDir(E_right);
+				else if (hspeed < 0)
+					ContractDir(E_left);
+				hspeed = 0;
+			}
+
 		}
 		else
 			MovePlayer(hspeed, 0);
@@ -74,7 +95,7 @@ void PlayerObject::StepPlayer()
 		if (vspeed < 0)
 		{
 			//WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y)
-			if (WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 1) == 1 || WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 0) == 1)
+			if (WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 1) || WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 0) == 1)
 			{
 				ContractDir(E_up);
 				vspeed = 0;
@@ -84,7 +105,7 @@ void PlayerObject::StepPlayer()
 		}
 		else
 		{
-			if (WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 1) == 1 || WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 0) == 1)
+			if (WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 1)  || WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 0) == 1)
 			{
 				falling = false;
 				vspeed = 0;
@@ -101,7 +122,7 @@ void PlayerObject::StepPlayer()
 	}
 	else
 	{
-		if (WCR.MapPtr->CheckCollision(BoundBox, x, y + 1, 1) != 1)//not a solid
+		if (!WCR.MapPtr->CheckCollision(BoundBox, x, y + 1, 1))//not a solid
 			falling = true;
 	}
 	if (WCR.MapPtr->CheckCollision(BoundBox, x, y, 2) == 2)//Bouncy Block
@@ -135,35 +156,52 @@ void PlayerObject::ResetMovement()
 }
 
 void PlayerObject::PollControls() {
+	float HAUse = 0, frixUse = 0;
+	if (WCR.MapPtr->CheckCollision(BoundBox, x, y + 1, 5) == 5)
+	{
+		frixUse = hfricSlip;
+		HAUse = haccelSlip;
+	}
+	else
+	{
+		frixUse = hfric;
+		HAUse = haccel;
+	}
+
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && WCR.RenderRef.hasFocus())
 	{
 		//vspeed, hspeed, gravity, haccel, hspeedmax;
-		if (hspeed - haccel >= -hspeedmax)
-			hspeed -= haccel;
+		if (hspeed - HAUse >= -hspeedmax)
+			hspeed -= HAUse;
 		else
 			hspeed = -hspeedmax;
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && WCR.RenderRef.hasFocus())
 	{
 		//vspeed, hspeed, gravity, haccel, hspeedmax;
-		if (hspeed + haccel <= hspeedmax)
-			hspeed += haccel;
+		if (hspeed + HAUse <= hspeedmax)
+			hspeed += HAUse;
 		else
 			hspeed = hspeedmax; 
 	}
 	else if (hspeed != 0)
 	{
+		float frixUse = 0;
+		if (WCR.MapPtr->CheckCollision(BoundBox, x, y + 1, 5) == 5)
+			frixUse = hfricSlip;
+		else
+			frixUse = hfric;
 		if (hspeed > 0)
 		{
-			if (hspeed - hfric >= 0)
-				hspeed -= hfric;
+			if (hspeed - frixUse >= 0)
+				hspeed -= frixUse;
 			else
 				hspeed = 0;
 		}
 		else
 		{
-			if (hspeed + hfric <= 0)
-				hspeed += hfric;
+			if (hspeed + frixUse <= 0)
+				hspeed += frixUse;
 			else
 				hspeed = 0;
 		}
@@ -184,6 +222,7 @@ void PlayerObject::MovePlayer(float Xmove, float Ymove)
 	x += Xmove;
 	y += Ymove;
 	PlayerImage.setPosition(x, y);
+	NameText.setPosition(round(x + PlayerImage.getLocalBounds().width / 2 - NameText.getLocalBounds().width / 2), y - NameText.getLocalBounds().height - 8);
 }
 
 void PlayerObject::sendJump()
@@ -191,7 +230,7 @@ void PlayerObject::sendJump()
 	if (!WCR.online)
 		return;
 	sf::Packet sendData;
-	sendData << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)x << (sf::Int32)y;
+	sendData << (sf::Int32)2 << (sf::Int32)0 << x << y;
 	WCR.MHandle.sendData(sendData, WCR.socket);
 }
 
@@ -200,7 +239,7 @@ void PlayerObject::sendPos()
 	if (!WCR.online)
 		return;
 	sf::Packet sendData;
-	sendData << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)x << (sf::Int32)y;
+	sendData << (sf::Int32)2 << (sf::Int32)2 << x << y;
 	WCR.MHandle.sendData(sendData, WCR.socket);
 }
 
@@ -225,9 +264,16 @@ void PlayerObject::sendXChange()
 	{
 		xDirOld = xdir_;
 		sf::Packet sendData;
-		sendData << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)xdir_;
+		sendData << (sf::Int32)2 << (sf::Int32)1 << x << y << (sf::Int32)xdir_;
 		WCR.MHandle.sendData(sendData, WCR.socket);
 	}
+}
+
+void PlayerObject::ChangeName(const char* NewName)
+{
+	myName = new char[strlen(NewName) + 1];
+	strcpy(myName, NewName);
+	NameText.setString(myName);
 }
 
 void PlayerObject::DrawPlayer() {
@@ -235,4 +281,5 @@ void PlayerObject::DrawPlayer() {
 	for (int i = 0; i < AfterImage.size(); i++)
 		WCR.RenderRef.draw(AfterImage[i]);
 	WCR.RenderRef.draw(PlayerImage);
+	WCR.RenderRef.draw(NameText);
 }

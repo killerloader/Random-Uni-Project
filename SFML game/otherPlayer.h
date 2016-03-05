@@ -31,14 +31,17 @@ public:
 	sf::Sprite PlayerImage;
 	sf::Rect<int> BoundBox;
 	bool falling;
-	float vspeed, hspeed, gravity, haccel, hspeedmax, hfric, x, y, xstart, ystart, SPD;
+	float vspeed, hspeed, gravity, haccel, haccelSlip, hspeedmax, hfric, x, y, xstart, ystart, SPD, hfricSlip;
+	float xAct, yAct;
 	int vspeedMax;
 	int xdir_;
 
 	char* myName;
 
 	sf::Color MyCol = sf::Color();
+	sf::Text NameText;
 
+	void ChangeName(const char* NewName);
 	void ContractDir(Edirection);
 	void MovePlayer(float Xmove, float Ymove);
 };
