@@ -4,13 +4,13 @@ TODO:
 	- Fix headers, do not include .h files in headers (or include one which only has predefinitions)
 	- Add connections and listening to header.
 	- Function to check player ID to see if it is within acceptable player id limits and that it is not a nullptr.
-	- Allow other players to have permissions to edit the world, by command, or just give everyone permission with a tickbox (sends permission when they login or on command)
 	- Save blocks to map instead of whole array.
 	- Send blocks to players instead of whole array.
 	- Clearing should not send all data again, but just ask the client to clear their screen.
 	- Colour picker for map when in server.
-	- Other players using map maker but without server options.
 	- Not detecting collision on right side of player?
+	- Placing pixel perfect blocks on client doesn't seem to register all the time.
+	- When pressing 'm' to go into the map mode, you currently have to first click on the map editor then on the map to start editing, it must think that the mouse isn't ready to place for some reason.
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
