@@ -9,6 +9,7 @@ using namespace std;
 struct Map;
 class mapObject;
 class WrapperClass;
+class Animation;
 
 class otherPlayer
 {
@@ -40,6 +41,7 @@ public:
 
 	sf::Color MyCol = sf::Color();
 	sf::Text NameText;
+	Animation PlayerAnimation;
 
 	void ChangeName(const char* NewName);
 	void ContractDir(Edirection);

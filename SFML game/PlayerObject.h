@@ -6,6 +6,7 @@ class fileManager;
 class mapObject;
 class otherPlayer;
 class WrapperClass;
+class Animation;
 
 class PlayerObject
 {
@@ -15,6 +16,7 @@ public:
 	sf::View PlayerView;
 	sf::Texture PlayerTex;
 	sf::Sprite PlayerImage;
+	Animation PlayerAnimation;
 	sf::Image PlayerMask;
 	PlayerObject(WrapperClass &WCR_);
 	void PollControls();

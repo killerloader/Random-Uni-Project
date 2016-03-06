@@ -1,6 +1,6 @@
 #include "Main.h"
 
-PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
+PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_), PlayerAnimation(WCR_) {
 	PlayerTex.loadFromFile("Data/Sprites/Player.png");
 	int Pw_(46), Ph_(35);
 	PlayerImage.setTexture(PlayerTex);
@@ -20,8 +20,8 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	NameText.setString(myName);
 	NameText.setFont(WCR.MainFont);
 	NameText.setCharacterSize(12);
-	BoundBox.width = 46;
-	BoundBox.height = 35;
+	BoundBox.width = Pw_;
+	BoundBox.height = Ph_;
 	vspeedMax = 16;
 	SPD = 5.f;
 	falling = true;
@@ -32,6 +32,18 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_) {
 	pressWOld = false;
 	//PlayerImage.setSize(sf::Vector2f(32,32));
 	PlayerImage.setPosition(x, y);
+
+	//Setup animation:
+	PlayerAnimation.addAnimation("Data\\Sprites\\PlayerLeft.png", 1, 1, 1, 3, 46, 35,5);
+	PlayerAnimation.addAnimation("Data\\Sprites\\PlayerRight.png", 1, 1, 1, 3, 46, 35,5);
+}
+
+void PlayerObject::MovePlayer(float Xmove, float Ymove)
+{
+	x += Xmove;
+	y += Ymove;
+	PlayerImage.setPosition(x, y);
+	NameText.setPosition(round(x + PlayerImage.getLocalBounds().width / 2 - NameText.getLocalBounds().width / 2), y - NameText.getLocalBounds().height - 8);
 }
 
 void PlayerObject::ContractDir(Edirection DIrr)
@@ -52,7 +64,7 @@ void PlayerObject::ContractDir(Edirection DIrr)
 
 void PlayerObject::StepPlayer()
 {
-	AfterImage.emplace_back(PlayerImage);
+	AfterImage.emplace_back(PlayerAnimation.getCurrentSprite());
 	//AfterImage[AfterImage.size() - 1].setPosition(x, y);
 	//after image step
 	int AlphaDec = 15;
@@ -72,7 +84,7 @@ void PlayerObject::StepPlayer()
 			bool fixed = false;
 			if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) != 1)
 			{
-				for (int i = 1; i <= 16; i++)
+				for (int i = 1; i <= 17; i++)
 					if (!WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y - i, 1))
 					{
 						fixed = true;
@@ -88,7 +100,6 @@ void PlayerObject::StepPlayer()
 					ContractDir(E_left);
 				hspeed = 0;
 			}
-
 		}
 		else
 			MovePlayer(hspeed, 0);
@@ -108,7 +119,7 @@ void PlayerObject::StepPlayer()
 		}
 		else
 		{
-			if (WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 1)  || WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 0) == 1)
+			if (WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 1) || WCR.MapPtr->CheckCollision(BoundBox, x, y + vspeed, 0) == 1)
 			{
 				falling = false;
 				vspeed = 0;
@@ -149,6 +160,7 @@ void PlayerObject::StepPlayer()
 	}
 
 	PlayerView.setCenter(sf::Vector2f((int)x + 16, (int)y + 16));
+	PlayerAnimation.step();
 }
 
 void PlayerObject::ResetMovement()
@@ -173,7 +185,12 @@ void PlayerObject::PollControls() {
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && WCR.RenderRef.hasFocus())
 	{
-		//vspeed, hspeed, gravity, haccel, hspeedmax;
+		//Animation stuff
+		if (PlayerAnimation.getCurrentAnimationID() != 0)//Not going left.
+			PlayerAnimation.setAnimation(0);
+		if (!PlayerAnimation.getIsPlaying())
+			PlayerAnimation.setPlaying(true);
+		//----
 		if (hspeed - HAUse >= -hspeedmax)
 			hspeed -= HAUse;
 		else
@@ -181,7 +198,12 @@ void PlayerObject::PollControls() {
 	}
 	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && WCR.RenderRef.hasFocus())
 	{
-		//vspeed, hspeed, gravity, haccel, hspeedmax;
+		//Animation stuff
+		if (PlayerAnimation.getCurrentAnimationID() != 1)//Not going right.
+			PlayerAnimation.setAnimation(1);
+		if (!PlayerAnimation.getIsPlaying())
+			PlayerAnimation.setPlaying(true);
+		//----
 		if (hspeed + HAUse <= hspeedmax)
 			hspeed += HAUse;
 		else
@@ -189,6 +211,11 @@ void PlayerObject::PollControls() {
 	}
 	else if (hspeed != 0)
 	{
+		if (PlayerAnimation.getIsPlaying())
+		{
+			PlayerAnimation.setPlaying(false);
+			PlayerAnimation.resetAnimation();
+		}
 		float frixUse = 0;
 		if (WCR.MapPtr->CheckCollision(BoundBox, x, y + 1, 5) == 5)
 			frixUse = hfricSlip;
@@ -218,14 +245,6 @@ void PlayerObject::PollControls() {
 			falling = true;
 		}
 	sendXChange();
-}
-
-void PlayerObject::MovePlayer(float Xmove, float Ymove)
-{
-	x += Xmove;
-	y += Ymove;
-	PlayerImage.setPosition(x, y);
-	NameText.setPosition(round(x + PlayerImage.getLocalBounds().width / 2 - NameText.getLocalBounds().width / 2), y - NameText.getLocalBounds().height - 8);
 }
 
 void PlayerObject::sendJump()
@@ -267,7 +286,8 @@ void PlayerObject::sendXChange()
 	{
 		xDirOld = xdir_;
 		sf::Packet sendData;
-		sendData << (sf::Int32)2 << (sf::Int32)1 << x << y << (sf::Int32)xdir_;
+		sendData << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)xdir_ << x << y << hspeed;
+		//cout << "Sent pos: (" << x << ", " << y << ")" << endl;
 		WCR.MHandle.sendData(sendData, WCR.socket);
 	}
 }
@@ -283,6 +303,7 @@ void PlayerObject::DrawPlayer() {
 
 	for (int i = 0; i < AfterImage.size(); i++)
 		WCR.RenderRef.draw(AfterImage[i]);
-	WCR.RenderRef.draw(PlayerImage);
+	//WCR.RenderRef.draw(PlayerImage);
+	PlayerAnimation.draw(x,y);
 	WCR.RenderRef.draw(NameText);
 }

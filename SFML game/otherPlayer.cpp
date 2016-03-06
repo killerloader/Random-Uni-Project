@@ -1,15 +1,16 @@
-#include "otherPlayer.h"
-#include "Maps.h"
-#include "mapObject.h"
 #include "main.h"
 
-
-otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_)
+otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_), PlayerAnimation(WCR_)
 {
+	int Pw_(46), Ph_(35);
 	PlayerImage.setTexture(WCR.PlrPtr->PlayerTex);
-	BoundBox.width = 46;
-	BoundBox.height = 35;
+	//Setup animation:
+	//----
+	BoundBox.width = Pw_;
+	BoundBox.height = Ph_;
 	MyCol = sf::Color::White;
+	PlayerAnimation.addAnimation(WCR.PlrPtr->PlayerAnimation.getTexture(0), 1, 1, 1, 3, "Left", 46, 35, 5, MyCol);
+	PlayerAnimation.addAnimation(WCR.PlrPtr->PlayerAnimation.getTexture(1), 1, 1, 1, 3, "Right", 46, 35, 5, MyCol);
 	PID = -1;
 	vspeedMax = 16;
 	myName = new char[5]{ "NULL" };
@@ -64,7 +65,7 @@ void otherPlayer::step()
 {
 //vspeed, hspeed, gravity, haccel, hspeedmax;
 
-	AfterImage.emplace_back(PlayerImage);
+	AfterImage.emplace_back(PlayerAnimation.getCurrentSprite());
 
 	//AfterImage[AfterImage.size() - 1].setPosition(x, y);
 	//AfterImage[AfterImage.size() - 1].setColor(MyCol);
@@ -92,7 +93,10 @@ void otherPlayer::step()
 
 	if (xdir_ == -1)
 	{
-		//vspeed, hspeed, gravity, haccel, hspeedmax;
+		if (PlayerAnimation.getCurrentAnimationID() != 0)//Not going left.
+			PlayerAnimation.setAnimation(0);
+		if (!PlayerAnimation.getIsPlaying())
+			PlayerAnimation.setPlaying(true);
 		if (hspeed - HAUse >= -hspeedmax)
 			hspeed -= HAUse;
 		else
@@ -100,7 +104,10 @@ void otherPlayer::step()
 	}
 	else if (xdir_ == 1)
 	{
-		//vspeed, hspeed, gravity, haccel, hspeedmax;
+		if (PlayerAnimation.getCurrentAnimationID() != 1)//Not going right.
+			PlayerAnimation.setAnimation(1);
+		if (!PlayerAnimation.getIsPlaying())
+			PlayerAnimation.setPlaying(true);
 		if (hspeed + HAUse <= hspeedmax)
 			hspeed += HAUse;
 		else
@@ -108,6 +115,11 @@ void otherPlayer::step()
 	}
 	else if (hspeed != 0)
 	{
+		if (PlayerAnimation.getIsPlaying())
+		{
+			PlayerAnimation.setPlaying(false);
+			PlayerAnimation.resetAnimation();
+		}
 		if (hspeed > 0)
 		{
 			if (hspeed - frixUse >= 0)
@@ -124,7 +136,6 @@ void otherPlayer::step()
 		}
 
 	}
-
 	if (hspeed != 0)
 	{
 		if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 1) || WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) == 1)
@@ -132,7 +143,7 @@ void otherPlayer::step()
 			bool fixed = false;
 			if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) != 1)
 			{
-				for (int i = 1; i <= 16; i++)
+				for (int i = 1; i <= 17; i++)//17 because there seems to be a rounding bug?
 					if (!WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y - i, 1))
 					{
 						fixed = true;
@@ -144,7 +155,7 @@ void otherPlayer::step()
 			{
 				if (hspeed > 0)
 					ContractDir(E_right);
-				if (hspeed < 0)
+				else if (hspeed < 0)
 					ContractDir(E_left);
 				hspeed = 0;
 			}
@@ -220,6 +231,7 @@ void otherPlayer::step()
 			yAct = 0;
 	}
 	PlayerImage.setPosition(x - xAct, y - yAct);	
+	PlayerAnimation.step();
 }
 
 void otherPlayer::ChangeName(const char* NewName)
@@ -243,6 +255,7 @@ void otherPlayer::draw()
 {
 	for (int i = 0; i < AfterImage.size(); i++)
 		WCR.RenderRef.draw(AfterImage[i]);
-	WCR.RenderRef.draw(PlayerImage);
+	//WCR.RenderRef.draw(PlayerImage);
+	PlayerAnimation.draw(x - xAct, y - yAct);
 	WCR.RenderRef.draw(NameText);
 }

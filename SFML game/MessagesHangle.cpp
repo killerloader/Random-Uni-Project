@@ -166,8 +166,7 @@ void MessagesHangle::ServerMessagesHandle()
 						if (ii == i || WCR.clients[ii] == nullptr)
 							continue;
 						sf::Packet Data_;
-						Data_ << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)i;
-						Data_ << x_ << y_;
+						Data_ << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)0 << (sf::Int32)i << x_ << y_;
 						sendData(Data_, ii);
 					}
 					//jump otherplayer object
@@ -183,23 +182,24 @@ void MessagesHangle::ServerMessagesHandle()
 				case 1://xdir change
 				{
 					sf::Int32 xDIr;
-					float x_, y_;
-					recievedata >> x_ >> y_ >> xDIr;
+					float x_, y_, hspd_;
+					recievedata >> xDIr >> x_ >> y_ >> hspd_;
+
 					for (int ii = 0; ii < WCR.clients.size(); ii++)
 					{
 						if (ii == i || WCR.clients[ii] == nullptr)
 							continue;
 						sf::Packet Data_;
-						Data_ << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)i << xDIr;
-						Data_ << x_ << y_;
+						Data_ << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)1 << (sf::Int32)i << xDIr << x_ << y_ << hspd_;
 						sendData(Data_, ii);
-						continue;//no point
 					}
 					//Move otherplayer object.
+					//cout << "Got pos: (" << x_ << ", " << y_ << ")" << endl;
 					WCR.otherPlayers[i]->xAct += x_ - WCR.otherPlayers[i]->x;
 					WCR.otherPlayers[i]->yAct += y_ - WCR.otherPlayers[i]->y;
 					WCR.otherPlayers[i]->x = x_;
 					WCR.otherPlayers[i]->y = y_;
+					WCR.otherPlayers[i]->hspeed = hspd_;
 					WCR.otherPlayers[i]->xdir_ = xDIr;
 					//WCR.otherPlayers[i]->PlayerImage.setPosition(WCR.otherPlayers[i]->x, WCR.otherPlayers[i]->y);
 					break;
@@ -213,8 +213,7 @@ void MessagesHangle::ServerMessagesHandle()
 						if (ii == i || WCR.clients[ii] == nullptr)
 							continue;
 						sf::Packet Data_;
-						Data_ << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)i;
-						Data_ << x_ << y_;
+						Data_ << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)i << x_ << y_;
 						sendData(Data_, ii);
 						continue;//no point
 					}
@@ -404,15 +403,16 @@ void MessagesHangle::ClientMessagesHandle()
 					case 2://Update x, y
 					{
 						sf::Int32 OPID;
-						float x_, y_;
+						float x_, y_, hspd_;
 						recievedata >> OPID;
 						if (WCR.otherPlayers[OPID] == nullptr)
 							break;
-						recievedata >> x_ >> y_;
+						recievedata >> x_ >> y_ >> hspd_;
 						WCR.otherPlayers[OPID]->xAct = 0;
 						WCR.otherPlayers[OPID]->xAct = 0;
 						WCR.otherPlayers[OPID]->x = x_;
 						WCR.otherPlayers[OPID]->y = y_;
+						WCR.otherPlayers[OPID]->hspeed = hspd_;
 						//WCR.otherPlayers[OPID]->PlayerImage.setPosition(WCR.otherPlayers[OPID]->x, WCR.otherPlayers[OPID]->y);
 						break;
 					}
@@ -427,6 +427,7 @@ void MessagesHangle::ClientMessagesHandle()
 						break;
 					WCR.otherPlayers[OPID]->MyCol = sf::Color(pr_, pg_, pb_, 255);
 					WCR.otherPlayers[OPID]->PlayerImage.setColor(WCR.otherPlayers[OPID]->MyCol);
+					WCR.otherPlayers[OPID]->PlayerAnimation.setColor(WCR.otherPlayers[OPID]->MyCol);
 					break;
 				}
 				case 4://Change my colour
@@ -435,6 +436,7 @@ void MessagesHangle::ClientMessagesHandle()
 					recievedata >> pr_ >> pg_ >> pb_;
 					WCR.PlrPtr->MyCol = sf::Color(pr_, pg_, pb_, 255);
 					WCR.PlrPtr->PlayerImage.setColor(WCR.PlrPtr->MyCol);
+					WCR.PlrPtr->PlayerAnimation.setColor(WCR.PlrPtr->MyCol);
 					break;
 				}
 				case 5://name change (set)

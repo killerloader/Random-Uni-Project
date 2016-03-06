@@ -73,14 +73,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(SolutionDir)\CompileFiles</IntDir>
-    <OutDir>$(SolutionDir)\game</OutDir>
+    <IntDir>$(SolutionDir)\CompileFiles\</IntDir>
+    <OutDir>$(SolutionDir)\game\</OutDir>
     <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Rel(MapMaker)|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IntDir>$(SolutionDir)\CompileFiles</IntDir>
-    <OutDir>$(SolutionDir)\game</OutDir>
+    <IntDir>$(SolutionDir)\CompileFiles\</IntDir>
+    <OutDir>$(SolutionDir)\game\</OutDir>
     <TargetName>$(ProjectName)_MapMaker</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

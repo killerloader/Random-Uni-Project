@@ -4,14 +4,46 @@
 #include <iostream>
 #include <vector>
 
-class Tileset;
+class TileSet;
+class WrapperClass;
 
 class Animation
 {
 public:
-	Animation();
+	Animation(WrapperClass& WCR_, sf::Color Col_ = sf::Color::White);
 	~Animation();
 
-	Tileset* MyTileset;
+	WrapperClass& WCR;
+	void draw(int x_, int y_);
+	void step();
+	void addAnimation(const char* FileName, int xOff, int yOff, int xGap, int xCells, int cellSizeX, int cellSizeY, int FrmTm_, sf::Color MyCol = sf::Color(255,255,255,255));
+	void addAnimation(sf::Texture* NewTexture , int xOff, int yOff, int xGap, int xCells, const char* TSName, int cellSizeX, int cellSizeY, int FrmTm_, sf::Color MyCol = sf::Color(255, 255, 255, 255));
+	void setAnimation(int AnimID);
+	void setColor(sf::Color);
+	void resetAnimation();
+	void setPlaying(bool Play_);
+	bool getIsPlaying()
+	{
+		return Playing;
+	}
+	int getCurrentAnimationID()
+	{
+		return CurTileSet;
+	}
+	sf::Sprite& getCurrentSprite()
+	{
+		return DrawSprite;
+	}
+	sf::Texture* getTexture(int TexId);
+private:
+	void updateRect();
+
+	int CurrentTime;
+	vector<TileSet> MyTilesets;
+	int CurTileSet;
+	int CurTile;
+	bool Playing;
+	sf::Color MyColor;
+	sf::Sprite DrawSprite;
 };
 

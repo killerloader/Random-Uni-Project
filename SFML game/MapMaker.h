@@ -11,7 +11,7 @@ class MapMaker;
 
 struct TileSet
 {
-	TileSet(const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, bool isMapTileSet = true, int cellSizeX = 32, int cellSizeY = 32)
+	TileSet(const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, int cellSizeX = 32, int cellSizeY = 32)
 	{
 		xOffset = xOff;
 		yOffset = yOff;
@@ -25,15 +25,33 @@ struct TileSet
 		if (!TileSheetTex->loadFromFile(FileName))
 			cout << "Could not load image" << endl;
 #ifdef MapMakerMode
-		if(isMapTileSet)
-			TSL->AppendItem(FileName);
+		TSL->AppendItem(FileName);
 #endif
 		UpdateSprites();
 		//UpdateSprites();
 		//CreateCollisionMaps();
 	}
 
-	TileSet(sf::Texture* TexPtr, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, bool isMapTileSet = true, const char* TSName = " ", int cellSizeX = 32, int cellSizeY = 32)
+	TileSet(const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, int cellSizeX, int cellSizeY, int FrmTm)
+	{
+		xOffset = xOff;
+		yOffset = yOff;
+		GapW = xGap;
+		GapH = yGap;
+		CellsX = xCells;
+		CellsY = yCells;
+		CSizeX = cellSizeX;
+		CSizeY = cellSizeY;
+		TileSheetTex = new sf::Texture;
+		if (!TileSheetTex->loadFromFile(FileName))
+			cout << "Could not load image" << endl;
+		FrameTime = FrmTm;
+		UpdateSprites();
+		//UpdateSprites();
+		//CreateCollisionMaps();
+	}
+
+	TileSet(sf::Texture* TexPtr, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, const char* TSName = " ", int cellSizeX = 32, int cellSizeY = 32)
 	{
 		xOffset = xOff;
 		yOffset = yOff;
@@ -45,9 +63,22 @@ struct TileSet
 		CSizeY = cellSizeY;
 		TileSheetTex = TexPtr;
 #ifdef MapMakerMode
-		if(isMapTileSet)
-			TSL->AppendItem(TSName);
+		TSL->AppendItem(TSName);
 #endif
+	}
+
+	TileSet(sf::Texture* TexPtr, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, const char* TSName, int cellSizeX, int cellSizeY, int FrmTm)
+	{
+		xOffset = xOff;
+		yOffset = yOff;
+		GapW = xGap;
+		GapH = yGap;
+		CellsX = xCells;
+		CellsY = yCells;
+		CSizeX = cellSizeX;
+		CSizeY = cellSizeY;
+		TileSheetTex = TexPtr;
+		FrameTime = FrmTm;
 	}
 
 	void UpdateSprites()
@@ -118,6 +149,7 @@ struct TileSet
 	int CellsX;
 	int CellsY;
 	int CSizeX, CSizeY;
+	int FrameTime;//For use with animations.
 };
 
 class MapMaker

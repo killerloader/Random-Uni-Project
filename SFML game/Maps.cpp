@@ -140,7 +140,6 @@ namespace mmath
 
 int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 {
-	
 	int Xmin = floor(X / CellSize);
 	int Xmax = floor((X + CheckRect.width) / CellSize);
 	int Ymin = floor(Y / CellSize);

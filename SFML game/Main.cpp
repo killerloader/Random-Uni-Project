@@ -3,12 +3,8 @@
 TODO: 
 	- Fix headers, do not include .h files in headers (or include one which only has predefinitions)
 	- Add connections and listening to header.
-	- Commands on server
 	- Function to check player ID to see if it is within acceptable player id limits and that it is not a nullptr.
-	- Animation for players
 	- Allow other players to have permissions to edit the world, by command, or just give everyone permission with a tickbox (sends permission when they login or on command)
-	- Add precise option for server to make pixel perfect blocks
-	- Save pixel perfect blocks to map
 	- Save blocks to map instead of whole array.
 	- Send blocks to players instead of whole array.
 	- Clearing should not send all data again, but just ask the client to clear their screen.
@@ -147,13 +143,13 @@ int main()
 		window.clear(sf::Color(98,195,227));
 		MainMap.DrawMap(obj_Player.PlayerView);
 		MainMap.drawBorders();
-		obj_Player.DrawPlayer();
 #ifdef MapMakerMode//Don't poll player events if in mapmaker mode.
 		MapMkr.Draw();
 #endif
 		for (int i = 0; i < WC.otherPlayers.size(); i++)
 			if (WC.otherPlayers[i] != nullptr)
 				WC.otherPlayers[i]->draw();
+		obj_Player.DrawPlayer();
 		//Display the window to the client.
 		window.display();
 	}

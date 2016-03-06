@@ -7,13 +7,13 @@
 using namespace std;
 
 #include "MapMaker.h"
+#include "Animation.h"
 #include "fileManager.h"
 #include "Maps.h"
 #include "mapObject.h"
 #include "otherPlayer.h"
 #include "PlayerObject.h"
 #include "MessagesHangle.h"
-#include "Animation.h"
 
 /* Should not be needed as headers are above!
 class PlayerObject;
