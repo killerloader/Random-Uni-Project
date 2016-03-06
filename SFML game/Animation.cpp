@@ -5,7 +5,7 @@ Animation::Animation(WrapperClass& WCR_, sf::Color col_) : WCR(WCR_)
 	CurTileSet = -1;
 	CurTile = -1;
 	CurrentTime = 0;
-	Playing = true;
+	Playing = false;
 	MyColor = col_;
 	DrawSprite.setColor(MyColor);
 }
@@ -21,7 +21,7 @@ void Animation::setColor(sf::Color newCol_)
 	DrawSprite.setColor(newCol_);
 }
 
-void Animation::addAnimation(const char* FileName, int xOff, int yOff, int xGap, int xCells, int cellSizeX, int cellSizeY, int FrmTm_, sf::Color MyCol)
+void Animation::addAnimation(const char* FileName, int xOff, int yOff, int xGap, int xCells, int cellSizeX, int cellSizeY, int FrmTm_)
 {
 	MyTilesets.emplace_back(FileName, xOff, yOff, xGap, 0, xCells, 1, cellSizeX, cellSizeY, FrmTm_);//Only 2d sheets, but can have multiple
 	if (CurTileSet == -1)
@@ -39,7 +39,7 @@ sf::Texture* Animation::getTexture(int TexId)
 	return MyTilesets[TexId].TileSheetTex;
 }
 
-void Animation::addAnimation(sf::Texture* NewTex , int xOff, int yOff, int xGap, int xCells, const char* TSName, int cellSizeX, int cellSizeY, int FrmTm_, sf::Color MyCol)
+void Animation::addAnimation(sf::Texture* NewTex , int xOff, int yOff, int xGap, int xCells, const char* TSName, int cellSizeX, int cellSizeY, int FrmTm_)
 {
 	MyTilesets.emplace_back(NewTex, xOff, yOff, xGap, 0, xCells, 1, TSName, cellSizeX, cellSizeY, FrmTm_);//Only 2d sheets, but can have multiple
 	if (CurTileSet == -1)

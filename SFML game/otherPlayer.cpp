@@ -9,8 +9,8 @@ otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_), PlayerAnimation(WCR_)
 	BoundBox.width = Pw_;
 	BoundBox.height = Ph_;
 	MyCol = sf::Color::White;
-	PlayerAnimation.addAnimation(WCR.PlrPtr->PlayerAnimation.getTexture(0), 1, 1, 1, 3, "Left", 46, 35, 5, MyCol);
-	PlayerAnimation.addAnimation(WCR.PlrPtr->PlayerAnimation.getTexture(1), 1, 1, 1, 3, "Right", 46, 35, 5, MyCol);
+	PlayerAnimation.addAnimation(WCR.PlrPtr->PlayerAnimation.getTexture(0), 1, 1, 1, 3, "Left", 46, 35, 5);
+	PlayerAnimation.addAnimation(WCR.PlrPtr->PlayerAnimation.getTexture(1), 1, 1, 1, 3, "Right", 46, 35, 5);
 	PID = -1;
 	vspeedMax = 16;
 	myName = new char[5]{ "NULL" };
@@ -30,6 +30,7 @@ otherPlayer::otherPlayer(WrapperClass &WCR_) : WCR(WCR_), PlayerAnimation(WCR_)
 	xdir_ = 0;
 	xAct = 0;
 	yAct = 0;
+	MapEditPermissions = false;
 }
 
 otherPlayer::~otherPlayer()

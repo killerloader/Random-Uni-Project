@@ -4,12 +4,13 @@
 
 MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 {
-#ifdef MapMakerMode
-	mmWindow.create(sf::VideoMode(640, 480), "Unnamed project");
+#ifdef MapMakerMode//Start window straight away for server.
+	mmWindow.create(sf::VideoMode(640, 480), "Map Editor");
 	mmWindow.setFramerateLimit(60);
 	mmWindow.setVerticalSyncEnabled(true);
 	mmView.setSize(sf::Vector2f(640, 480));
 	mmWindow.setView(mmView);
+#endif
 	/*
 	sf::Font my_font;
 	my_font.loadFromFile("Data/Fonts/OptimusPrinceps.ttf");
@@ -59,12 +60,11 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	*/
 
 	TilesetList = sfg::ComboBox::Create();
-#endif
 
 	loadTiles();
 	updateTiles();
 
-#ifdef MapMakerMode
+
 	lvlIdMinus = sfg::Button::Create("-");
 	lvlIdPlus = sfg::Button::Create("+");
 
@@ -81,6 +81,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 
 	//First three are save/load/clear
 
+#ifdef MapMakerMode//No console on client map editor
 	box->Pack(sfg::Label::Create("--Map Management--"), false);
 	box->Pack(sfg::Separator::Create(), false);
 	MapBox->Pack(lvlIdMinus, false);
@@ -99,6 +100,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	}
 
 	box->Pack(sfg::Separator::Create(), false);
+#endif
 	box->Pack(sfg::Label::Create("--Map Editing--"), false);
 	box->Pack(sfg::Separator::Create(), false);
 	box->Pack(sfg::Label::Create("Object Type"), false);
@@ -124,9 +126,18 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	box->Pack(sfg::Label::Create("--Settings--"), false);
 	box->Pack(sfg::Separator::Create(), false);
 	box->Pack(ShowObjectTypes, false);
+#ifdef MapMakerMode//No console on client map editor
+	GiveAllPermissions = sfg::CheckButton::Create("Give All Edit Permission");
+	box->Pack(GiveAllPermissions, false);
 	ConsoleButton = sfg::Button::Create("Console");
 	ConsoleButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 100));
 	box->Pack(ConsoleButton, false);
+#else//Only allow clients to exit and enter map maker mode.
+	box->Pack(sfg::Separator::Create(), false);
+	ExitMapMakerButton = sfg::Button::Create("Exit map maker");
+	ExitMapMakerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::exitMapMaker, this));
+	box->Pack(ExitMapMakerButton, false);
+#endif
 	//end
 	//Tile window
 	windowTiles = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
@@ -146,6 +157,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	TileBoxVert->Pack(TilesetList, false, false);
 	TileBoxVert->Pack(TileCanvas);
 	//end
+#ifdef MapMakerMode//No console on client map editor
 	//Command window
 	CommandWindow = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
 	CommandWindow->SetPosition(sf::Vector2f(200, 0));
@@ -160,9 +172,9 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	SendCommand->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::sendCommand, this));
 	CWTileBoxVert->Pack(CommandEntry);
 	CWTileBoxVert->Pack(SendCommand);
-		
 
 	CommandWindow->Add(CWTileBoxVert);
+#endif
 	/*
 	sfg::Window::Ptr CommandWindow;//Window to select drawn tile.
 	sfg::Box::Ptr CWTileBoxVert;
@@ -177,14 +189,42 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	desktop.Add(windowSFG);
 	windowTiles->Add(TileBoxVert);
 	desktop.Add(windowTiles);
+#ifdef MapMakerMode//No console on client map editor
 	desktop.Add(CommandWindow);
-	mmWindow.resetGLStates();
 #endif
+	mmWindow.resetGLStates();
 }
 
 MapMaker::~MapMaker()
 {
 
+}
+
+void MapMaker::exitMapMaker()
+{
+	WCR.inMapMaker = false;
+	mmWindow.close();
+}
+
+void MapMaker::enterMapMaker()
+{
+	if (!WCR.mapMakerPermissions)
+	{
+		cout << "No permission to open map editor!" << endl;
+		return;
+	}
+	WCR.inMapMaker = true;
+	mmWindow.create(sf::VideoMode(640, 480), "Map Editor");
+	mmWindow.setFramerateLimit(60);
+	mmWindow.setVerticalSyncEnabled(true);
+	mmView.setSize(sf::Vector2f(640, 480));
+	mmWindow.setView(mmView);
+	mmWindow.resetGLStates();
+}
+
+bool MapMaker::isInMapMaker()
+{
+	return WCR.inMapMaker;
 }
 
 void MapMaker::sendCommand()
@@ -215,9 +255,57 @@ void MapMaker::sendCommand()
 						cout << "Player with ID: " << PID << " has been kicked from the server!" << endl;
 					}
 		}
-
+		else if (baseCommand == "setpermission")
+		{
+			string permType;
+			if (Command >> permType)
+			{
+				if (permType == "edit")
+				{
+					int PID;
+					if (Command >> PID)
+						if (PID >= 0 && PID < WCR.clients.size())
+							if (WCR.clients[PID] != nullptr)
+							{
+								int PVal;
+								if (Command >> PVal)
+								{
+									WCR.otherPlayers[PID]->MapEditPermissions = PVal;
+									sf::Packet PermSend;
+									PermSend << (sf::Int32)2 << (sf::Int32)6 << (sf::Int32)0 << (sf::Int32)PVal;
+									WCR.MHandle.sendData(PermSend, PID);
+									cout << "Player with ID: " << PID << ", permission: [" << permType << "] is now set to: " << PVal << endl;
+								}
+							}
+				}
+			}
+		}
+		else if (baseCommand == "setallpermission")
+		{
+			string permType;
+			if (Command >> permType)
+			{
+				if (permType == "edit")
+				{
+					int PVal;
+					if (Command >> PVal)
+					{
+						sf::Packet PermSend;
+						PermSend << (sf::Int32)2 << (sf::Int32)6 << (sf::Int32)0 << (sf::Int32)PVal;
+						for (int i = 0; i < WCR.clients.size(); i++)
+						{
+							if (WCR.clients[i] == nullptr)
+								continue;
+							WCR.otherPlayers[i]->MapEditPermissions = PVal;
+							WCR.MHandle.sendData(PermSend, i);
+						}
+						cout << "Player with any ID, permission: [" << permType << "] is now set to: " << PVal << endl;
+					}
+				}
+			}
+		}
 		//Teleport
-	}
+		}
 	CommandEntry->SetText("");
 }
 
@@ -424,7 +512,7 @@ bool MapMaker::LoadMap(int MID)
 	WCR.MapPtr->setupBorders();
 	cout << "Loaded MAP ID: " << MID << endl;
 
-#ifdef MapMakerMode//start server.
+#ifdef MapMakerMode//Send map data on load from server
 	if (WCR.connected)
 	{
 		sf::Packet mapData;
@@ -549,13 +637,15 @@ void MapMaker::Step()
 	{
 		PollGUIEvents();
 		if (event.type == sf::Event::Closed)
+		{
 			mmWindow.close();
-		if (event.type == sf::Event::Closed)
+			WCR.RenderRef.close();//Close main window.
+		}
+		if (event.type == sf::Event::Resized)
 		{
 			mmView.setSize(mmWindow.getSize().x, mmWindow.getSize().y);
 			mmWindow.setSize(sf::Vector2u(floorf(mmWindow.getSize().x / 2) * 2, floorf(mmWindow.getSize().y / 2) * 2));
 		}
-
 	}
 
 	static bool LCtrlPressed_ = false;
@@ -661,7 +751,7 @@ void MapMaker::ClearMap()
 	WCR.MapPtr->MapMatrix = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
 	WCR.MapPtr->setupBorders();
 
-#ifdef MapMakerMode//start server.
+#ifdef MapMakerMode//Send new map data on clear
 	if (WCR.connected)
 	{
 		sf::Packet mapData;

@@ -50,6 +50,14 @@ public:
 
 	//vector<int> clientIds;
 	//bool idFree[256];
-	bool connected = false;
-	bool online = false;
+	
+	enum E_GameType
+	{
+		ET_Server,
+		ET_Client
+	};
+	bool inMapMaker;
+	bool mapMakerPermissions;
+	bool connected;
+	E_GameType gameType;
 };

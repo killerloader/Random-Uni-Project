@@ -24,9 +24,7 @@ struct TileSet
 		TileSheetTex = new sf::Texture;
 		if (!TileSheetTex->loadFromFile(FileName))
 			cout << "Could not load image" << endl;
-#ifdef MapMakerMode
 		TSL->AppendItem(FileName);
-#endif
 		UpdateSprites();
 		//UpdateSprites();
 		//CreateCollisionMaps();
@@ -62,9 +60,7 @@ struct TileSet
 		CSizeX = cellSizeX;
 		CSizeY = cellSizeY;
 		TileSheetTex = TexPtr;
-#ifdef MapMakerMode
 		TSL->AppendItem(TSName);
-#endif
 	}
 
 	TileSet(sf::Texture* TexPtr, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, const char* TSName, int cellSizeX, int cellSizeY, int FrmTm)
@@ -158,6 +154,9 @@ private:
 	void setBlock(int BLK);
 	int getBlock();
 public:
+	void MapMaker::exitMapMaker();
+	void MapMaker::enterMapMaker();
+	bool MapMaker::isInMapMaker();
 	//GUI stuff
 	sfg::SFGUI sfgui;
 	sfg::Desktop desktop;
@@ -179,6 +178,7 @@ public:
 	sfg::Box::Ptr MapBox;
 	sfg::Button::Ptr ConsoleButton;
 	sfg::CheckButton::Ptr PixelPerfectToggle;
+	sfg::Button::Ptr ExitMapMakerButton;
 
 	//Console window
 	sfg::Window::Ptr CommandWindow;//Window to select drawn tile.
@@ -195,7 +195,10 @@ public:
 	sfg::Canvas::Ptr TileCanvas;
 	sfg::Window::Ptr windowTiles;//Window to select drawn tile.
 	sfg::Box::Ptr TileBoxVert;
+
+	//Settings
 	sfg::CheckButton::Ptr ShowObjectTypes;
+	sfg::CheckButton::Ptr GiveAllPermissions;
 
 
 	//vector<sfg::Box::Ptr> TileBoxesHor;

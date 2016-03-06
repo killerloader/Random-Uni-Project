@@ -90,10 +90,19 @@ void MessagesHangle::ServerMessagesHandle()
 			WCR.otherPlayers[foundEmpty]->PID = foundEmpty;
 			WCR.otherPlayers[foundEmpty]->x = WCR.PlrPtr->x;
 			WCR.otherPlayers[foundEmpty]->y = WCR.PlrPtr->y;
+			WCR.otherPlayers[foundEmpty]->PlayerAnimation.setColor(WCR.otherPlayers[foundEmpty]->MyCol);
 		}
 		sf::Packet ColourData;
 		ColourData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)WCR.otherPlayers[foundEmpty]->MyCol.r << (sf::Int32)WCR.otherPlayers[foundEmpty]->MyCol.g << (sf::Int32)WCR.otherPlayers[foundEmpty]->MyCol.b;
 		sendData(ColourData, foundEmpty);
+
+		if (WCR.MMPtr->GiveAllPermissions->IsActive())//If giveallperms tick is active, give everyone permission to edit map.
+		{
+			sf::Packet PermSend;
+			PermSend << (sf::Int32)2 << (sf::Int32)6 << (sf::Int32)0 << (sf::Int32)1;
+			sendData(PermSend, foundEmpty);
+			WCR.otherPlayers[foundEmpty]->MapEditPermissions = 1;
+		}
 
 		//Send to other players
 		ColourData.clear();
@@ -242,6 +251,17 @@ void MessagesHangle::ServerMessagesHandle()
 					WCR.otherPlayers[i]->ChangeName(OName_.toAnsiString().c_str());
 					break;
 				}
+				case 4://Client places block
+				{
+					if (WCR.otherPlayers[i]->MapEditPermissions)
+					{
+						sf::Int32 x_, y_, ID_, TID_, TSID_, PP_;
+						recievedata >> x_ >> y_ >> ID_ >> TID_ >> TSID_ >> PP_;
+						//<< (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << PP;
+						WCR.MapPtr->SetObject(x_, y_, ID_, TID_, TSID_, PP_);
+					}
+					break;
+				}
 				}
 			}
 		}
@@ -326,7 +346,7 @@ void MessagesHangle::ClientMessagesHandle()
 			WCR.MapPtr->MapMatrix[x][y].tileSetID = TSID;
 			WCR.MapPtr->MapMatrix[x][y].pixelPerfect = TPP;
 			break;
-		case 2://Other Player
+		case 2://Players
 			sf::Int32 oPlayerMessage;
 			recievedata >> oPlayerMessage;
 			{
@@ -449,6 +469,19 @@ void MessagesHangle::ClientMessagesHandle()
 					WCR.otherPlayers[ID]->ChangeName(OName_.toAnsiString().c_str());
 					break;
 				}
+				case 6://Permission Change
+				{
+					sf::Int32 PID, PVal;
+					
+					recievedata >> PID >> PVal;
+					switch (PID)
+					{
+					case 0://Map Editor Permissions
+						WCR.mapMakerPermissions = PVal;
+						break;
+					}
+					break;
+				}
 				}
 			}
 			break;
@@ -464,7 +497,7 @@ void MessagesHangle::ClientMessagesHandle()
 				WCR.otherPlayers[i] = nullptr;
 			}
 		}
-		WCR.online = false;
+		WCR.connected = false;
 		WCR.socket.disconnect();//May be pointless, as already disconnected, hopefully doesn't create double delete error...
 		cout << "Disconnected from the server!" << endl;
 	}

@@ -245,11 +245,16 @@ void PlayerObject::PollControls() {
 			falling = true;
 		}
 	sendXChange();
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::M) && WCR.RenderRef.hasFocus())
+	{
+		WCR.MMPtr->enterMapMaker();
+	}
 }
 
 void PlayerObject::sendJump()
 {
-	if (!WCR.online)
+	if (!WCR.connected)
 		return;
 	sf::Packet sendData;
 	sendData << (sf::Int32)2 << (sf::Int32)0 << x << y;
@@ -258,7 +263,7 @@ void PlayerObject::sendJump()
 
 void PlayerObject::sendPos()
 {
-	if (!WCR.online)
+	if (!WCR.connected)
 		return;
 	sf::Packet sendData;
 	sendData << (sf::Int32)2 << (sf::Int32)2 << x << y;
@@ -267,7 +272,7 @@ void PlayerObject::sendPos()
 
 void PlayerObject::sendXChange()
 {
-	if (!WCR.online)
+	if (!WCR.connected)
 		return;
 	/*
 	xDirOld = 0;

@@ -37,6 +37,8 @@ public:
 	int vspeedMax;
 	int xdir_;
 
+	bool MapEditPermissions;
+
 	char* myName;
 
 	sf::Color MyCol = sf::Color();

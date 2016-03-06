@@ -16,8 +16,8 @@ public:
 	WrapperClass& WCR;
 	void draw(int x_, int y_);
 	void step();
-	void addAnimation(const char* FileName, int xOff, int yOff, int xGap, int xCells, int cellSizeX, int cellSizeY, int FrmTm_, sf::Color MyCol = sf::Color(255,255,255,255));
-	void addAnimation(sf::Texture* NewTexture , int xOff, int yOff, int xGap, int xCells, const char* TSName, int cellSizeX, int cellSizeY, int FrmTm_, sf::Color MyCol = sf::Color(255, 255, 255, 255));
+	void addAnimation(const char* FileName, int xOff, int yOff, int xGap, int xCells, int cellSizeX, int cellSizeY, int FrmTm_);
+	void addAnimation(sf::Texture* NewTexture , int xOff, int yOff, int xGap, int xCells, const char* TSName, int cellSizeX, int cellSizeY, int FrmTm_);
 	void setAnimation(int AnimID);
 	void setColor(sf::Color);
 	void resetAnimation();

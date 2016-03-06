@@ -10,6 +10,7 @@ TODO:
 	- Clearing should not send all data again, but just ask the client to clear their screen.
 	- Colour picker for map when in server.
 	- Other players using map maker but without server options.
+	- Not detecting collision on right side of player?
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
@@ -25,6 +26,18 @@ WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 	MainFont.loadFromFile("Data\\Fonts\\ARLRDBD.TTF");
 	otherPlayers = vector<otherPlayer*>(256, nullptr);
 	curmapID = 0;
+
+	
+	connected = false;
+	mapMakerPermissions = true;
+#ifdef MapMakerMode//start server.
+	inMapMaker = true;
+	gameType= ET_Server;
+#else
+	inMapMaker = false;
+	gameType = ET_Client;
+	mapMakerPermissions = false;//Need to receive from server.
+#endif
 }
 
 int main()
@@ -58,7 +71,7 @@ int main()
 	window.setFramerateLimit(60);
 	window.setVerticalSyncEnabled(true);
 
-#ifdef MapMakerMode//start server.
+#ifdef MapMakerMode//server stuff
 	WC.listener.setBlocking(false);
 	cout << "Attemtping to bind port..." << endl;
 	// bind the listener to a port
@@ -98,12 +111,12 @@ int main()
 #ifdef MapMakerMode//start server.
 		WC.MHandle.ServerMessagesHandle();
 #else
-		if (!WC.online)
+		if (!WC.connected)
 		{
 			sf::Socket::Status status = WC.socket.connect(WC.ConnectIp, 53000);
 			if (status == sf::Socket::Done)
 			{
-				WC.online = true;
+				WC.connected = true;
 				cout << "Connection to server successful!" << endl;
 
 				sf::Packet namePacket;
@@ -128,13 +141,16 @@ int main()
 			}
 		}
 		//Get player controls.
-		#ifndef MapMakerMode//Don't poll player events if in mapmaker mode.
+		if (!WC.inMapMaker)//Don't poll player events if in mapmaker mode.
+		{
 			obj_Player.StepPlayer();
 			window.setView(obj_Player.PlayerView);
-		#else
+		}
+		else
+		{
 			MapMkr.Step();
 			window.setView(MapMkr.MapMakrView);
-		#endif
+		}
 		for (int i = 0; i < WC.otherPlayers.size(); i++)
 			if (WC.otherPlayers[i] != nullptr)
 				WC.otherPlayers[i]->step();
@@ -143,9 +159,8 @@ int main()
 		window.clear(sf::Color(98,195,227));
 		MainMap.DrawMap(obj_Player.PlayerView);
 		MainMap.drawBorders();
-#ifdef MapMakerMode//Don't poll player events if in mapmaker mode.
-		MapMkr.Draw();
-#endif
+		if(WC.inMapMaker)
+			MapMkr.Draw();
 		for (int i = 0; i < WC.otherPlayers.size(); i++)
 			if (WC.otherPlayers[i] != nullptr)
 				WC.otherPlayers[i]->draw();

@@ -66,29 +66,43 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP)
 	MapMatrix[x][y].tileSetID = TSID;
 	MapMatrix[x][y].pixelPerfect = PP;
 
+#ifdef MapMakerMode
 	if (WCR.connected)
 	{
 		sf::Packet mapData;
 		mapData << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << PP;
 		for (int i = 0; i < WCR.clients.size(); i++)
 			if (WCR.clients[i] != nullptr)
-				WCR.clients[i]->send(mapData);
+				WCR.MHandle.sendData(mapData, i);
 	}
+#else
+	if (WCR.connected)
+	{
+		sf::Packet mapData;
+		mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << PP;
+		WCR.MHandle.sendData(mapData, WCR.socket);
+	}
+#endif
+
 }
 
 void Map::DrawMap(sf::View& ViewRef)
 {
-#ifdef MapMakerMode
-	int MinX = floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
-	int MaxX = ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
-	int MinY = floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
-	int MaxY = ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
-#else
-	int MinX = floor((ViewRef.getCenter().x - ViewRef.getSize().x / 2) / CellSize);
-	int MaxX = ceil((ViewRef.getCenter().x + ViewRef.getSize().x / 2) / CellSize);
-	int MinY = floor((ViewRef.getCenter().y - ViewRef.getSize().y / 2) / CellSize);
-	int MaxY = ceil((ViewRef.getCenter().y + ViewRef.getSize().y / 2) / CellSize);
-#endif
+	int MinX, MaxX, MinY, MaxY;
+	if (WCR.inMapMaker)
+	{
+		MinX = floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
+		MaxX = ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
+		MinY = floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
+		MaxY = ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
+	}
+	else
+	{
+		MinX = floor((ViewRef.getCenter().x - ViewRef.getSize().x / 2) / CellSize);
+		MaxX = ceil((ViewRef.getCenter().x + ViewRef.getSize().x / 2) / CellSize);
+		MinY = floor((ViewRef.getCenter().y - ViewRef.getSize().y / 2) / CellSize);
+		MaxY = ceil((ViewRef.getCenter().y + ViewRef.getSize().y / 2) / CellSize);
+	}
 	WCR.LimitVariable(0, MapWidth - 1, MinX);
 	WCR.LimitVariable(0, MapWidth - 1, MaxX);
 	WCR.LimitVariable(0, MapHeight - 1, MinY);
@@ -101,25 +115,24 @@ void Map::DrawMap(sf::View& ViewRef)
 			{
 				WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID].setPosition(i * CellSize, ii * CellSize);
 				WCR.RenderRef.draw(WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID]);
-#ifdef MapMakerMode
-				if (WCR.MMPtr->viewObjectTypes)
-				{
-					sf::RectangleShape DrawRect;
-					DrawRect.setSize(sf::Vector2f(32, 32));
-					switch (MapMatrix[i][ii].objectType)
+				if (WCR.inMapMaker)
+					if (WCR.MMPtr->viewObjectTypes)
 					{
-					case 0:DrawRect.setFillColor(sf::Color::White); break;//Invis
-					case 1:DrawRect.setFillColor(sf::Color::Blue); break;//Solid
-					case 2:DrawRect.setFillColor(sf::Color::Green); break;//Bouncy
-					case 3:DrawRect.setFillColor(sf::Color::Red); break;//Death
-					case 4:DrawRect.setFillColor(sf::Color::Yellow); break;//Next Level
-					case 5:DrawRect.setFillColor(sf::Color::Cyan); break;//Ice
+						sf::RectangleShape DrawRect;
+						DrawRect.setSize(sf::Vector2f(32, 32));
+						switch (MapMatrix[i][ii].objectType)
+						{
+						case 0:DrawRect.setFillColor(sf::Color::White); break;//Invis
+						case 1:DrawRect.setFillColor(sf::Color::Blue); break;//Solid
+						case 2:DrawRect.setFillColor(sf::Color::Green); break;//Bouncy
+						case 3:DrawRect.setFillColor(sf::Color::Red); break;//Death
+						case 4:DrawRect.setFillColor(sf::Color::Yellow); break;//Next Level
+						case 5:DrawRect.setFillColor(sf::Color::Cyan); break;//Ice
+						}
+						DrawRect.setFillColor(sf::Color(DrawRect.getFillColor().r, DrawRect.getFillColor().g, DrawRect.getFillColor().b, 100));
+						DrawRect.setPosition(i * CellSize, ii * CellSize);
+						WCR.RenderRef.draw(DrawRect);
 					}
-					DrawRect.setFillColor(sf::Color(DrawRect.getFillColor().r, DrawRect.getFillColor().g, DrawRect.getFillColor().b, 100));
-					DrawRect.setPosition(i * CellSize, ii * CellSize);
-					WCR.RenderRef.draw(DrawRect);
-				}
-#endif
 			}
 		}
 }
