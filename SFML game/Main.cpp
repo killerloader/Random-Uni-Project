@@ -8,9 +8,11 @@ TODO:
 	- Send blocks to players instead of whole array.
 	- Clearing should not send all data again, but just ask the client to clear their screen.
 	- Colour picker for map when in server.
-	- Not detecting collision on right side of player?
-	- Placing pixel perfect blocks on client doesn't seem to register all the time.
 	- When pressing 'm' to go into the map mode, you currently have to first click on the map editor then on the map to start editing, it must think that the mouse isn't ready to place for some reason.
+	- Send map resize.
+	- Add map resize to GUI. (Map Settings Window)
+	- Ability to add layers of backgrounds with GUI.
+	- Backgrounds should draw
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
@@ -157,15 +159,18 @@ int main()
 		//Clear the window so we can draw new stuff to it.
 
 		window.clear(sf::Color(98,195,227));
+		MainMap.Drawbackground(obj_Player.PlayerView, MainMap.E_vBackground);
 		MainMap.DrawMap(obj_Player.PlayerView);
 		MainMap.drawBorders();
 		if(WC.inMapMaker)
 			MapMkr.Draw();
+		MainMap.Drawbackground(obj_Player.PlayerView, MainMap.E_vMiddleground);
 		for (int i = 0; i < WC.otherPlayers.size(); i++)
 			if (WC.otherPlayers[i] != nullptr)
 				WC.otherPlayers[i]->draw();
 		obj_Player.DrawPlayer();
-		//Display the window to the client.
+		MainMap.Drawbackground(obj_Player.PlayerView, MainMap.E_vForeground);
+		//Display the window to theclient.
 		window.display();
 	}
 

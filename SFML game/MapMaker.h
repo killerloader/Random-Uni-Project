@@ -180,7 +180,17 @@ public:
 	sfg::Box::Ptr MapBox;
 	sfg::Button::Ptr ConsoleButton;
 	sfg::CheckButton::Ptr PixelPerfectToggle;
+	sfg::CheckButton::Ptr PlacingObjects;
+	sfg::CheckButton::Ptr PlacingTiles;
+	sfg::Button::Ptr LayersButton;
 	sfg::Button::Ptr ExitMapMakerButton;
+
+	//Layer Window
+	sfg::Window::Ptr LayerWindow;//Window to select drawn tile.
+	sfg::Box::Ptr LWTileBoxVert;
+	sfg::Entry::Ptr NewLayerEntry;
+	sfg::Button::Ptr AddLayerButton;
+	sfg::ComboBox::Ptr LayerList;
 
 	//Console window
 	sfg::Window::Ptr CommandWindow;//Window to select drawn tile.
@@ -220,6 +230,7 @@ public:
 	void changeTileSet();
 	void changeObjectType();
 	void tickButtonPress(int);
+	int curTileLayer = 0;
 
 	bool viewObjectTypes = false;
 	bool pixelPerfectBlocks = false;

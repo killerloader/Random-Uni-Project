@@ -13,7 +13,44 @@ Map::Map(WrapperClass &WCR_) : WCR(WCR_) {
 	SolidObj.setFillColor(sf::Color::Blue);
 	SolidObj.setSize(sf::Vector2f(32, 32));
 	//Fill map with null object ids.
+	resetMap();
+	setupBorders();
+}
+
+int Map::addLayer(int Layer_)
+{
+	BackgroundMatrix.push_back(vector<vector<mapObject>>(MapWidth, vector<mapObject>(MapHeight, mapObject())));
+	BackgroundLayers.push_back(Layer_);
+	for (int i = 0; i < OrderedBackgroundLayers.size(); i++)
+		if (Layer_ > BackgroundLayers[OrderedBackgroundLayers[i]])
+		{
+			OrderedBackgroundLayers.insert(OrderedBackgroundLayers.begin() + i, BackgroundMatrix.size()-1);
+			return i;
+		}
+	OrderedBackgroundLayers.push_back(BackgroundMatrix.size() - 1);
+	return OrderedBackgroundLayers.size()-1;
+}
+
+void Map::resetMap()
+{
 	MapMatrix = vector<vector<mapObject>>(MapWidth, vector<mapObject>(MapHeight));//-1 is a null object id
+	BackgroundMatrix = vector<vector<vector<mapObject>>>(1, vector<vector<mapObject>>(MapWidth, vector<mapObject>(MapHeight)));//-1 is a null object id
+	OrderedBackgroundLayers = vector<int>(1, 0);
+	BackgroundLayers = vector<int>(1, 1);
+	setupBorders();
+}
+
+void Map::expandMap(int newSizeX, int newSizeY)
+{
+	int expandX = newSizeX - MapWidth;
+	int expandY = newSizeY - MapHeight;
+	MapWidth = newSizeX;
+	MapHeight = newSizeY;
+	MapMatrix.resize(newSizeY);
+	for (int i = 0; i < MapMatrix.size(); i++)
+	{
+		MapMatrix[i].resize(newSizeX);
+	}
 	setupBorders();
 }
 
@@ -47,6 +84,15 @@ bool Map::isObject(int x, int y)
 	if (x<0 || y<0 || x >MapWidth - 1 || y >MapHeight - 1)
 		return true;
 	if (MapMatrix[x][y].tileID != -1)//some tile here
+		return true;
+	return false;
+}
+
+bool Map::isBg(int x, int y, int Layer)
+{
+	if (x<0 || y<0 || x >MapWidth - 1 || y >MapHeight - 1)
+		return true;
+	if (BackgroundMatrix[Layer][x][y].tileID != -1)//some tile here
 		return true;
 	return false;
 }
@@ -86,6 +132,94 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP)
 
 }
 
+void Map::SetBG(int x, int y, int TID, int TSID, int LID)
+{
+	//X and Y are grid cells not actual coords.
+	WCR.LimitVariable(0, MapWidth - 1, x);
+	WCR.LimitVariable(0, MapHeight - 1, y);
+	if (x<floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+		|| x > ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+		|| y < floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
+		|| y > ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
+		return;
+	BackgroundMatrix[LID][x][y].tileID = TID;
+	BackgroundMatrix[LID][x][y].tileSetID = TSID;
+/*
+#ifdef MapMakerMode
+	if (WCR.connected)
+	{
+		sf::Packet mapData;
+		mapData << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)TID << (sf::Int32)TSID;
+		for (int i = 0; i < WCR.clients.size(); i++)
+			if (WCR.clients[i] != nullptr)
+				WCR.MHandle.sendData(mapData, i);
+	}
+#else
+	if (WCR.connected)
+	{
+		sf::Packet mapData;
+		mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << (sf::Int32)PP;
+		WCR.MHandle.sendData(mapData, WCR.socket);
+	}
+#endif*/
+
+}
+
+void Map::Drawbackground(sf::View& ViewRef, E_Ground Ground)
+{
+	int MinX, MaxX, MinY, MaxY;
+	if (WCR.inMapMaker)
+	{
+		MinX = floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
+		MaxX = ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
+		MinY = floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
+		MaxY = ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
+	}
+	else
+	{
+		MinX = floor((ViewRef.getCenter().x - ViewRef.getSize().x / 2) / CellSize);
+		MaxX = ceil((ViewRef.getCenter().x + ViewRef.getSize().x / 2) / CellSize);
+		MinY = floor((ViewRef.getCenter().y - ViewRef.getSize().y / 2) / CellSize);
+		MaxY = ceil((ViewRef.getCenter().y + ViewRef.getSize().y / 2) / CellSize);
+	}
+	WCR.LimitVariable(0, MapWidth - 1, MinX);
+	WCR.LimitVariable(0, MapWidth - 1, MaxX);
+	WCR.LimitVariable(0, MapHeight - 1, MinY);
+	WCR.LimitVariable(0, MapHeight - 1, MaxY);
+	for (int LID = BackgroundMatrix.size()-1; LID >= 0; LID--)
+	{
+		int BL_ = BackgroundLayers[OrderedBackgroundLayers[LID]];
+		//(OrderedBackgroundLayers[LID]<1)
+		if (Ground == E_vForeground)
+		{
+			if (BL_ >= 0)
+				break;//Not up to yet
+		}
+		else if (Ground == E_vMiddleground)
+		{
+			if (BL_ > 0)
+				break;//Gone past
+			if (BL_ != 0)
+				continue;//Go till found.
+		}
+		else if (Ground == E_vBackground)
+		{
+			if (BL_ < 1)
+				continue;//Gone past
+		}
+		BL_ = OrderedBackgroundLayers[LID];
+		for (int i = MinX; i <= MaxX; i++)
+			for (int ii = MinY; ii <= MaxY; ii++)
+			{
+				if (BackgroundMatrix[BL_][i][ii].tileID != -1)//Not empty space.
+				{
+					WCR.MMPtr->TileSets[BackgroundMatrix[BL_][i][ii].tileSetID].Tiles[BackgroundMatrix[BL_][i][ii].tileID].setPosition(i * CellSize, ii * CellSize);
+					WCR.RenderRef.draw(WCR.MMPtr->TileSets[BackgroundMatrix[BL_][i][ii].tileSetID].Tiles[BackgroundMatrix[BL_][i][ii].tileID]);
+				}
+			}
+	}
+}
+
 void Map::DrawMap(sf::View& ViewRef)
 {
 	int MinX, MaxX, MinY, MaxY;
@@ -107,7 +241,7 @@ void Map::DrawMap(sf::View& ViewRef)
 	WCR.LimitVariable(0, MapWidth - 1, MaxX);
 	WCR.LimitVariable(0, MapHeight - 1, MinY);
 	WCR.LimitVariable(0, MapHeight - 1, MaxY);
-	sf::Drawable* DrawPtr;
+	//sf::Drawable* DrawPtr;
 	for (int i = MinX; i <= MaxX; i++)
 		for (int ii = MinY; ii <= MaxY; ii++)
 		{
@@ -119,7 +253,7 @@ void Map::DrawMap(sf::View& ViewRef)
 					if (WCR.MMPtr->viewObjectTypes)
 					{
 						sf::RectangleShape DrawRect;
-						DrawRect.setSize(sf::Vector2f(32, 32));
+						DrawRect.setSize(sf::Vector2f(32, 32));						
 						switch (MapMatrix[i][ii].objectType)
 						{
 						case 0:DrawRect.setFillColor(sf::Color::White); break;//Invis
@@ -132,6 +266,17 @@ void Map::DrawMap(sf::View& ViewRef)
 						DrawRect.setFillColor(sf::Color(DrawRect.getFillColor().r, DrawRect.getFillColor().g, DrawRect.getFillColor().b, 100));
 						DrawRect.setPosition(i * CellSize, ii * CellSize);
 						WCR.RenderRef.draw(DrawRect);
+						if (MapMatrix[i][ii].pixelPerfect)
+						{
+							sf::CircleShape DrawCirc;
+							DrawCirc.setRadius(8);
+							DrawCirc.setPosition(i * CellSize + 8, ii * CellSize + 8);
+							sf::Color MyCol_ = sf::Color::Black;
+							MyCol_.a = 100;
+							DrawCirc.setFillColor(MyCol_);
+
+							WCR.RenderRef.draw(DrawCirc);
+						}
 					}
 			}
 		}
@@ -228,7 +373,6 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 								if (WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].CollisionMaps[MapMatrix[i][ii].tileID].getPixel(f, ff).a != 0 && WCR.PlrPtr->PlayerMask.getPixel(f - SLeft_, ff - STop_).a != 0)
 									return MapMatrix[i][ii].objectType;
 							}
-
 					}
 					
 				}

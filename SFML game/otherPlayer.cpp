@@ -231,6 +231,15 @@ void otherPlayer::step()
 		if (yAct > 0)
 			yAct = 0;
 	}
+
+	for (int i = 0; i < 100; i++)
+	{
+		if (WCR.MapPtr->CheckCollision(BoundBox, x, y, 1))
+			y -= 1;
+		else
+			break;
+	}
+
 	PlayerImage.setPosition(x - xAct, y - yAct);	
 	PlayerAnimation.step();
 }

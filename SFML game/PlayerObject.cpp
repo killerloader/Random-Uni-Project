@@ -44,7 +44,6 @@ void PlayerObject::MovePlayer(float Xmove, float Ymove)
 {
 	x += Xmove;
 	y += Ymove;
-	PlayerImage.setPosition(x, y);
 	NameText.setPosition(round(x + PlayerImage.getLocalBounds().width / 2 - NameText.getLocalBounds().width / 2), y - NameText.getLocalBounds().height - 8);
 }
 
@@ -161,6 +160,15 @@ void PlayerObject::StepPlayer()
 			cout << "Map load failed!" << endl;
 	}
 
+	for (int i = 0; i < 100; i++)
+	{
+		if (WCR.MapPtr->CheckCollision(BoundBox, x, y, 1))
+			y -= 1;
+		else
+			break;
+	}
+
+	PlayerImage.setPosition(x, y);
 	PlayerView.setCenter(sf::Vector2f((int)x + 16, (int)y + 16));
 	PlayerAnimation.step();
 }

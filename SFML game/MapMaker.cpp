@@ -118,7 +118,41 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	PixelPerfectToggle = sfg::CheckButton::Create("Precise Collision");
 	PixelPerfectToggle->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 1));
 
+	PlacingObjects = sfg::CheckButton::Create("Place Objects");
+	PlacingObjects->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 2));
+	PlacingObjects->SetActive(true);
+	PlacingTiles = sfg::CheckButton::Create("Place Tiles");
+	PlacingTiles->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 3));
+	LayersButton = sfg::Button::Create("Layer Settings");
+	LayersButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 101));
+	box->Pack(LayersButton, false);
+
 	box->Pack(PixelPerfectToggle, false);
+	box->Pack(PlacingObjects, false);
+	box->Pack(PlacingTiles, false);
+
+	LayerWindow = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
+	LayerWindow->SetPosition(sf::Vector2f(200, 0));
+	LayerWindow->SetTitle("Layer Settings");
+	LayerWindow->SetRequisition(sf::Vector2f(200, 200));
+	LayerWindow->Show(false);
+
+	LWTileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	NewLayerEntry = sfg::Entry::Create();
+	
+	AddLayerButton = sfg::Button::Create("Add Layer");
+	AddLayerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 102));
+
+	LayerList = sfg::ComboBox::Create();
+	LayerList->AppendItem("1");
+
+	LWTileBoxVert->Pack(LayerList, true, false);
+	LWTileBoxVert->Pack(NewLayerEntry, true, false);
+	LWTileBoxVert->Pack(AddLayerButton, true, false);
+	LayerWindow->Add(LWTileBoxVert);
+
+	LayerList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::ButtonPress, this, 103));
+
 	//Editor Settings
 	ShowObjectTypes = sfg::CheckButton::Create("View Object Types");
 	ShowObjectTypes->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 0));
@@ -189,6 +223,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	desktop.Add(windowSFG);
 	windowTiles->Add(TileBoxVert);
 	desktop.Add(windowTiles);
+	desktop.Add(LayerWindow);
 #ifdef MapMakerMode//No console on client map editor
 	desktop.Add(CommandWindow);
 #endif
@@ -304,6 +339,16 @@ void MapMaker::sendCommand()
 				}
 			}
 		}
+		else if (baseCommand == "changemapsize")
+		{
+			int nsx_, nsy_;
+			if (Command >> nsx_)
+				if (Command >> nsy_)
+				{
+					WCR.MapPtr->expandMap(nsx_, nsy_);
+					cout << "Changed map size to: (" << nsx_ << ", " << nsy_ << ")" << endl;
+				}
+		}
 		//Teleport
 		}
 	CommandEntry->SetText("");
@@ -321,6 +366,12 @@ void MapMaker::tickButtonPress(int TID)
 	case 1:
 		pixelPerfectBlocks = PixelPerfectToggle->IsActive();
 		//cout << "Set PPB to " << pixelPerfectBlocks << endl;
+		break;
+	case 2://Placing objects
+		PlacingTiles->SetActive(!PlacingObjects->IsActive());
+		break;
+	case 3://Placing tiles
+		PlacingObjects->SetActive(!PlacingTiles->IsActive());
 		break;
 	}
 }
@@ -466,8 +517,27 @@ void MapMaker::ButtonPress(int test)
 		else
 			CommandWindow->Show(true);
 		break;
+	case 101://Layers
+		if (LayerWindow->IsLocallyVisible())
+			LayerWindow->Show(false);
+		else
+			LayerWindow->Show(true);
+		break;
+	case 102:
+	{
+		int buf_number(0);
+		std::stringstream sstr(std::string(NewLayerEntry->GetText()));
+		sstr >> buf_number;
+		int Index_ = WCR.MapPtr->addLayer(buf_number);
+		std::stringstream backtoStr;
+		backtoStr << buf_number;
+		LayerList->InsertItem(Index_, backtoStr.str());
+		NewLayerEntry->SetText("");
+		break;
+		//NewLayerEntry
 	}
-
+	case 103:curTileLayer = WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()]; cout << "Tile layer is now: " << curTileLayer << endl; break;
+	}
 }
 
 bool MapMaker::LoadMap(int MID)
@@ -505,9 +575,44 @@ bool MapMaker::LoadMap(int MID)
 		int BlockX = FMuse.load4Bytes();
 		int BlockY = FMuse.load4Bytes();
 		WCR.MapPtr->MapMatrix[BlockX][BlockY].objectType = FMuse.loadByte();
-		WCR.MapPtr->MapMatrix[BlockX][BlockY].tileID = FMuse.loadByte() - 1;
+		WCR.MapPtr->MapMatrix[BlockX][BlockY].tileID = FMuse.loadByte();
 		WCR.MapPtr->MapMatrix[BlockX][BlockY].tileSetID = FMuse.loadByte();
 		WCR.MapPtr->MapMatrix[BlockX][BlockY].pixelPerfect = FMuse.loadByte();
+	}
+	int Layers_ = FMuse.load4Bytes();
+	WCR.MapPtr->BackgroundMatrix = vector<vector<vector<mapObject>>>(Layers_, vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight)));
+	WCR.MapPtr->BackgroundLayers.clear();
+	WCR.MapPtr->OrderedBackgroundLayers.clear();
+	LayerList->Clear();
+	for (int i = 0; i < Layers_; i++)
+	{
+		int LayerId_ = FMuse.load4Bytes();
+		WCR.MapPtr->BackgroundLayers.push_back(LayerId_);
+		stringstream BacktoStr_;
+		BacktoStr_ << LayerId_;
+		bool foundSpot = false;
+		for (int ii = 0; ii < i; ii++)
+			if (LayerId_ > WCR.MapPtr->BackgroundLayers[WCR.MapPtr->OrderedBackgroundLayers[ii]])
+			{
+				WCR.MapPtr->OrderedBackgroundLayers.insert(WCR.MapPtr->OrderedBackgroundLayers.begin() + ii, i);
+				foundSpot = true;
+				LayerList->InsertItem(ii, BacktoStr_.str());
+				break;
+			}
+		if (!foundSpot)
+		{
+			LayerList->AppendItem(BacktoStr_.str());
+			WCR.MapPtr->OrderedBackgroundLayers.push_back(i);
+		}
+
+		Blocks_ = FMuse.load4Bytes();
+		for (int ii = 0; ii < Blocks_; ii++)
+		{
+			int BlockX = FMuse.load4Bytes();
+			int BlockY = FMuse.load4Bytes();
+			WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileID = FMuse.loadByte();
+			WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileSetID = FMuse.loadByte();
+		}
 	}
 	WCR.MapPtr->setupBorders();
 	cout << "Loaded MAP ID: " << MID << endl;
@@ -548,14 +653,11 @@ bool MapMaker::SaveMap(int MID)
 	FMuse.saveByte(255);//R
 	FMuse.saveByte(255);//G
 	FMuse.saveByte(255);//B
-	
 	int count_ = 0;
 	for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
-		{
 			if (WCR.MapPtr->MapMatrix[i][ii].tileID != -1)
 				count_++;
-		}
 	FMuse.save4Bytes(count_);//Map Blocks to save
 	for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 		for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
@@ -564,10 +666,30 @@ bool MapMaker::SaveMap(int MID)
 				FMuse.save4Bytes(i);
 				FMuse.save4Bytes(ii);
 				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].objectType);
-				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID + 1);//+1 because -1 is reserved for nothing.
+				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID);//+1 because -1 is reserved for nothing.
 				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileSetID);
 				FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].pixelPerfect);
 			}
+	FMuse.save4Bytes(WCR.MapPtr->BackgroundMatrix.size());//Layers to save
+	for (int i = 0; i < WCR.MapPtr->BackgroundMatrix.size(); i++)
+	{
+		FMuse.save4Bytes(WCR.MapPtr->BackgroundLayers[i]);//Layer ID (Not vector ID, but what was typed in, can order them later on load)
+		count_ = 0;
+		for (int ii = 0; ii < WCR.MapPtr->MapWidth; ii++)
+			for (int iii = 0; iii < WCR.MapPtr->MapHeight; iii++)
+				if (WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID != -1)
+					count_++;
+		FMuse.save4Bytes(count_);//Amoount of blocks on this layer.
+		for (int ii = 0; ii < WCR.MapPtr->MapWidth; ii++)
+			for (int iii = 0; iii < WCR.MapPtr->MapHeight; iii++)
+				if (WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID != -1)
+				{
+					FMuse.save4Bytes(i);
+					FMuse.save4Bytes(ii);
+					FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID);//+1 because -1 is reserved for nothing.
+					FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileSetID);
+				}
+	}
 
 	cout << "Saved MAP ID: " << MID << endl;
 	return true;
@@ -670,17 +792,32 @@ void MapMaker::Step()
 		{
 			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
-			if(!WCR.MapPtr->isObject(PlaceX, PlaceY))//If no object already here
-				WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile, curTileSet, pixelPerfectBlocks);
-			//cout << CurBlock << "_" << curTile << "_" << curTileSet << endl;
+			if (!PlacingObjects->IsActive())
+			{
+				if (!WCR.MapPtr->isBg(PlaceX, PlaceY, curTileLayer))//If no object already here
+					WCR.MapPtr->SetBG(PlaceX, PlaceY, curTile, curTileSet, curTileLayer);
+			}
+			else
+			{
+				if (!WCR.MapPtr->isObject(PlaceX, PlaceY))//If no object already here
+					WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile, curTileSet, pixelPerfectBlocks);
+			}
 		}
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
 		{
 			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
 			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
-			if (WCR.MapPtr->isObject(PlaceX, PlaceY))//If object is here
-				WCR.MapPtr->SetObject(PlaceX, PlaceY, 0, -1, 0);
+			if (!PlacingObjects->IsActive())
+			{
+				if (WCR.MapPtr->isBg(PlaceX, PlaceY, curTileLayer))//If object is here
+					WCR.MapPtr->SetBG(PlaceX, PlaceY, -1, 0, curTileLayer);
+			}
+			else
+			{
+				if (WCR.MapPtr->isObject(PlaceX, PlaceY))//If object is here
+					WCR.MapPtr->SetObject(PlaceX, PlaceY, 0, -1, 0);
+			}
 		}
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
