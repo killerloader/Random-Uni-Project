@@ -143,12 +143,16 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	AddLayerButton = sfg::Button::Create("Add Layer");
 	AddLayerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 102));
 
+	ClearLayerButton = sfg::Button::Create("Clear Layer");
+	ClearLayerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 104));
+
 	LayerList = sfg::ComboBox::Create();
 	LayerList->AppendItem("1");
 
 	LWTileBoxVert->Pack(LayerList, true, false);
 	LWTileBoxVert->Pack(NewLayerEntry, true, false);
 	LWTileBoxVert->Pack(AddLayerButton, true, false);
+	LWTileBoxVert->Pack(ClearLayerButton, true, false);
 	LayerWindow->Add(LWTileBoxVert);
 
 	LayerList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::ButtonPress, this, 103));
@@ -537,6 +541,7 @@ void MapMaker::ButtonPress(int test)
 		//NewLayerEntry
 	}
 	case 103:curTileLayer = WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()]; cout << "Tile layer is now: " << curTileLayer << endl; break;
+	case 104:WCR.MapPtr->BackgroundMatrix[LayerList->GetSelectedItem()] = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));break;
 	}
 }
 
@@ -612,6 +617,7 @@ bool MapMaker::LoadMap(int MID)
 			int BlockY = FMuse.load4Bytes();
 			WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileID = FMuse.loadByte();
 			WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileSetID = FMuse.loadByte();
+			cout << "Adding layer " << i << "block at " << BlockX << ", " << BlockY << " with TID: " << WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileID << endl;
 		}
 	}
 	WCR.MapPtr->setupBorders();
@@ -684,10 +690,10 @@ bool MapMaker::SaveMap(int MID)
 			for (int iii = 0; iii < WCR.MapPtr->MapHeight; iii++)
 				if (WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID != -1)
 				{
-					FMuse.save4Bytes(i);
 					FMuse.save4Bytes(ii);
-					FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileID);//+1 because -1 is reserved for nothing.
-					FMuse.saveByte(WCR.MapPtr->MapMatrix[i][ii].tileSetID);
+					FMuse.save4Bytes(iii);
+					FMuse.saveByte(WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID);//+1 because -1 is reserved for nothing.
+					FMuse.saveByte(WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileSetID);
 				}
 	}
 

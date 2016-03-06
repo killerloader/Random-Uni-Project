@@ -186,18 +186,17 @@ void Map::Drawbackground(sf::View& ViewRef, E_Ground Ground)
 	WCR.LimitVariable(0, MapWidth - 1, MaxX);
 	WCR.LimitVariable(0, MapHeight - 1, MinY);
 	WCR.LimitVariable(0, MapHeight - 1, MaxY);
-	for (int LID = BackgroundMatrix.size()-1; LID >= 0; LID--)
+	for (int LID = 0; LID < BackgroundMatrix.size(); LID++)
 	{
 		int BL_ = BackgroundLayers[OrderedBackgroundLayers[LID]];
-		//(OrderedBackgroundLayers[LID]<1)
 		if (Ground == E_vForeground)
 		{
 			if (BL_ >= 0)
-				break;//Not up to yet
+				continue;//Not up to yet
 		}
 		else if (Ground == E_vMiddleground)
 		{
-			if (BL_ > 0)
+			if (BL_ < 0)
 				break;//Gone past
 			if (BL_ != 0)
 				continue;//Go till found.
@@ -205,8 +204,9 @@ void Map::Drawbackground(sf::View& ViewRef, E_Ground Ground)
 		else if (Ground == E_vBackground)
 		{
 			if (BL_ < 1)
-				continue;//Gone past
+				break;//Gone past
 		}
+		
 		BL_ = OrderedBackgroundLayers[LID];
 		for (int i = MinX; i <= MaxX; i++)
 			for (int ii = MinY; ii <= MaxY; ii++)

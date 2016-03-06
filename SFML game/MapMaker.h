@@ -190,6 +190,7 @@ public:
 	sfg::Box::Ptr LWTileBoxVert;
 	sfg::Entry::Ptr NewLayerEntry;
 	sfg::Button::Ptr AddLayerButton;
+	sfg::Button::Ptr ClearLayerButton;
 	sfg::ComboBox::Ptr LayerList;
 
 	//Console window
