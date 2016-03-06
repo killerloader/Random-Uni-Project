@@ -256,8 +256,9 @@ void MessagesHangle::ServerMessagesHandle()
 					if (WCR.otherPlayers[i]->MapEditPermissions)
 					{
 						sf::Int32 x_, y_, ID_, TID_, TSID_, PP_;
+						//mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << (sf::Int32)PP;
 						recievedata >> x_ >> y_ >> ID_ >> TID_ >> TSID_ >> PP_;
-						//<< (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << PP;
+						//cout << x_ << "_" << y_ << "_" << ID_ << "_" << TID_ << "_" << TSID_ << "_" << PP_;
 						WCR.MapPtr->SetObject(x_, y_, ID_, TID_, TSID_, PP_);
 					}
 					break;

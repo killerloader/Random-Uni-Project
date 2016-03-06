@@ -5,8 +5,10 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_), PlayerAnimation(WCR_
 	int Pw_(46), Ph_(35);
 	PlayerImage.setTexture(PlayerTex);
 	PlayerView.setSize(sf::Vector2f(640, 480));
-	PlayerMask.create(Pw_, Ph_, sf::Color(255, 255, 255, 0));
-	PlayerMask.copy(PlayerTex.copyToImage(), 0, 0);//, sf::IntRect(0, 0, Pw_, Ph_), true);
+	PlayerMask.create(Pw_, Ph_);
+	PlayerMask.copy(PlayerTex.copyToImage(), 0, 0, sf::IntRect(0, 0, Pw_, Ph_));
+	//PlayerMask.saveToFile("ahhh.png");
+	//PlayerMask.copy(PlayerTex.copyToImage(), 0, 0,sf::IntRect(0,0, Pw_, Ph_),true);//, sf::IntRect(0, 0, Pw_, Ph_), true);
 	//vspeed, hspeed, gravity, haccel, hspeedmax, hfric;
 	hspeed = 0;
 	haccel = 0.4;

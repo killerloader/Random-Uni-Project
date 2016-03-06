@@ -25,7 +25,7 @@ struct TileSet
 		if (!TileSheetTex->loadFromFile(FileName))
 			cout << "Could not load image" << endl;
 		TSL->AppendItem(FileName);
-		UpdateSprites();
+		CreateSprites();
 		//UpdateSprites();
 		//CreateCollisionMaps();
 	}
@@ -44,7 +44,7 @@ struct TileSet
 		if (!TileSheetTex->loadFromFile(FileName))
 			cout << "Could not load image" << endl;
 		FrameTime = FrmTm;
-		UpdateSprites();
+		CreateSprites();
 		//UpdateSprites();
 		//CreateCollisionMaps();
 	}
@@ -77,6 +77,13 @@ struct TileSet
 		FrameTime = FrmTm;
 	}
 
+	void CreateSprites()
+	{
+		for (int i = 0; i < CellsX; i++)
+			for (int ii = 0; ii < CellsY; ii++)
+				Tiles.emplace_back(*TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
+	}
+
 	void UpdateSprites()
 	{
 		TileSheetSprite.setTexture(*TileSheetTex);
@@ -86,18 +93,13 @@ struct TileSet
 			for (int i = 0; i < CellsX; i++)
 				for (int ii = 0; ii < CellsY; ii++)
 				{
-					//Tiles[i + ii*CellsX].setTexture(*TileSheetTex);
-					//Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
-					Tiles[i + ii*CellsX].setTexture(ImgTex[i + ii*CellsX]);
-					Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(0,0), sf::Vector2i(CSizeX, CSizeY)));
-					
+					Tiles[i + ii*CellsX].setTexture(*TileSheetTex);
+					Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
+					//Tiles[i + ii*CellsX].setTexture(ImgTex[i + ii*CellsX]);
+					//Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(CSizeX, CSizeY)));
+
 				}
-					
 		}
-		else
-			for (int i = 0; i < CellsX; i++)
-				for (int ii = 0; ii < CellsY; ii++)
-					Tiles.emplace_back(*TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
 	}
 
 	void CreateCollisionMaps()
@@ -110,7 +112,7 @@ struct TileSet
 				for (int ii = 0; ii < CellsY; ii++)
 				{
 					CollisionMaps.emplace_back();
-					ImgTex.emplace_back();
+					//ImgTex.emplace_back();
 				}
 					
 		for (int i = 0; i < CellsX; i++)
@@ -122,10 +124,10 @@ struct TileSet
 				//TempRenderTextures.draw(Tiles[i + ii*CellsX]);
 				//TempRenderTextures.display();
 				//Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
-				
-				CollisionMaps[i + ii*CellsX].create(32, 32, sf::Color(255,255,255,0));
-				CollisionMaps[i + ii*CellsX].copy(TileSheetTex->copyToImage(), 0,0, sf::IntRect(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii, 32, 32), true);
-				ImgTex[i + ii*CellsX].loadFromImage(CollisionMaps[i + ii*CellsX]);
+				//CollisionMaps[i + ii*CellsX].copy( = Tiles[i + ii*CellsX].getTexture()->copyToImage();
+				CollisionMaps[i + ii*CellsX].create(32, 32);
+				CollisionMaps[i + ii*CellsX].copy(TileSheetTex->copyToImage(), 0,0, sf::IntRect(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii, 32, 32));
+				//ImgTex[i + ii*CellsX].loadFromImage(CollisionMaps[i + ii*CellsX]);
 				//sf::Image test((*TileSheetTex).copyToImage(), 0, 0, sf::IntRect(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii, 32, 32), true);
 				//CollisionMaps[CollisionMaps.size() - 1] = TempRenderTextures.getTexture().copyToImage();
 			}

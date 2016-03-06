@@ -79,7 +79,7 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP)
 	if (WCR.connected)
 	{
 		sf::Packet mapData;
-		mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << PP;
+		mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << (sf::Int32)PP;
 		WCR.MHandle.sendData(mapData, WCR.socket);
 	}
 #endif
@@ -196,8 +196,8 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 						int Top_ = Y - ii * 32;
 						int SLeft_ = Left_;
 						int STop_ = Top_;
-						int Wid_ = CheckRect.width;
-						int Hei_ = CheckRect.height;
+						int Wid_ = CheckRect.width-1;
+						int Hei_ = CheckRect.height - 1;
 
 						if (Left_ < 0)
 						{
@@ -211,6 +211,12 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 							Top_ = 0;
 						}
 
+						/*if (Top_ > 46)
+							Top_ = 46;
+						if (Hei_ > 35)
+							Hei_ = 35;*/
+
+
 						if (Wid_ > 31)
 							Wid_ = 31;
 						if (Hei_ > 31)
@@ -218,8 +224,11 @@ int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 
 						for (int f = Wid_; f >= Left_; f--)//<= ??
 							for (int ff = Hei_; ff >= Top_; ff--)//<= ??
+							{
 								if (WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].CollisionMaps[MapMatrix[i][ii].tileID].getPixel(f, ff).a != 0 && WCR.PlrPtr->PlayerMask.getPixel(f - SLeft_, ff - STop_).a != 0)
 									return MapMatrix[i][ii].objectType;
+							}
+
 					}
 					
 				}

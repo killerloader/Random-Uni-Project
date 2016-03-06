@@ -320,6 +320,7 @@ void MapMaker::tickButtonPress(int TID)
 		break;
 	case 1:
 		pixelPerfectBlocks = PixelPerfectToggle->IsActive();
+		//cout << "Set PPB to " << pixelPerfectBlocks << endl;
 		break;
 	}
 }
@@ -356,13 +357,12 @@ void MapMaker::updateTiles()
 {
 	for (int i = 0; i < TileSets.size(); i++)
 	{
-		TileSets[i].CreateCollisionMaps();
+		TileSets[i].UpdateSprites();
 	}
 	for (int i = 0; i < TileSets.size(); i++)
 	{
-		TileSets[i].UpdateSprites();
+		TileSets[i].CreateCollisionMaps();
 	}
-	
 }
 
 void MapMaker::loadTiles()
