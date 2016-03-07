@@ -14,7 +14,7 @@ Map::Map(WrapperClass &WCR_) : WCR(WCR_) {
 	SolidObj.setSize(sf::Vector2f(32, 32));
 	//Fill map with null object ids.
 	resetMap();
-	setupBorders();
+	//setupBorders();
 }
 
 int Map::addLayer(int Layer_)
@@ -38,10 +38,29 @@ void Map::resetMap()
 	OrderedBackgroundLayers = vector<int>(1, 0);
 	BackgroundLayers = vector<int>(1, 1);
 	setupBorders();
+
+#ifdef MapMakerMode
+	if (WCR.connected)
+	{
+		sf::Packet mapData;
+		mapData << (sf::Int32)5;
+		for (int i = 0; i < WCR.clients.size(); i++)
+			if (WCR.clients[i] != nullptr)
+				WCR.MHandle.sendData(mapData, i);
+	}
+#endif
 }
 
 void Map::expandMap(int newSizeX, int newSizeY)
 {
+	if (newSizeX > 500 || newSizeY > 500)
+	{
+		cout << "Map size exceeds maximum size of: " << 500 << "x" << 500 << ", clamping map dimensions!" << endl;
+	}
+	if (newSizeX > 500)
+		newSizeX = 500;
+	if (newSizeY > 500)
+		newSizeY = 500;
 	int expandX = newSizeX - MapWidth;
 	int expandY = newSizeY - MapHeight;
 	MapWidth = newSizeX;
@@ -52,6 +71,17 @@ void Map::expandMap(int newSizeX, int newSizeY)
 		MapMatrix[i].resize(newSizeX);
 	}
 	setupBorders();
+
+#ifdef MapMakerMode
+	if (WCR.connected)
+	{
+		sf::Packet mapData;
+		mapData << (sf::Int32)6 << (sf::Int16)newSizeX << (sf::Int16)newSizeY;
+		for (int i = 0; i < WCR.clients.size(); i++)
+			if (WCR.clients[i] != nullptr)
+				WCR.MHandle.sendData(mapData, i);
+	}
+#endif
 }
 
 void Map::setupBorders()
@@ -97,7 +127,7 @@ bool Map::isBg(int x, int y, int Layer)
 	return false;
 }
 
-void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP)
+void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP, int NoSend)
 {
 	//X and Y are grid cells not actual coords.
 	WCR.LimitVariable(0, MapWidth - 1, x);
@@ -118,7 +148,7 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP)
 		sf::Packet mapData;
 		mapData << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << PP;
 		for (int i = 0; i < WCR.clients.size(); i++)
-			if (WCR.clients[i] != nullptr)
+			if (WCR.clients[i] != nullptr && i != NoSend)
 				WCR.MHandle.sendData(mapData, i);
 	}
 #else
@@ -132,7 +162,7 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP)
 
 }
 
-void Map::SetBG(int x, int y, int TID, int TSID, int LID)
+void Map::SetBG(int x, int y, int TID, int TSID, int LID, int NoSend)
 {
 	//X and Y are grid cells not actual coords.
 	WCR.LimitVariable(0, MapWidth - 1, x);
@@ -144,25 +174,24 @@ void Map::SetBG(int x, int y, int TID, int TSID, int LID)
 		return;
 	BackgroundMatrix[LID][x][y].tileID = TID;
 	BackgroundMatrix[LID][x][y].tileSetID = TSID;
-/*
+
 #ifdef MapMakerMode
 	if (WCR.connected)
 	{
 		sf::Packet mapData;
-		mapData << (sf::Int32)1 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)TID << (sf::Int32)TSID;
+		mapData << (sf::Int32)3 << (sf::Int16)x << (sf::Int16)y << (sf::Int8)LID << (sf::Int16)TID << (sf::Int8)TSID;
 		for (int i = 0; i < WCR.clients.size(); i++)
-			if (WCR.clients[i] != nullptr)
+			if (WCR.clients[i] != nullptr && i != NoSend)
 				WCR.MHandle.sendData(mapData, i);
 	}
 #else
 	if (WCR.connected)
 	{
 		sf::Packet mapData;
-		mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << (sf::Int32)PP;
+		mapData << (sf::Int32)2 << (sf::Int32)5 << (sf::Int16)x << (sf::Int16)y << (sf::Int8)LID << (sf::Int16)TID << (sf::Int8)TSID;
 		WCR.MHandle.sendData(mapData, WCR.socket);
 	}
-#endif*/
-
+#endif
 }
 
 void Map::Drawbackground(sf::View& ViewRef, E_Ground Ground)

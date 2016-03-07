@@ -29,13 +29,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	windowSFG->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 0));
 	windowSFG->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 0));
 
-	//setup block names
-	/*BlockNames.push_back("asdasd");//FIrst object is ID 0 which is reserved for empty space.
-	BlockNames.push_back("Solid");
-	BlockNames.push_back("Bouncy Block");
-	BlockNames.push_back("Lava");
-	BlockNames.push_back("Finish block");
-	BlockNames.push_back("Select Tile");*/
+	//Setup some buttons
 	BlockNames.push_back("Save Map");
 	BlockNames.push_back("Load Map");
 	BlockNames.push_back("Clear Map");
@@ -55,15 +49,10 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 
 	ObjectTypeList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::changeObjectType, this));
 	
-	/*
-			BUG might be due to storing them in pointers, although its strange that it always breaks on the same part.
-	*/
-
 	TilesetList = sfg::ComboBox::Create();
 
 	loadTiles();
 	updateTiles();
-
 
 	lvlIdMinus = sfg::Button::Create("-");
 	lvlIdPlus = sfg::Button::Create("+");
@@ -75,8 +64,6 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	//MapIDEntry->SetRequisition(sf::Vector2f(64, 0));
 	MapIDEntry->SetMaximumLength(2);//Only allow 2 digit number max.
 	MapBox = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
-
-	
 
 
 	//First three are save/load/clear
@@ -148,6 +135,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 
 	LayerList = sfg::ComboBox::Create();
 	LayerList->AppendItem("1");
+	LayerList->SelectItem(0);
 
 	LWTileBoxVert->Pack(LayerList, true, false);
 	LWTileBoxVert->Pack(NewLayerEntry, true, false);
@@ -505,7 +493,8 @@ void MapMaker::ButtonPress(int test)
 		LoadMap(buf_number);
 		break;
 	}
-	case 2:ClearMap();
+	case 2:
+		ClearMap();
 		break;
 	case 3://Tile Selector
 	{
@@ -527,7 +516,7 @@ void MapMaker::ButtonPress(int test)
 		else
 			LayerWindow->Show(true);
 		break;
-	case 102:
+	case 102://Add layer
 	{
 		int buf_number(0);
 		std::stringstream sstr(std::string(NewLayerEntry->GetText()));
@@ -537,11 +526,39 @@ void MapMaker::ButtonPress(int test)
 		backtoStr << buf_number;
 		LayerList->InsertItem(Index_, backtoStr.str());
 		NewLayerEntry->SetText("");
+
+#ifdef MapMakerMode
+		if (WCR.connected)
+		{
+			sf::Packet mapData;
+			mapData << (sf::Int32)4 << (sf::Int32)0 << (sf::Int32)buf_number;
+			for (int i = 0; i < WCR.clients.size(); i++)
+				if (WCR.clients[i] != nullptr)
+					WCR.MHandle.sendData(mapData, i);
+		}
+#endif
+		cout << WCR.MapPtr->BackgroundMatrix.size()*WCR.MapPtr->MapWidth*WCR.MapPtr->MapHeight << " _ " << WCR.MapPtr->BackgroundMatrix.size()*WCR.MapPtr->MapWidth*WCR.MapPtr->MapHeight*4 << "_" << WCR.MapPtr->BackgroundMatrix.max_size() << endl;
 		break;
 		//NewLayerEntry
 	}
 	case 103:curTileLayer = WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()]; cout << "Tile layer is now: " << curTileLayer << endl; break;
-	case 104:WCR.MapPtr->BackgroundMatrix[LayerList->GetSelectedItem()] = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));break;
+	case 104:
+	if (LayerList->GetSelectedItem() < 0 || LayerList->GetSelectedItem() >= LayerList->GetItemCount())//Nothing selected
+		break;
+		//cout << WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()] << endl;
+		//WCR.MapPtr->BackgroundMatrix[WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()]].clear();
+		WCR.MapPtr->BackgroundMatrix[WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()]] = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
+#ifdef MapMakerMode
+		if (WCR.connected)
+		{
+			sf::Packet mapData;
+			mapData << (sf::Int32)4 << (sf::Int32)1 << (sf::Int8)LayerList->GetSelectedItem();
+			for (int i = 0; i < WCR.clients.size(); i++)
+				if (WCR.clients[i] != nullptr)
+					WCR.MHandle.sendData(mapData, i);
+		}
+#endif
+		break;
 	}
 }
 
@@ -617,9 +634,9 @@ bool MapMaker::LoadMap(int MID)
 			int BlockY = FMuse.load4Bytes();
 			WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileID = FMuse.loadByte();
 			WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileSetID = FMuse.loadByte();
-			cout << "Adding layer " << i << "block at " << BlockX << ", " << BlockY << " with TID: " << WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileID << endl;
 		}
 	}
+	LayerList->SelectItem(0);
 	WCR.MapPtr->setupBorders();
 	cout << "Loaded MAP ID: " << MID << endl;
 
@@ -628,14 +645,39 @@ bool MapMaker::LoadMap(int MID)
 	{
 		sf::Packet mapData;
 		mapData << (sf::Int32)0;
-		mapData << (sf::Int32)WCR.MapPtr->MapWidth << (sf::Int32)WCR.MapPtr->MapHeight << WCR.PlrPtr->x << WCR.PlrPtr->y;
-
+		mapData << (sf::Int16)WCR.MapPtr->MapWidth << (sf::Int16)WCR.MapPtr->MapHeight << WCR.PlrPtr->x << WCR.PlrPtr->y;
+		int count_ = 0;
 		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
-				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID << WCR.MapPtr->MapMatrix[i][ii].pixelPerfect;
+				if (WCR.MapPtr->MapMatrix[i][ii].tileID != -1)
+					count_++;
+		mapData << (sf::Int16)count_;
+		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
+			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
+				if (WCR.MapPtr->MapMatrix[i][ii].tileID != -1)
+					mapData << (sf::Int16)i << (sf::Int16)ii << (sf::Int8)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int16)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int8)WCR.MapPtr->MapMatrix[i][ii].tileSetID << (sf::Int8)WCR.MapPtr->MapMatrix[i][ii].pixelPerfect;
+
+		mapData << (sf::Int8)WCR.MapPtr->BackgroundMatrix.size();
+
+		for (int i = 0; i < WCR.MapPtr->BackgroundMatrix.size(); i++)
+		{
+			mapData << (sf::Int32)WCR.MapPtr->BackgroundLayers[i];
+
+			count_ = 0;
+			for (int ii = 0; ii < WCR.MapPtr->MapWidth; ii++)
+				for (int iii = 0; iii < WCR.MapPtr->MapHeight; iii++)
+					if (WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID != -1)
+						count_++;
+			mapData << (sf::Int16)count_;
+			for (int ii = 0; ii < WCR.MapPtr->MapWidth; ii++)
+				for (int iii = 0; iii < WCR.MapPtr->MapHeight; iii++)
+					if (WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID != -1)
+						mapData << (sf::Int16)ii << (sf::Int16)iii << (sf::Int16)WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID << (sf::Int8)WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileSetID;
+		}
+
 		for (int i = 0; i < WCR.clients.size(); i++)
 			if (WCR.clients[i] != nullptr)
-				WCR.clients[i]->send(mapData);
+				WCR.MHandle.sendData(mapData, *WCR.clients[i]);
 	}
 #endif
 
@@ -887,29 +929,10 @@ void MapMaker::Step()
 
 void MapMaker::ClearMap()
 {
-	//cout << "Enter a new map size, width: " << endl;
-	//cin >> WCR.MapPtr->MapWidth;
-	//cout << "Height: " << endl;
-	//cin >> WCR.MapPtr->MapHeight;
-	WCR.MapPtr->MapMatrix = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
-	WCR.MapPtr->setupBorders();
-
-#ifdef MapMakerMode//Send new map data on clear
-	if (WCR.connected)
-	{
-		sf::Packet mapData;
-		mapData << (sf::Int32)0;
-		mapData << (sf::Int32)WCR.MapPtr->MapWidth << (sf::Int32)WCR.MapPtr->MapHeight << WCR.PlrPtr->x << WCR.PlrPtr->y;
-
-		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
-			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
-				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID << WCR.MapPtr->MapMatrix[i][ii].pixelPerfect;
-		for (int i = 0; i < WCR.clients.size(); i++)
-			if (WCR.clients[i] != nullptr)
-				WCR.clients[i]->send(mapData);
-	}
-#endif
-
+	LayerList->Clear();
+	LayerList->AppendItem("1");
+	LayerList->SelectItem(0);
+	WCR.MapPtr->resetMap();
 }
 
 void MapMaker::setBlock(int BLK)

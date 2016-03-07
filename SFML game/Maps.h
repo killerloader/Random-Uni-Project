@@ -26,8 +26,8 @@ struct Map
 	int CellSize;
 	sf::RectangleShape MapBorders[4];
 	sf::RectangleShape SolidObj;
-	void SetObject(int, int, int, int, int, bool = false);
-	void SetBG(int, int, int, int, int);
+	void SetObject(int, int, int, int, int, bool PP = false, int = -1);
+	void SetBG(int, int, int, int, int, int = -1);
 	void setupBorders();
 	void drawBorders();
 	void resetMap();

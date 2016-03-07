@@ -4,15 +4,12 @@ TODO:
 	- Fix headers, do not include .h files in headers (or include one which only has predefinitions)
 	- Add connections and listening to header.
 	- Function to check player ID to see if it is within acceptable player id limits and that it is not a nullptr.
-	- Save blocks to map instead of whole array.
-	- Send blocks to players instead of whole array.
-	- Clearing should not send all data again, but just ask the client to clear their screen.
 	- Colour picker for map when in server.
 	- When pressing 'm' to go into the map mode, you currently have to first click on the map editor then on the map to start editing, it must think that the mouse isn't ready to place for some reason.
-	- Send map resize.
 	- Add map resize to GUI. (Map Settings Window)
-	- Ability to add layers of backgrounds with GUI.
-	- Backgrounds should draw
+	- Don't allow client to add or clear layers.
+	- If sending gets slow, could aways store objects in a 1D array, then for the map array, just point to the value in the array.
+	- Somestimes player cant place even with permission??
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)

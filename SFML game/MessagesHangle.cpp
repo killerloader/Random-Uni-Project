@@ -69,13 +69,35 @@ void MessagesHangle::ServerMessagesHandle()
 		//Send map:
 		sf::Packet mapData;
 		mapData << (sf::Int32)0;
-		mapData << (sf::Int32)WCR.MapPtr->MapWidth << (sf::Int32)WCR.MapPtr->MapHeight << WCR.PlrPtr->x << WCR.PlrPtr->y;
-
+		mapData << (sf::Int16)WCR.MapPtr->MapWidth << (sf::Int16)WCR.MapPtr->MapHeight << WCR.PlrPtr->x << WCR.PlrPtr->y;
+		int count_ = 0;
 		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
 			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
-			{
-				mapData << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int32)WCR.MapPtr->MapMatrix[i][ii].tileSetID << WCR.MapPtr->MapMatrix[i][ii].pixelPerfect;
-			}
+				if (WCR.MapPtr->MapMatrix[i][ii].tileID != -1)
+					count_++;
+		mapData << (sf::Int16)count_;
+		for (int i = 0; i < WCR.MapPtr->MapWidth; i++)
+			for (int ii = 0; ii < WCR.MapPtr->MapHeight; ii++)
+				if (WCR.MapPtr->MapMatrix[i][ii].tileID != -1)
+					mapData << (sf::Int16)i << (sf::Int16)ii << (sf::Int8)WCR.MapPtr->MapMatrix[i][ii].objectType << (sf::Int16)WCR.MapPtr->MapMatrix[i][ii].tileID << (sf::Int8)WCR.MapPtr->MapMatrix[i][ii].tileSetID << (sf::Int8)WCR.MapPtr->MapMatrix[i][ii].pixelPerfect;
+
+		mapData << (sf::Int8)WCR.MapPtr->BackgroundMatrix.size();
+
+		for (int i = 0; i < WCR.MapPtr->BackgroundMatrix.size(); i++)
+		{
+			mapData << (sf::Int32)WCR.MapPtr->BackgroundLayers[i];
+
+			count_ = 0;
+			for (int ii = 0; ii < WCR.MapPtr->MapWidth; ii++)
+				for (int iii = 0; iii < WCR.MapPtr->MapHeight; iii++)
+					if (WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID != -1)
+						count_++;
+			mapData << (sf::Int16)count_;
+			for (int ii = 0; ii < WCR.MapPtr->MapWidth; ii++)
+				for (int iii = 0; iii < WCR.MapPtr->MapHeight; iii++)
+					if (WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID != -1)
+						mapData << (sf::Int16)ii << (sf::Int16)iii << (sf::Int16)WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileID << (sf::Int8)WCR.MapPtr->BackgroundMatrix[i][ii][iii].tileSetID;
+		}
 
 		sendData(mapData, foundEmpty);
 		//cout << "Sent map data!" << endl;
@@ -259,7 +281,20 @@ void MessagesHangle::ServerMessagesHandle()
 						//mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << (sf::Int32)PP;
 						recievedata >> x_ >> y_ >> ID_ >> TID_ >> TSID_ >> PP_;
 						//cout << x_ << "_" << y_ << "_" << ID_ << "_" << TID_ << "_" << TSID_ << "_" << PP_;
-						WCR.MapPtr->SetObject(x_, y_, ID_, TID_, TSID_, PP_);
+						WCR.MapPtr->SetObject(x_, y_, ID_, TID_, TSID_, PP_, i);
+					}
+					break;
+				}
+				case 5://Client places background
+				{
+					if (WCR.otherPlayers[i]->MapEditPermissions)
+					{
+						sf::Int16 x_, y_, TID_;
+						sf::Int8 LID_, TSID_;
+						//mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << (sf::Int32)PP;
+						recievedata >> x_ >> y_ >> LID_ >> TID_ >> TSID_;
+						//cout << x_ << "_" << y_ << "_" << ID_ << "_" << TID_ << "_" << TSID_ << "_" << PP_;
+						WCR.MapPtr->SetBG(x_, y_, TID_, TSID_, LID_, i);
 					}
 					break;
 				}
@@ -311,7 +346,8 @@ void MessagesHangle::ClientMessagesHandle()
 		switch (messageType)
 		{
 		case 0://Receive map
-			sf::Int32 mapSizeX, mapSizeY;
+		{
+			sf::Int16 mapSizeX, mapSizeY;
 			float Px_, Py_;
 			recievedata >> mapSizeX >> mapSizeY >> Px_ >> Py_;
 			WCR.MapPtr->MapWidth = mapSizeX;
@@ -323,22 +359,71 @@ void MessagesHangle::ClientMessagesHandle()
 			WCR.PlrPtr->ystart = WCR.PlrPtr->y;
 			//Error here, when different map size.
 			WCR.MapPtr->MapMatrix = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
-			for (int i = 0; i < mapSizeX; i++)
-				for (int ii = 0; ii < mapSizeY; ii++)
+			sf::Int16 Blockss_;
+			recievedata >> Blockss_;
+			for (int i = 0; i < Blockss_; i++)
+			{
+				sf::Int16 BlockX, BlockY, tileID;
+				sf::Int8 objectT, TPP, tileSID;
+				recievedata >> BlockX >> BlockY >> objectT >> tileID >> tileSID >> TPP;
+				//bool TPP;
+				WCR.MapPtr->MapMatrix[BlockX][BlockY].objectType = objectT;
+				WCR.MapPtr->MapMatrix[BlockX][BlockY].tileID = tileID;
+				WCR.MapPtr->MapMatrix[BlockX][BlockY].tileSetID = tileSID;
+				WCR.MapPtr->MapMatrix[BlockX][BlockY].pixelPerfect = TPP;
+			}
+
+			sf::Int8 Layers;
+			recievedata >> Layers;
+			WCR.MapPtr->BackgroundMatrix = vector<vector<vector<mapObject>>>(Layers, vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight)));
+			WCR.MapPtr->BackgroundLayers.clear();
+			WCR.MapPtr->OrderedBackgroundLayers.clear();
+			WCR.MMPtr->LayerList->Clear();
+
+			for (int i = 0; i < Layers; i++)
+			{
+				sf::Int32 LayerId_;
+				recievedata >> LayerId_;
+
+				WCR.MapPtr->BackgroundLayers.push_back(LayerId_);
+				stringstream BacktoStr_;
+				BacktoStr_ << LayerId_;
+				bool foundSpot = false;
+				for (int ii = 0; ii < i; ii++)
+					if (LayerId_ > WCR.MapPtr->BackgroundLayers[WCR.MapPtr->OrderedBackgroundLayers[ii]])
+					{
+						WCR.MapPtr->OrderedBackgroundLayers.insert(WCR.MapPtr->OrderedBackgroundLayers.begin() + ii, i);
+						foundSpot = true;
+						WCR.MMPtr->LayerList->InsertItem(ii, BacktoStr_.str());
+						break;
+					}
+				if (!foundSpot)
 				{
-					sf::Int32 objectT, tileID, tileSID;
-					bool TPP;
-					recievedata >> objectT >> tileID >> tileSID >> TPP;
-					WCR.MapPtr->MapMatrix[i][ii].objectType = objectT;
-					WCR.MapPtr->MapMatrix[i][ii].tileID = tileID;
-					WCR.MapPtr->MapMatrix[i][ii].tileSetID = tileSID;
-					WCR.MapPtr->MapMatrix[i][ii].pixelPerfect = TPP;
+					WCR.MMPtr->LayerList->AppendItem(BacktoStr_.str());
+					WCR.MapPtr->OrderedBackgroundLayers.push_back(i);
 				}
+
+				sf::Int16 Blocks_;
+				recievedata >> Blocks_;
+				for (int ii = 0; ii < Blocks_; ii++)
+				{
+					sf::Int16 BlockX, BlockY, TID;
+					sf::Int8 TSID;
+					recievedata >> BlockX >> BlockY >> TID >> TSID;
+					cout << "_" << BlockX << "_" << BlockY << "_" << TID << "_" << TSID << endl;
+					WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileID = TID;
+					WCR.MapPtr->BackgroundMatrix[i][BlockX][BlockY].tileSetID = TSID;
+				}
+			}
+			WCR.MMPtr->LayerList->SelectItem(0);
 			WCR.MapPtr->setupBorders();
 			cout << "Loaded map from server!" << endl;
+			WCR.PlrPtr->sendXChange();//When loading new map, send new position.
 			break;
+		}
 		case 1://Receive block change
 			   //(int x, int y, int ID, int TID, int TSID)
+		{
 			sf::Int32 x, y, ID, TID, TSID;
 			bool TPP;
 			recievedata >> x >> y >> ID >> TID >> TSID >> TPP;
@@ -347,6 +432,7 @@ void MessagesHangle::ClientMessagesHandle()
 			WCR.MapPtr->MapMatrix[x][y].tileSetID = TSID;
 			WCR.MapPtr->MapMatrix[x][y].pixelPerfect = TPP;
 			break;
+		}
 		case 2://Players
 			sf::Int32 oPlayerMessage;
 			recievedata >> oPlayerMessage;
@@ -473,7 +559,7 @@ void MessagesHangle::ClientMessagesHandle()
 				case 6://Permission Change
 				{
 					sf::Int32 PID, PVal;
-					
+
 					recievedata >> PID >> PVal;
 					switch (PID)
 					{
@@ -486,6 +572,47 @@ void MessagesHangle::ClientMessagesHandle()
 				}
 			}
 			break;
+			case 3://Background Change
+			{
+				sf::Int16 x_, y_, TID_;
+				sf::Int8 LID_, TSID_;
+				recievedata >> x_ >> y_ >> LID_ >> TID_ >> TSID_;
+				WCR.MapPtr->BackgroundMatrix[LID_][x_][y_].tileID = TID_;
+				WCR.MapPtr->BackgroundMatrix[LID_][x_][y_].tileSetID = TSID_;
+				break;
+			}
+			case 4://Layer stuff
+			{
+				sf::Int32 LayerMsg;
+				recievedata >> LayerMsg;
+				switch (LayerMsg)
+				{
+				case 0://Layer add
+				{
+					sf::Int32 LID_;
+					recievedata >> LID_;
+					int Index_ = WCR.MapPtr->addLayer(LID_);
+					std::stringstream backtoStr;
+					backtoStr << LID_;
+					WCR.MMPtr->LayerList->InsertItem(Index_, backtoStr.str());
+					break;
+					//NewLayerEntry
+				}
+				case 1://Layer clear
+					sf::Int8 LID_;
+					recievedata >> LID_;
+					WCR.MapPtr->BackgroundMatrix[WCR.MapPtr->OrderedBackgroundLayers[LID_]] = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight)); break;
+				}
+
+			}
+			case 5://Clear Map
+				WCR.MapPtr->resetMap();
+				break;
+			case 6://Expand map
+				sf::Int16 NewW_, NewH_;
+				recievedata >> NewW_ >> NewH_;
+				WCR.MapPtr->expandMap(NewW_, NewH_);
+				break;
 		}
 	}
 	if (sockstat == sf::Socket::Disconnected)
