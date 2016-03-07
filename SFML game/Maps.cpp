@@ -217,6 +217,8 @@ void Map::Drawbackground(sf::View& ViewRef, E_Ground Ground)
 	WCR.LimitVariable(0, MapHeight - 1, MaxY);
 	for (int LID = 0; LID < BackgroundMatrix.size(); LID++)
 	{
+		if (WCR.MMPtr->OnlyShowThisLayer->IsActive() && WCR.inMapMaker && OrderedBackgroundLayers[LID] != WCR.MMPtr->curTileLayer)
+			continue;//Skip, not the layer we want.
 		int BL_ = BackgroundLayers[OrderedBackgroundLayers[LID]];
 		if (Ground == E_vForeground)
 		{
@@ -276,8 +278,11 @@ void Map::DrawMap(sf::View& ViewRef)
 		{
 			if (MapMatrix[i][ii].tileID != -1)//Not empty space.
 			{
-				WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID].setPosition(i * CellSize, ii * CellSize);
-				WCR.RenderRef.draw(WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID]);
+				if (!(WCR.inMapMaker && WCR.MMPtr->HideObjectSprites->IsActive()))
+				{
+					WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID].setPosition(i * CellSize, ii * CellSize);
+					WCR.RenderRef.draw(WCR.MMPtr->TileSets[MapMatrix[i][ii].tileSetID].Tiles[MapMatrix[i][ii].tileID]);
+				}
 				if (WCR.inMapMaker)
 					if (WCR.MMPtr->viewObjectTypes)
 					{

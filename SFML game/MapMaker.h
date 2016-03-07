@@ -192,6 +192,7 @@ public:
 	sfg::Button::Ptr AddLayerButton;
 	sfg::Button::Ptr ClearLayerButton;
 	sfg::ComboBox::Ptr LayerList;
+	sfg::CheckButton::Ptr OnlyShowThisLayer;
 
 	//Console window
 	sfg::Window::Ptr CommandWindow;//Window to select drawn tile.
@@ -211,6 +212,7 @@ public:
 
 	//Settings
 	sfg::CheckButton::Ptr ShowObjectTypes;
+	sfg::CheckButton::Ptr HideObjectSprites;
 	sfg::CheckButton::Ptr GiveAllPermissions;
 
 

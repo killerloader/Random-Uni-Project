@@ -121,26 +121,37 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	LayerWindow = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
 	LayerWindow->SetPosition(sf::Vector2f(200, 0));
 	LayerWindow->SetTitle("Layer Settings");
-	LayerWindow->SetRequisition(sf::Vector2f(200, 200));
+	LayerWindow->SetRequisition(sf::Vector2f(200, 100));
 	LayerWindow->Show(false);
 
 	LWTileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
-	NewLayerEntry = sfg::Entry::Create();
 	
+	LayerList = sfg::ComboBox::Create();
+	LayerList->AppendItem("1");
+	LayerList->SelectItem(0);
+
+	LWTileBoxVert->Pack(LayerList, true, false);
+	
+#ifdef MapMakerMode//No console on client map editor
 	AddLayerButton = sfg::Button::Create("Add Layer");
 	AddLayerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 102));
 
 	ClearLayerButton = sfg::Button::Create("Clear Layer");
 	ClearLayerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 104));
 
-	LayerList = sfg::ComboBox::Create();
-	LayerList->AppendItem("1");
-	LayerList->SelectItem(0);
+	NewLayerEntry = sfg::Entry::Create();
+	NewLayerEntry->SetText("2");//default at 2
 
-	LWTileBoxVert->Pack(LayerList, true, false);
 	LWTileBoxVert->Pack(NewLayerEntry, true, false);
 	LWTileBoxVert->Pack(AddLayerButton, true, false);
 	LWTileBoxVert->Pack(ClearLayerButton, true, false);
+#endif
+
+	LWTileBoxVert->Pack(sfg::Separator::Create(), false);
+	LWTileBoxVert->Pack(sfg::Label::Create("--Settings--"), false);
+	OnlyShowThisLayer = sfg::CheckButton::Create("Hide Other Layers");
+	LWTileBoxVert->Pack(OnlyShowThisLayer);
+
 	LayerWindow->Add(LWTileBoxVert);
 
 	LayerList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::ButtonPress, this, 103));
@@ -148,10 +159,12 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	//Editor Settings
 	ShowObjectTypes = sfg::CheckButton::Create("View Object Types");
 	ShowObjectTypes->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 0));
+	HideObjectSprites = sfg::CheckButton::Create("Hide Object Sprites");
 	box->Pack(sfg::Separator::Create(), false);
 	box->Pack(sfg::Label::Create("--Settings--"), false);
 	box->Pack(sfg::Separator::Create(), false);
 	box->Pack(ShowObjectTypes, false);
+	box->Pack(HideObjectSprites, false);
 #ifdef MapMakerMode//No console on client map editor
 	GiveAllPermissions = sfg::CheckButton::Create("Give All Edit Permission");
 	box->Pack(GiveAllPermissions, false);
@@ -176,8 +189,9 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	TileCanvas = sfg::Canvas::Create();
 	TileCanvas->SetRequisition(sf::Vector2f(200.0f, 200.0f));
 	TilesetList->SelectItem(curTileSet);
-	windowTiles->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
-	windowTiles->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
+
+	//windowTiles->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
+	//windowTiles->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
 
 	TileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
 	TileBoxVert->Pack(TilesetList, false, false);
@@ -247,6 +261,8 @@ void MapMaker::enterMapMaker()
 	mmView.setSize(sf::Vector2f(640, 480));
 	mmWindow.setView(mmView);
 	mmWindow.resetGLStates();
+
+
 }
 
 bool MapMaker::isInMapMaker()
@@ -637,6 +653,7 @@ bool MapMaker::LoadMap(int MID)
 		}
 	}
 	LayerList->SelectItem(0);
+	curTileLayer = WCR.MapPtr->OrderedBackgroundLayers[0];
 	WCR.MapPtr->setupBorders();
 	cout << "Loaded MAP ID: " << MID << endl;
 
@@ -819,7 +836,7 @@ void MapMaker::Step()
 	}
 
 	static bool LCtrlPressed_ = false;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) && WCR.RenderRef.hasFocus())
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 	{
 		PixelPerfectToggle->SetActive(true);
 		pixelPerfectBlocks = true;
@@ -834,7 +851,7 @@ void MapMaker::Step()
 		}
 
 
-	if (MouseOverWindow == 0 && !pressedOffScreen && WCR.RenderRef.hasFocus())//Or just check if false?
+	if (WCR.RenderRef.hasFocus())//Or just check if false?
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
@@ -879,10 +896,6 @@ void MapMaker::Step()
 			WCR.PlrPtr->PlayerImage.setPosition(WCR.PlrPtr->x, WCR.PlrPtr->y);
 		}
 	}
-	else if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-		pressedOffScreen = true;
-	else
-		pressedOffScreen = false;
 	
 	if (WindowIsHovered[1] && mmWindow.hasFocus())//If over tile window
 	{
@@ -933,6 +946,7 @@ void MapMaker::ClearMap()
 	LayerList->AppendItem("1");
 	LayerList->SelectItem(0);
 	WCR.MapPtr->resetMap();
+	curTileLayer = WCR.MapPtr->OrderedBackgroundLayers[0];
 }
 
 void MapMaker::setBlock(int BLK)

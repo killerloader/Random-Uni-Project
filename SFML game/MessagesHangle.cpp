@@ -417,6 +417,7 @@ void MessagesHangle::ClientMessagesHandle()
 			}
 			WCR.MMPtr->LayerList->SelectItem(0);
 			WCR.MapPtr->setupBorders();
+			WCR.MMPtr->curTileLayer = WCR.MapPtr->OrderedBackgroundLayers[0];
 			cout << "Loaded map from server!" << endl;
 			WCR.PlrPtr->sendXChange();//When loading new map, send new position.
 			break;

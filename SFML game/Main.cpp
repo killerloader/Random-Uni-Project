@@ -7,7 +7,6 @@ TODO:
 	- Colour picker for map when in server.
 	- When pressing 'm' to go into the map mode, you currently have to first click on the map editor then on the map to start editing, it must think that the mouse isn't ready to place for some reason.
 	- Add map resize to GUI. (Map Settings Window)
-	- Don't allow client to add or clear layers.
 	- If sending gets slow, could aways store objects in a 1D array, then for the map array, just point to the value in the array.
 	- Somestimes player cant place even with permission??
 	- Add health
@@ -29,7 +28,6 @@ WrapperClass::WrapperClass(sf::RenderWindow &RenderRef_) : RenderRef(RenderRef_)
 	otherPlayers = vector<otherPlayer*>(256, nullptr);
 	curmapID = 0;
 
-	
 	connected = false;
 	mapMakerPermissions = true;
 #ifdef MapMakerMode//start server.
