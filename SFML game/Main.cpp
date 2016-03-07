@@ -10,6 +10,9 @@ TODO:
 	- Don't allow client to add or clear layers.
 	- If sending gets slow, could aways store objects in a 1D array, then for the map array, just point to the value in the array.
 	- Somestimes player cant place even with permission??
+	- Add health
+	- Add punching that takes off health (A fist just comes out of the player)
+	- Punch cooldown.
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
