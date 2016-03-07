@@ -149,6 +149,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 
 	LWTileBoxVert->Pack(sfg::Separator::Create(), false);
 	LWTileBoxVert->Pack(sfg::Label::Create("--Settings--"), false);
+	LWTileBoxVert->Pack(sfg::Separator::Create(), false);
 	OnlyShowThisLayer = sfg::CheckButton::Create("Hide Other Layers");
 	LWTileBoxVert->Pack(OnlyShowThisLayer);
 
@@ -190,8 +191,9 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	TileCanvas->SetRequisition(sf::Vector2f(200.0f, 200.0f));
 	TilesetList->SelectItem(curTileSet);
 
-	//windowTiles->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
-	//windowTiles->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
+	//Still usefull for tile selector.
+	windowTiles->GetSignal(sfg::Button::OnMouseEnter).Connect(bind(&MapMaker::mouseEnterWindow, this, 1));
+	windowTiles->GetSignal(sfg::Button::OnMouseLeave).Connect(bind(&MapMaker::mouseLeaveWindow, this, 1));
 
 	TileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
 	TileBoxVert->Pack(TilesetList, false, false);

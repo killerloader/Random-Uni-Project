@@ -12,6 +12,10 @@ TODO:
 	- Add health
 	- Add punching that takes off health (A fist just comes out of the player)
 	- Punch cooldown.
+	- Hold shift to create box of tiles or objects.
+	- When making a box of tiles, you may want to make them not be placed under certain things, to avoid placing too many:
+		- Option to not place tiles under other layer of tiles.
+		- Option to not allow tiles to be placed under objects.
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
