@@ -16,6 +16,11 @@ TODO:
 	- When making a box of tiles, you may want to make them not be placed under certain things, to avoid placing too many:
 		- Option to not place tiles under other layer of tiles.
 		- Option to not allow tiles to be placed under objects.
+	- Tickbox to state if want to use animated object.
+	- Animation selector in server.
+	- Background tile selection.
+	- Climbing blocks.
+	- seed rand so same colours don't keep appearing.
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)

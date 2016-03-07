@@ -429,7 +429,7 @@ void MapMaker::updateTiles()
 void MapMaker::loadTiles()
 {
 	//const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, bool isMapTileSet = true, int cellSizeX = 32, int cellSizeY = 32
-	TileSets.emplace_back("Data/Sprites/TileSheet1.png", 0, 0, 1, 1, 3, 3, TilesetList);
+	TileSets.emplace_back("Data/Sprites/TileSheet1.png", 0, 0, 0, 0, 8, 10, TilesetList);
 	TileSets.emplace_back("Data/Sprites/TileSheet2.png", 0, 0, 0, 0, 10, 15, TilesetList);
 	TileSets.emplace_back("Data/Sprites/TileSheet3.png", 2, 1, 2, 2, 18, 11, TilesetList);
 	TileSets.emplace_back("Data/Sprites/TileSheet4.png", 20, 10, 2, 2, 30, 16, TilesetList);
