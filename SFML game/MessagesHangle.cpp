@@ -106,7 +106,7 @@ void MessagesHangle::ServerMessagesHandle()
 		if (WCR.otherPlayers[foundEmpty] == nullptr)
 		{
 			WCR.otherPlayers[foundEmpty] = new otherPlayer(WCR);
-			WCR.otherPlayers[foundEmpty]->MyCol = sf::Color(rand()%256, 30 + rand() % 196, 30 + rand() % 196, 30 + rand() % 196);
+			WCR.otherPlayers[foundEmpty]->MyCol = sf::Color(rand()%256, 50 + rand() % 196, 50 + rand() % 196, 255);
 			WCR.otherPlayers[foundEmpty]->PlayerImage.setColor(WCR.otherPlayers[foundEmpty]->MyCol);
 			WCR.otherPlayers[foundEmpty]->PlayerImage.setPosition(WCR.PlrPtr->x, WCR.PlrPtr->y);
 			WCR.otherPlayers[foundEmpty]->PID = foundEmpty;
@@ -566,6 +566,13 @@ void MessagesHangle::ClientMessagesHandle()
 					{
 					case 0://Map Editor Permissions
 						WCR.mapMakerPermissions = PVal;
+
+						//Check if map editor is open, if it is, force it closed.
+						if (WCR.inMapMaker)
+						{
+							WCR.inMapMaker = false;
+							WCR.MMPtr->mmWindow.close();
+						}
 						break;
 					}
 					break;
