@@ -52,7 +52,6 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	TilesetList = sfg::ComboBox::Create();
 
 	loadTiles();
-	updateTiles();
 
 	lvlIdMinus = sfg::Button::Create("-");
 	lvlIdPlus = sfg::Button::Create("+");
@@ -414,27 +413,22 @@ void MapMaker::changeTileSet()
 	windowTiles->SetRequisition(sf::Vector2f(TileSets[curTileSet].TileSheetSprite.getLocalBounds().width, TileSets[curTileSet].TileSheetSprite.getLocalBounds().height));
 }
 
-void MapMaker::updateTiles()
-{
-	for (int i = 0; i < TileSets.size(); i++)
-	{
-		TileSets[i].UpdateSprites();
-	}
-	for (int i = 0; i < TileSets.size(); i++)
-	{
-		TileSets[i].CreateCollisionMaps();
-	}
-}
-
 void MapMaker::loadTiles()
 {
-	//const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, bool isMapTileSet = true, int cellSizeX = 32, int cellSizeY = 32
-	TileSets.emplace_back("Data/Sprites/TileSheet1.png", 0, 0, 0, 0, 8, 10, TilesetList);
-	TileSets.emplace_back("Data/Sprites/TileSheet2.png", 0, 0, 0, 0, 10, 15, TilesetList);
-	TileSets.emplace_back("Data/Sprites/TileSheet3.png", 2, 1, 2, 2, 18, 11, TilesetList);
-	TileSets.emplace_back("Data/Sprites/TileSheet4.png", 20, 10, 2, 2, 30, 16, TilesetList);
-		//const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells
-	//loadTile("Data/Sprites/TileSheet3.png");//Load first tilesheet.
+	cout << "Loading tilesets...";
+	TileSets.emplace_back("Data/Sprites/TileSheet1.png", 0, 0, 0, 0, 8, 10, TilesetList); cout << ".";
+	TileSets.emplace_back("Data/Sprites/TileSheet2.png", 0, 0, 0, 0, 10, 15, TilesetList); cout << ".";
+	TileSets.emplace_back("Data/Sprites/TileSheet3.png", 2, 1, 2, 2, 18, 11, TilesetList); cout << ".";
+	TileSets.emplace_back("Data/Sprites/TileSheet4.png", 20, 10, 2, 2, 30, 16, TilesetList); cout << ".";
+	cout << " Done!" << endl << endl;
+
+	cout << "Loading pixel perfect collision masks...";
+	for (int i = 0; i < TileSets.size(); i++) {
+		TileSets[i].CreateCollisionMaps(); cout << ".";
+	}
+	cout << " Done!" << endl << endl;
+
+	system("CLS");
 }
 
 void MapMaker::buttonPressChangeMapID(int test)

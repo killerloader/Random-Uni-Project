@@ -106,7 +106,7 @@ void MessagesHangle::ServerMessagesHandle()
 		if (WCR.otherPlayers[foundEmpty] == nullptr)
 		{
 			WCR.otherPlayers[foundEmpty] = new otherPlayer(WCR);
-			WCR.otherPlayers[foundEmpty]->MyCol = sf::Color(rand()%256, rand() % 256, rand() % 256, 255);
+			WCR.otherPlayers[foundEmpty]->MyCol = sf::Color(rand()%256, 30 + rand() % 196, 30 + rand() % 196, 30 + rand() % 196);
 			WCR.otherPlayers[foundEmpty]->PlayerImage.setColor(WCR.otherPlayers[foundEmpty]->MyCol);
 			WCR.otherPlayers[foundEmpty]->PlayerImage.setPosition(WCR.PlrPtr->x, WCR.PlrPtr->y);
 			WCR.otherPlayers[foundEmpty]->PID = foundEmpty;

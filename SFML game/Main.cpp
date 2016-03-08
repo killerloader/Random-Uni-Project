@@ -115,6 +115,8 @@ int main()
 	
 
 	//Start the game loop.
+
+	srand(time(0));
 	while (window.isOpen())
 	{
 #ifdef MapMakerMode//start server.

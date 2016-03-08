@@ -25,9 +25,7 @@ struct TileSet
 		if (!TileSheetTex->loadFromFile(FileName))
 			cout << "Could not load image" << endl;
 		TSL->AppendItem(FileName);
-		CreateSprites();
-		//UpdateSprites();
-		//CreateCollisionMaps();
+		UpdateSprites();
 	}
 
 	TileSet(const char* FileName, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, int cellSizeX, int cellSizeY, int FrmTm)
@@ -44,9 +42,7 @@ struct TileSet
 		if (!TileSheetTex->loadFromFile(FileName))
 			cout << "Could not load image" << endl;
 		FrameTime = FrmTm;
-		CreateSprites();
-		//UpdateSprites();
-		//CreateCollisionMaps();
+		UpdateSprites();
 	}
 
 	TileSet(sf::Texture* TexPtr, int xOff, int yOff, int xGap, int yGap, int xCells, int yCells, sfg::ComboBox::Ptr TSL, const char* TSName = " ", int cellSizeX = 32, int cellSizeY = 32)
@@ -60,6 +56,7 @@ struct TileSet
 		CSizeX = cellSizeX;
 		CSizeY = cellSizeY;
 		TileSheetTex = TexPtr;
+		UpdateSprites();
 		TSL->AppendItem(TSName);
 	}
 
@@ -74,70 +71,35 @@ struct TileSet
 		CSizeX = cellSizeX;
 		CSizeY = cellSizeY;
 		TileSheetTex = TexPtr;
+		UpdateSprites();
 		FrameTime = FrmTm;
-	}
-
-	void CreateSprites()
-	{
-		for (int i = 0; i < CellsX; i++)
-			for (int ii = 0; ii < CellsY; ii++)
-				Tiles.emplace_back(*TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
 	}
 
 	void UpdateSprites()
 	{
+		//Texture wont change location, so no point in calling this more than once.
 		TileSheetSprite.setTexture(*TileSheetTex);
 
-		if (Tiles.size() != 0)
-		{
+		for (int ii = 0; ii < CellsY; ii++)
 			for (int i = 0; i < CellsX; i++)
-				for (int ii = 0; ii < CellsY; ii++)
-				{
-					Tiles[i + ii*CellsX].setTexture(*TileSheetTex);
-					Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
-					//Tiles[i + ii*CellsX].setTexture(ImgTex[i + ii*CellsX]);
-					//Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(0, 0), sf::Vector2i(CSizeX, CSizeY)));
-
-				}
-		}
+				Tiles.emplace_back(*TileSheetTex, sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
 	}
 
 	void CreateCollisionMaps()
 	{
-		cout << "Creating pixel perfect collision map for tileset!" << endl;
-		//sf::RenderTexture TempRenderTextures;
-		//TempRenderTextures.create(32, 32);
-		if(CollisionMaps.size()==0)
+		//Doesn't require a copy of the texture, so no point in calling more than once.
+		for (int ii = 0; ii < CellsY; ii++)
 			for (int i = 0; i < CellsX; i++)
-				for (int ii = 0; ii < CellsY; ii++)
-				{
-					CollisionMaps.emplace_back();
-					//ImgTex.emplace_back();
-				}
-					
-		for (int i = 0; i < CellsX; i++)
-			for (int ii = 0; ii < CellsY; ii++)
 			{
-				//cout << "test" << endl;
-				//TempRenderTextures.clear();
-				//Tiles[i + ii*CellsX].setPosition(0, 0);
-				//TempRenderTextures.draw(Tiles[i + ii*CellsX]);
-				//TempRenderTextures.display();
-				//Tiles[i + ii*CellsX].setTextureRect(sf::IntRect(sf::Vector2i(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii), sf::Vector2i(CSizeX, CSizeY)));
-				//CollisionMaps[i + ii*CellsX].copy( = Tiles[i + ii*CellsX].getTexture()->copyToImage();
-				CollisionMaps[i + ii*CellsX].create(32, 32);
-				CollisionMaps[i + ii*CellsX].copy(TileSheetTex->copyToImage(), 0,0, sf::IntRect(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii, 32, 32));
-				//ImgTex[i + ii*CellsX].loadFromImage(CollisionMaps[i + ii*CellsX]);
-				//sf::Image test((*TileSheetTex).copyToImage(), 0, 0, sf::IntRect(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii, 32, 32), true);
-				//CollisionMaps[CollisionMaps.size() - 1] = TempRenderTextures.getTexture().copyToImage();
+				CollisionMaps.emplace_back();
+				CollisionMaps[CollisionMaps.size() -1].create(32, 32);
+				CollisionMaps[CollisionMaps.size() - 1].copy(TileSheetTex->copyToImage(), 0, 0, sf::IntRect(xOffset + (CSizeX + GapW) * i, yOffset + (CSizeY + GapH) * ii, 32, 32));
 			}
-		//TempRenderTextures.clear();
 	}
 
 	vector<sf::Image> CollisionMaps;
 	sf::Texture* TileSheetTex;
 	vector<sf::Sprite> Tiles;
-	vector<sf::Texture> ImgTex;
 	sf::Sprite TileSheetSprite;
 	string Name;
 	int xOffset;
@@ -228,7 +190,6 @@ public:
 	bool WindowIsHovered[2];
 
 	void loadTiles();
-	void updateTiles();
 	void loadTile(const char*);
 	void changeTileSet();
 	void changeObjectType();
