@@ -18,9 +18,9 @@ TODO:
 		- Option to not allow tiles to be placed under objects.
 	- Tickbox to state if want to use animated object.
 	- Animation selector in server.
-	- Background tile selection.
+	[?] - Background tile selection.
 	- Climbing blocks.
-	- seed rand so same colours don't keep appearing.
+	- Delete textyure pointer in tioleset omn destructor.
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)

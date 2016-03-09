@@ -21,7 +21,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	WindowIsHovered[0] = false;
 	WindowIsHovered[1] = false;
 	MapMakrView.setSize(sf::Vector2f(640, 480));
-	windowSFG = sfg::Window::Create(sfg::Window::Style::TITLEBAR | sfg::Window::Style::BACKGROUND);
+	windowSFG = sfg::Window::Create(sfg::Window::Style::BACKGROUND);
 	windowSFG->SetPosition(sf::Vector2f(0, 0));
 	windowSFG->SetTitle("Main Menu");
 	windowSFG->SetRequisition(sf::Vector2f(200, 200));
@@ -35,7 +35,25 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	BlockNames.push_back("Clear Map");
 	BlockNames.push_back("Tile Selector");
 
+/*	sfg::Box::Ptr boxes;
+	sfg::Box::Ptr box;
+	sfg::Box::Ptr box1;
+	sfg::Box::Ptr box2;
+	sfg::Box::Ptr box3;
+*/
+
 	box = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	box1 = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	box2 = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	box3 = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	boxes = sfg::Box::Create(sfg::Box::Orientation::HORIZONTAL, 5.0f);
+	boxes->Pack(box, false);
+	boxes->Pack(sfg::Separator::Create(sfg::Separator::Orientation::VERTICAL), false);
+	boxes->Pack(box1, false);
+	boxes->Pack(sfg::Separator::Create(sfg::Separator::Orientation::VERTICAL), false);
+	boxes->Pack(box2, false);
+	boxes->Pack(sfg::Separator::Create(sfg::Separator::Orientation::VERTICAL), false);
+	boxes->Pack(box3, false);
 
 	ObjectTypeList = sfg::ComboBox::Create();
 
@@ -85,12 +103,11 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 		box->Pack(blockButtons[i], false);
 	}
 
-	box->Pack(sfg::Separator::Create(), false);
 #endif
-	box->Pack(sfg::Label::Create("--Map Editing--"), false);
-	box->Pack(sfg::Separator::Create(), false);
-	box->Pack(sfg::Label::Create("Object Type"), false);
-	box->Pack(ObjectTypeList, false);
+	box1->Pack(sfg::Label::Create("--Map Editing--"), false);
+	box1->Pack(sfg::Separator::Create(), false);
+	box1->Pack(sfg::Label::Create("Object Type"), false);
+	box1->Pack(ObjectTypeList, false);
 
 	//Map editor things
 	for (int i = 3; i < BlockNames.size(); i++)
@@ -98,7 +115,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 		blockButtons[i] = sfg::Button::Create(BlockNames[i]);
 		blockButtons[i]->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, i));
 		//box->SetPosition(sf::Vector2f(0.f, 20.f * i));
-		box->Pack(blockButtons[i], false);
+		box1->Pack(blockButtons[i], false);
 	}
 
 	PixelPerfectToggle = sfg::CheckButton::Create("Precise Collision");
@@ -109,50 +126,52 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	PlacingObjects->SetActive(true);
 	PlacingTiles = sfg::CheckButton::Create("Place Tiles");
 	PlacingTiles->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 3));
-	LayersButton = sfg::Button::Create("Layer Settings");
-	LayersButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 101));
-	box->Pack(LayersButton, false);
+	//LayersButton = sfg::Button::Create("Layer Settings");
+	//LayersButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 101));
+	//box1->Pack(LayersButton, false);
 
-	box->Pack(PixelPerfectToggle, false);
-	box->Pack(PlacingObjects, false);
-	box->Pack(PlacingTiles, false);
+	box1->Pack(PixelPerfectToggle, false);
+	box1->Pack(PlacingObjects, false);
+	box1->Pack(PlacingTiles, false);
 
-	LayerWindow = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
+	/*LayerWindow = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
 	LayerWindow->SetPosition(sf::Vector2f(200, 0));
 	LayerWindow->SetTitle("Layer Settings");
 	LayerWindow->SetRequisition(sf::Vector2f(200, 100));
-	LayerWindow->Show(false);
+	LayerWindow->Show(false);*/
 
-	LWTileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
+	//LWTileBoxVert = sfg::Box::Create(sfg::Box::Orientation::VERTICAL, 5.0f);
 	
 	LayerList = sfg::ComboBox::Create();
 	LayerList->AppendItem("1");
 	LayerList->SelectItem(0);
 
-	LWTileBoxVert->Pack(LayerList, true, false);
 	
-#ifdef MapMakerMode//No console on client map editor
+	
+	box2->Pack(sfg::Label::Create("--Layers--"), false);
+	box2->Pack(sfg::Separator::Create(), false);
+	box2->Pack(sfg::Label::Create("Current Layer"), false);
+	box2->Pack(LayerList, true, false);
+#ifdef MapMakerMode
+	ClearLayerButton = sfg::Button::Create("Clear Layer");
+	ClearLayerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 104));
+	box2->Pack(ClearLayerButton, true, false);
+
 	AddLayerButton = sfg::Button::Create("Add Layer");
 	AddLayerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 102));
 
-	ClearLayerButton = sfg::Button::Create("Clear Layer");
-	ClearLayerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 104));
 
 	NewLayerEntry = sfg::Entry::Create();
 	NewLayerEntry->SetText("2");//default at 2
 
-	LWTileBoxVert->Pack(NewLayerEntry, true, false);
-	LWTileBoxVert->Pack(AddLayerButton, true, false);
-	LWTileBoxVert->Pack(ClearLayerButton, true, false);
+	box2->Pack(NewLayerEntry, true, false);
+	box2->Pack(AddLayerButton, true, false);
+	
 #endif
-
-	LWTileBoxVert->Pack(sfg::Separator::Create(), false);
-	LWTileBoxVert->Pack(sfg::Label::Create("--Settings--"), false);
-	LWTileBoxVert->Pack(sfg::Separator::Create(), false);
 	OnlyShowThisLayer = sfg::CheckButton::Create("Hide Other Layers");
-	LWTileBoxVert->Pack(OnlyShowThisLayer);
+	box2->Pack(OnlyShowThisLayer);
 
-	LayerWindow->Add(LWTileBoxVert);
+	//LayerWindow->Add(LWTileBoxVert);
 
 	LayerList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::ButtonPress, this, 103));
 
@@ -160,29 +179,28 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	ShowObjectTypes = sfg::CheckButton::Create("View Object Types");
 	ShowObjectTypes->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::tickButtonPress, this, 0));
 	HideObjectSprites = sfg::CheckButton::Create("Hide Object Sprites");
-	box->Pack(sfg::Separator::Create(), false);
-	box->Pack(sfg::Label::Create("--Settings--"), false);
-	box->Pack(sfg::Separator::Create(), false);
-	box->Pack(ShowObjectTypes, false);
-	box->Pack(HideObjectSprites, false);
+	box3->Pack(sfg::Label::Create("--Settings--"), false);
+	box3->Pack(sfg::Separator::Create(), false);
+	box3->Pack(ShowObjectTypes, false);
+	box3->Pack(HideObjectSprites, false);
 #ifdef MapMakerMode//No console on client map editor
 	GiveAllPermissions = sfg::CheckButton::Create("Give All Edit Permission");
-	box->Pack(GiveAllPermissions, false);
+	box3->Pack(GiveAllPermissions, false);
 	ConsoleButton = sfg::Button::Create("Console");
 	ConsoleButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::ButtonPress, this, 100));
-	box->Pack(ConsoleButton, false);
+	box3->Pack(ConsoleButton, false);
 #else//Only allow clients to exit and enter map maker mode.
-	box->Pack(sfg::Separator::Create(), false);
+	box3->Pack(sfg::Separator::Create(), false);
 	ExitMapMakerButton = sfg::Button::Create("Exit map maker");
 	ExitMapMakerButton->GetSignal(sfg::Button::OnLeftClick).Connect(bind(&MapMaker::exitMapMaker, this));
-	box->Pack(ExitMapMakerButton, false);
+	box3->Pack(ExitMapMakerButton, false);
 #endif
 	//end
 	//Tile window
 	windowTiles = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
-	windowTiles->SetPosition(sf::Vector2f(200,0));
+	windowTiles->SetPosition(sf::Vector2f(0,200));
 	windowTiles->SetTitle("Tile Selector");
-	windowTiles->SetRequisition(sf::Vector2f(200, 200));
+	windowTiles->SetRequisition(sf::Vector2f(400, 200));
 	windowTiles->Show(false);
 
 	TilesetList->GetSignal(sfg::ComboBox::OnSelect).Connect(std::bind(&MapMaker::changeTileSet, this));
@@ -201,7 +219,7 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 #ifdef MapMakerMode//No console on client map editor
 	//Command window
 	CommandWindow = sfg::Window::Create(sfg::Window::Style::CLOSE | sfg::Window::Style::TOPLEVEL);
-	CommandWindow->SetPosition(sf::Vector2f(200, 0));
+	CommandWindow->SetPosition(sf::Vector2f(200, 200));
 	CommandWindow->SetTitle("Command Console");
 	CommandWindow->SetRequisition(sf::Vector2f(200, 200));
 	CommandWindow->Show(false);
@@ -226,11 +244,11 @@ MapMaker::MapMaker(WrapperClass &WCR_) : WCR(WCR_)
 	//end
 
 
-	windowSFG->Add(box);
+	windowSFG->Add(boxes);
 	desktop.Add(windowSFG);
 	windowTiles->Add(TileBoxVert);
 	desktop.Add(windowTiles);
-	desktop.Add(LayerWindow);
+	//desktop.Add(LayerWindow);
 #ifdef MapMakerMode//No console on client map editor
 	desktop.Add(CommandWindow);
 #endif
@@ -513,20 +531,27 @@ void MapMaker::ButtonPress(int test)
 		if (windowTiles->IsLocallyVisible())
 			windowTiles->Show(false);
 		else
+		{
 			windowTiles->Show(true);
+			desktop.BringToFront(windowTiles);
+		}
 		break;
 	}
 	case 100://Console
 		if (CommandWindow->IsLocallyVisible())
 			CommandWindow->Show(false);
 		else
+		{
 			CommandWindow->Show(true);
+			desktop.BringToFront(CommandWindow);
+		}
+			
 		break;
 	case 101://Layers
-		if (LayerWindow->IsLocallyVisible())
+		/*if (LayerWindow->IsLocallyVisible())
 			LayerWindow->Show(false);
 		else
-			LayerWindow->Show(true);
+			LayerWindow->Show(true);*/
 		break;
 	case 102://Add layer
 	{
@@ -555,16 +580,16 @@ void MapMaker::ButtonPress(int test)
 	}
 	case 103:curTileLayer = WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()]; cout << "Tile layer is now: " << curTileLayer << endl; break;
 	case 104:
-	if (LayerList->GetSelectedItem() < 0 || LayerList->GetSelectedItem() >= LayerList->GetItemCount())//Nothing selected
+	if (curTileLayer < 0 || curTileLayer >= LayerList->GetItemCount())//Nothing selected
 		break;
 		//cout << WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()] << endl;
 		//WCR.MapPtr->BackgroundMatrix[WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()]].clear();
-		WCR.MapPtr->BackgroundMatrix[WCR.MapPtr->OrderedBackgroundLayers[LayerList->GetSelectedItem()]] = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
+		WCR.MapPtr->BackgroundMatrix[WCR.MapPtr->OrderedBackgroundLayers[curTileLayer]] = vector<vector<mapObject>>(WCR.MapPtr->MapWidth, vector<mapObject>(WCR.MapPtr->MapHeight));
 #ifdef MapMakerMode
 		if (WCR.connected)
 		{
 			sf::Packet mapData;
-			mapData << (sf::Int32)4 << (sf::Int32)1 << (sf::Int8)LayerList->GetSelectedItem();
+			mapData << (sf::Int32)4 << (sf::Int32)1 << (sf::Int8)curTileLayer;
 			for (int i = 0; i < WCR.clients.size(); i++)
 				if (WCR.clients[i] != nullptr)
 					WCR.MHandle.sendData(mapData, i);

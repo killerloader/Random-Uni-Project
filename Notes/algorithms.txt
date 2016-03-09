@@ -1,0 +1,19 @@
+BIg O Notation - system of explaining the worst case speed of an algorithm.
+O(1):
+	- Indexing an array: cour << Test[0];//Only one element though.
+O(n):
+	- Searching through an array for a value (worst case will go through whole array)
+O(N^2):
+	- Checking if any char in the first array is also in the second array (requires two for loops nested)
+O(2^n)
+	- 
+O(Log(n))
+	- Gets better as n increases (in comparison to others), binary search is an example.
+
+Binary search:
+	With a sorted array, you can check both halves and find which half a number would lie in, and you can continue halving the array until it is found.
+
+Measure of how an algorithm scales.
+
+bigocheatsheet
+website that rates alogrithms on their type.

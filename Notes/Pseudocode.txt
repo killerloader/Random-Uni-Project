@@ -1,0 +1,25 @@
+- Mainly used for planning.
+- Not actual code, halfway between english and code.
+- used to explain concepts.
+- not specific to any language.
+- Can use flowcharts, or structured english.
+- Similar to code but simpler and informal.
+- No need to worry about syntax, focus on logic.
+- don't need to define a varaible, just assume it exists, and use SET to change it.
+
+IF, ENDIF, WHILE, ENDWHILE, SET, PRINT, READ
+
+Some things you don't write commands with, you just use structured english, like:
+Find highest number
+
+READ, OBTAIN, GET
+PRINT, DISPALY, SHOW
+SET INIT
+INCREMENT
+ADD SUBTRACT AND OR NOT etc.
+
+ELSEIF
+ELSE
+
+no datatypes unless important to get point across.
+

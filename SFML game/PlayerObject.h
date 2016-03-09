@@ -21,6 +21,7 @@ public:
 	PlayerObject(WrapperClass &WCR_);
 	~PlayerObject()
 	{
+		if(myName!=nullptr)
 		delete[] myName;
 	}
 	void PollControls();

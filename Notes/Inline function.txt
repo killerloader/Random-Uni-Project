@@ -1,0 +1,32 @@
+class test
+{
+public:
+	int getHealth();
+	inline int getShield()
+	{
+		return shield;
+	}
+};
+
+int test::getHealth()
+{
+	return health;
+}
+
+int main()
+{
+test newtest;
+cout << newtest.getHealth() << endl;
+cout << newtest.getShield() << endl;
+}
+
+Jumps are slightly slow (jumps being running funmctions from away from where the function is defined)
+Inline basically causes the compiler to copy and paste the function definition to where it was called, which is faster.
+
+- Only functions can be made inline.
+- Becasue it copies and pastes, if you call it a lot, a lot of code is generated.
+- base it on the size of the function.
+- Bad practice to do inline functions with more than one line, although 2-3 is also alright.
+- Common to do getters and setters like this.
+- Cannot split between .h and .cpp (maybe possible but messier, and no point when function is ~2 lines long)
+- inline keyword is a 'recommendation' to the compiler, not a command. It can be ignored.

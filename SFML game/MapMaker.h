@@ -77,7 +77,8 @@ struct TileSet
 
 	~TileSet()
 	{
-		delete TileSheetTex;
+		//if (TileSheetTex != nullptr)
+			//delete TileSheetTex;
 	}
 
 	void UpdateSprites()
@@ -143,7 +144,11 @@ public:
 	sfg::Button::Ptr lvlIdMinus;
 	sfg::Button::Ptr lvlIdPlus;
 	sfg::Entry::Ptr MapIDEntry;
+	sfg::Box::Ptr boxes;
 	sfg::Box::Ptr box;
+	sfg::Box::Ptr box1;
+	sfg::Box::Ptr box2;
+	sfg::Box::Ptr box3;
 	sfg::Box::Ptr MapBox;
 	sfg::Button::Ptr ConsoleButton;
 	sfg::CheckButton::Ptr PixelPerfectToggle;
@@ -153,8 +158,8 @@ public:
 	sfg::Button::Ptr ExitMapMakerButton;
 
 	//Layer Window
-	sfg::Window::Ptr LayerWindow;//Window to select drawn tile.
-	sfg::Box::Ptr LWTileBoxVert;
+	//sfg::Window::Ptr LayerWindow;//Window to select drawn tile.
+	//sfg::Box::Ptr LWTileBoxVert;
 	sfg::Entry::Ptr NewLayerEntry;
 	sfg::Button::Ptr AddLayerButton;
 	sfg::Button::Ptr ClearLayerButton;

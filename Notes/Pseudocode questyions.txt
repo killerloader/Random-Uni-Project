@@ -1,0 +1,9 @@
+1a) it looks like it finds the mid point of the two numbers entered.
+b) 
+2
+3
+4
+
+c)
+Input is not super increasing.
+22 is smaller than 31, which is the sum of the numbers before it.
