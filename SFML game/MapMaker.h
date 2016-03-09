@@ -75,6 +75,11 @@ struct TileSet
 		FrameTime = FrmTm;
 	}
 
+	~TileSet()
+	{
+		delete TileSheetTex;
+	}
+
 	void UpdateSprites()
 	{
 		//Texture wont change location, so no point in calling this more than once.

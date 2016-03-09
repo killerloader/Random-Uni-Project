@@ -19,6 +19,10 @@ public:
 	Animation PlayerAnimation;
 	sf::Image PlayerMask;
 	PlayerObject(WrapperClass &WCR_);
+	~PlayerObject()
+	{
+		delete[] myName;
+	}
 	void PollControls();
 	void MovePlayer(float Xmove, float Ymove);
 	float vspeed, hspeed, gravity, haccel, haccelSlip, hspeedmax, hfric, x, y, xstart, ystart, SPD, hfricSlip;

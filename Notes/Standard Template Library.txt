@@ -1,0 +1,24 @@
+- Not used as much in games industry due to being bloated, and sometimes can be done better. (slightly slower)
+- Debatable whether to use.
+- many other containers than vectors.
+- List:
+	- A series of nodes that are connected to each other.
+- Vector:
+	- An array that resizes themselves.
+- Hash map, unordered map, queue, stack, dequeue, list, vector.
+- Using insert with a vector is hard to do with a for loop, so it is recommended to use:
+there is an iterator class in the stl.
+std::iterator<>
+
+vector<int>::iterator iter;
+for(iter = myVar.begin(); iter != myVar.end(); iter++)
+{
+	cout << *iter << endl;
+}
+
+(Less important with a vector, however is needed with other types, like the list type)
+
+myVar.insert(myVar.begin()+5, 54);
+
+STL algorithms:
+- Does things like sorting stl containers.
