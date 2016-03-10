@@ -84,7 +84,7 @@ void otherPlayer::step()
 		HAUse = haccel;
 	}
 		
-	int AlphaDec = 15;
+	int AlphaDec = 50;
 	for (int i = 0; i < AfterImage.size(); i++)
 	{
 		if (AfterImage[i].getColor().a - AlphaDec <= 0)

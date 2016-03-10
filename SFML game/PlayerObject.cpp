@@ -36,8 +36,8 @@ PlayerObject::PlayerObject(WrapperClass &WCR_) : WCR(WCR_), PlayerAnimation(WCR_
 	PlayerImage.setPosition(x, y);
 
 	//Setup animation:
-	PlayerAnimation.addAnimation("Data\\Sprites\\PlayerLeft.png", 1, 1, 1, 3, 46, 35,5);
-	PlayerAnimation.addAnimation("Data\\Sprites\\PlayerRight.png", 1, 1, 1, 3, 46, 35,5);
+	PlayerAnimation.addAnimation("Data\\Sprites\\PlayerLeft.png", 1, 1, 1, 6, 46, 35,5);
+	PlayerAnimation.addAnimation("Data\\Sprites\\PlayerRight.png", 1, 1, 1, 6, 46, 35,5);
 }
 
 void PlayerObject::MovePlayer(float Xmove, float Ymove)
@@ -68,7 +68,7 @@ void PlayerObject::StepPlayer()
 	AfterImage.emplace_back(PlayerAnimation.getCurrentSprite());
 	//AfterImage[AfterImage.size() - 1].setPosition(x, y);
 	//after image step
-	int AlphaDec = 15;
+	int AlphaDec = 50;
 	for (int i = 0; i < AfterImage.size(); i++)
 	{
 		if (AfterImage[i].getColor().a - AlphaDec <= 0)

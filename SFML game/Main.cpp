@@ -21,6 +21,7 @@ TODO:
 	[?] - Background tile selection.
 	- Climbing blocks.
 	- Delete textyure pointer in tioleset omn destructor.
+	- Can collide with very top of object
 	*/
 
 void WrapperClass::LimitVariable(int Min, int Max, int& Var)
