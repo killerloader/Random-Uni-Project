@@ -159,8 +159,6 @@ void MessagesHangle::ServerMessagesHandle()
 			ColourData << (sf::Int32)2 << (sf::Int32)3 << (sf::Int32)i << (sf::Int32)WCR.otherPlayers[i]->MyCol.r << (sf::Int32)WCR.otherPlayers[i]->MyCol.g << (sf::Int32)WCR.otherPlayers[i]->MyCol.b;
 			sendData(ColourData, foundEmpty);
 		}
-		
-
 		//---
 
 
@@ -237,14 +235,14 @@ void MessagesHangle::ServerMessagesHandle()
 				}
 				case 2://pos change
 				{
-					float x_, y_;
-					recievedata >> x_ >> y_;
+					float x_, y_, hspeed_;
+					recievedata >> x_ >> y_ >> hspeed_;
 					for (int ii = 0; ii < WCR.clients.size(); ii++)
 					{
 						if (ii == i || WCR.clients[ii] == nullptr)
 							continue;
 						sf::Packet Data_;
-						Data_ << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)i << x_ << y_;
+						Data_ << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)2 << (sf::Int32)i << x_ << y_ << hspeed_;
 						sendData(Data_, ii);
 						continue;//no point
 					}
@@ -281,7 +279,7 @@ void MessagesHangle::ServerMessagesHandle()
 						//mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << (sf::Int32)PP;
 						recievedata >> x_ >> y_ >> ID_ >> TID_ >> TSID_ >> PP_;
 						//cout << x_ << "_" << y_ << "_" << ID_ << "_" << TID_ << "_" << TSID_ << "_" << PP_;
-						WCR.MapPtr->SetObject(x_, y_, ID_, TID_, TSID_, PP_, i);
+						WCR.MapPtr->SetObject(x_, y_, ID_, TID_, TSID_, PP_, i,true);
 					}
 					break;
 				}
@@ -294,7 +292,7 @@ void MessagesHangle::ServerMessagesHandle()
 						//mapData << (sf::Int32)2 << (sf::Int32)4 << (sf::Int32)x << (sf::Int32)y << (sf::Int32)ID << (sf::Int32)TID << (sf::Int32)TSID << (sf::Int32)PP;
 						recievedata >> x_ >> y_ >> LID_ >> TID_ >> TSID_;
 						//cout << x_ << "_" << y_ << "_" << ID_ << "_" << TID_ << "_" << TSID_ << "_" << PP_;
-						WCR.MapPtr->SetBG(x_, y_, TID_, TSID_, LID_, i);
+						WCR.MapPtr->SetBG(x_, y_, TID_, TSID_, LID_, i, true);
 					}
 					break;
 				}
@@ -515,9 +513,10 @@ void MessagesHangle::ClientMessagesHandle()
 						recievedata >> OPID;
 						if (WCR.otherPlayers[OPID] == nullptr)
 							break;
+						//cout << x_ << "" << y_ << endl;
 						recievedata >> x_ >> y_ >> hspd_;
 						WCR.otherPlayers[OPID]->xAct = 0;
-						WCR.otherPlayers[OPID]->xAct = 0;
+						WCR.otherPlayers[OPID]->yAct = 0;
 						WCR.otherPlayers[OPID]->x = x_;
 						WCR.otherPlayers[OPID]->y = y_;
 						WCR.otherPlayers[OPID]->hspeed = hspd_;
@@ -576,6 +575,11 @@ void MessagesHangle::ClientMessagesHandle()
 						break;
 					}
 					break;
+				}
+				case 7://Other player attack
+				{
+					sf::Int32 PID;//Get player ID
+					recievedata >> PID;
 				}
 				}
 			}

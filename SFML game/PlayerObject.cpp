@@ -276,7 +276,7 @@ void PlayerObject::sendPos()
 	if (!WCR.connected)
 		return;
 	sf::Packet sendData;
-	sendData << (sf::Int32)2 << (sf::Int32)2 << x << y;
+	sendData << (sf::Int32)2 << (sf::Int32)2 << x << y << hspeed;
 	WCR.MHandle.sendData(sendData, WCR.socket);
 }
 

@@ -17,4 +17,5 @@ mapObject::mapObject()
 
 mapObject::~mapObject()
 {
+
 }

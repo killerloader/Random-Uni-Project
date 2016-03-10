@@ -139,7 +139,7 @@ void otherPlayer::step()
 	}
 	if (hspeed != 0)
 	{
-		if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 1) || WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) == 1)
+		if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 1) || WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0))
 		{
 			bool fixed = false;
 			if (WCR.MapPtr->CheckCollision(BoundBox, x + hspeed, y, 0) != 1)
@@ -155,7 +155,7 @@ void otherPlayer::step()
 			if (!fixed)
 			{
 				if (hspeed > 0)
-					ContractDir(E_right);
+					ContractDir(E_right);//Error?
 				else if (hspeed < 0)
 					ContractDir(E_left);
 				hspeed = 0;

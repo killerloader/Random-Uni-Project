@@ -127,16 +127,17 @@ bool Map::isBg(int x, int y, int Layer)
 	return false;
 }
 
-void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP, int NoSend)
+void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP, int NoSend, bool Player)
 {
 	//X and Y are grid cells not actual coords.
 	WCR.LimitVariable(0, MapWidth - 1, x);
 	WCR.LimitVariable(0, MapHeight - 1, y);
-	if (x<floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
-		|| x > ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
-		|| y < floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
-		|| y > ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
-		return;
+	if(!Player)
+		if (x<floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+			|| x > ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+			|| y < floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
+			|| y > ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
+			return;
 	MapMatrix[x][y].objectType = ID;
 	MapMatrix[x][y].tileID = TID;
 	MapMatrix[x][y].tileSetID = TSID;
@@ -162,16 +163,17 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP, int NoSend
 
 }
 
-void Map::SetBG(int x, int y, int TID, int TSID, int LID, int NoSend)
+void Map::SetBG(int x, int y, int TID, int TSID, int LID, int NoSend, bool Player)
 {
 	//X and Y are grid cells not actual coords.
 	WCR.LimitVariable(0, MapWidth - 1, x);
 	WCR.LimitVariable(0, MapHeight - 1, y);
-	if (x<floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
-		|| x > ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
-		|| y < floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
-		|| y > ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
-		return;
+	if(!Player)
+		if (x<floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+			|| x > ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+			|| y < floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
+			|| y > ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
+			return;
 	BackgroundMatrix[LID][x][y].tileID = TID;
 	BackgroundMatrix[LID][x][y].tileSetID = TSID;
 
