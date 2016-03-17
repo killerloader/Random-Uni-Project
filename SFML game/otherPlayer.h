@@ -10,6 +10,7 @@ struct Map;
 class mapObject;
 class WrapperClass;
 class Animation;
+class fireBall;
 
 class otherPlayer
 {
@@ -21,6 +22,8 @@ public:
 	void draw();
 
 	WrapperClass &WCR;
+
+	vector<sf::Sprite> FireBalls;
 
 	enum Edirection
 	{

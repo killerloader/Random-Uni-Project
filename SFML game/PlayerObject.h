@@ -7,6 +7,7 @@ class mapObject;
 class otherPlayer;
 class WrapperClass;
 class Animation;
+class fireBall;
 
 class PlayerObject
 {
@@ -16,6 +17,8 @@ public:
 	sf::View PlayerView;
 	sf::Texture PlayerTex;
 	sf::Sprite PlayerImage;
+	sf::Texture PlayerAttackTex;
+	vector<fireBall> FireBalls;
 	Animation PlayerAnimation;
 	sf::Image PlayerMask;
 	PlayerObject(WrapperClass &WCR_);
@@ -34,6 +37,7 @@ public:
 	void sendXChange();
 	void sendJump();
 	void sendPos();//Positioning of player
+	void attack();
 	enum Edirection
 	{
 		E_left, E_right, E_up, E_down
@@ -43,6 +47,7 @@ public:
 
 	char* myName;
 	sf::Text NameText;
+
 
 
 	bool falling;

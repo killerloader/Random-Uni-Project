@@ -14,6 +14,7 @@ using namespace std;
 #include "otherPlayer.h"
 #include "PlayerObject.h"
 #include "MessagesHangle.h"
+#include "fireBall.h"
 
 /* Should not be needed as headers are above!
 class PlayerObject;

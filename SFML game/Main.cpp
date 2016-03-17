@@ -20,7 +20,7 @@ TODO:
 	- Animation selector in server.
 	[?] - Background tile selection.
 	- Climbing blocks.
-	- Delete textyure pointer in tioleset omn destructor.
+	- Delete texture pointer in tileset on destructor.
 	- Can collide with very top of object
 	*/
 

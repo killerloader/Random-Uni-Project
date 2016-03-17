@@ -63,6 +63,12 @@ void PlayerObject::ContractDir(Edirection DIrr)
 		MovePlayer(Xdir, Ydir);
 }
 
+void PlayerObject::attack()
+{
+	//Send step data and client side attack.
+
+}
+
 void PlayerObject::StepPlayer()
 {
 	AfterImage.emplace_back(PlayerAnimation.getCurrentSprite());
