@@ -1,0 +1,19 @@
+- Unified Modelling Language (UML)
+
+- In most programs we will use more than one class, these work together to achieve a result.
+- THis works by sending messages to other functions, or calling the functions of other classes.
+
+- Two types of diagrams:
+	- Collaboration diagrams
+		- Shows how one class/ object might interact with another.
+		- Pretty much class diagram.
+	- Sequence diagrams
+		- Shows what happens over time.
+		- Shows sequence/ timeline of messages between classes.
+		- Set up similar to a callstack.
+		- Called left to right (messages passed)
+		- Returns go from right to left)
+		- All goes from top to bottom until main program return.
+
+- Cmesh can be used with these diagrams, which is just a box showing the the class fuctions and vars.
++ meaning public and - meaning private.

@@ -1,0 +1,11 @@
+- Finding elements or an element that match a set of properties.
+- Linear search: Just iterate through array.
+
+- Binary search:
+	- only works if sorted.
+	- Split the data in two and check if it would be on both halves.
+	- Keep splitting data and checking middle value until found, if min and max are the same and it is not found, then it does not exist.
+	- DOuble size of array and you only need one more check, 16 checks with 60k items.
+
+- If you were searching for if an enemy was alive, you could use a second array that points to the alive ones (not really binary)
+- 

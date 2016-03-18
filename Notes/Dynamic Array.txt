@@ -1,0 +1,6 @@
+- Might not know the amount of data you will need for something.
+- A dynamic array is an array that shrinks to roughly match the size of the data stored within it.
+- Array is stored on the heap.
+- Number sotring how much memory and how many elements, Pointer to array itself.
+- Usually has a size that starts off bigger than amount needed, so that it doesn't need to resize every thing put in it.
+- When removing from middle, most efficient way is to copy end value to the middle and replace the old one (if you don't care about order)

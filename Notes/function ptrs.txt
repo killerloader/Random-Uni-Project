@@ -1,0 +1,12 @@
+Point to first byte of function.
+Can swap what function a function ptr points to to change behaviour.
+can use a typedef to make it a lot simpler to create a function ptr.
+typedef int (*MathFunction)(int, int);
+MathFunction FuncPtr = nullptr;
+
+not common in c++ becasue most things can be done with classes/ inheritence etc.
+Another way to do things, flexibly.
+
+c++ approach:
+
+typedef int (Player::*MathFunction)(int, int);// (Even though is in header, must be in class)

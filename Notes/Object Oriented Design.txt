@@ -1,0 +1,32 @@
+(One of the paradimes you can use)
+
+- Procedural Programming:
+	- Has limitations.
+	- WHat C is built around.
+	- Discrete functions performing small tasks.
+	- Data transfer via functions and global variables.
+	- Limitations:
+		- 
+Objects(Classes)
+	- Bind together data and functions.
+Objects (not functions)
+	- OOP divides a progream intyo objects instead of functions.
+	- Pretty much any game component (splash screen, menu, level manager, etc.
+	- Doesn't need to be tangible, could have separate classes for different monsters.
+FOur main tenets of OO:
+	- Abstraction:
+		- Same class/ data types, but can be a different thing (two different monsters in one monster class)
+	- Encapsulation and reusability:
+		- Data and functions get encased in a class/ object.
+		- One class can be reused for different things.
+		- Interface:
+			- Can have private variables, and create functions to access it, giving limits to what can be changed.
+			- Pretty much all public functions.
+	- Inheritance:
+		- Sub classes inherit data from base classes.
+	- Polymorphism:
+		- Sub classes are compatible with base classes (any class higher up in the inhertitance link), using casts.
+		- Can put a sub class in a base class pointer.
+
+Can call base classes by doing
+foo.Base::funtion()

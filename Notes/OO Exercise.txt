@@ -1,0 +1,26 @@
+1) OO uses objects to encapsulate data, these objects can be related to pretty much any system of a game.
+2) Encpasulation, Polymorphism, Abstraction, Inheritance.
+3) all private.
+4) 
+
+- Stone
+- Plant
+	- Tree
+	- Grass
+- Animal
+	- Rabbit
+	- Predator 
+		- Fox
+		- Tiger
+
+I might add 'Object' at the very base for everything to inherit from.
+And i might add prey for the rabit to inherit from.
+
+5) 
+'Object' would have a position and a sprite.
+'Animal' would have a name an animation, health and a movement function.
+'Predator' may have which animals it would attack, and it's damage.
+
+6)
+
+
