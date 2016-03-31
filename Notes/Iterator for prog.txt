@@ -1,0 +1,6 @@
+for( auto iter = list.begin(); iter != list.end(); ++iter)
+{
+	(iter*).doStuff();
+}
+
+(iter is overloaded so that ++ will cause it to go to the next item)
