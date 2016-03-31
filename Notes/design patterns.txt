@@ -1,0 +1,49 @@
+Common patterns:
+- Singleton
+- Pooling
+- Factory
+- Prototype
+
+Designing software is hard, but designing reusable object-oriented software us even harder.
+There are recurring patterns of classes in many OO systems.
+
+Once you know the patter, a lot of design decisions follow automatically.
+
+3 Groups of design patterns:
+- Creational - Process of object creation. (Factyory, Prototype, Singleton)
+- Structural - Deal with the composition of classes of objects. 
+- Behavioural - Characterize the way in which classes or objects interact and distribute responsibility. (Command)
+
+Singleton:
+- Global variables are bad.
+	- Needs extern between files.
+	- Accidentally corrupted.
+	- Accidentally made duplicate.
+- Singleton overcomes these problems.
+- Ensures a class only has one instance.
+- Provides a global point of access to it.
+- Is basically an instance of a class that can be accessed from anywhere in the program.
+- Not allowed to create another instance of the class.
+- In separate files like an ordinary class.
+- Have the class create itself: private pointer to itself (static)
+	- Set to nullptr in class cpp.
+	- Private: myClass* m_myPointer;
+	- (in CPP) myClass* myClass::m_myPointer = nullptr; (Set like function definitions)
+	- Also need a static function to create the instance:
+		- static input* getSingleton()
+		- static input* myClass::getSingleton()
+			{
+				if(m_myPointer == nullptr)
+					m_myPointer = new myClass;
+				return m_myPointer;
+			}
+		- This stops the class from being created twice with the function.
+- By putting the constructor and destructor in private, nothing else can create the class aside from the static function inside the class.
+- Pointer commonly called m_Instance
+- bad because it encourages coupling.
+
+Object pool:
+- When need a huge number of the exact same things.
+- Objects don't get deleted, they just get set to dead.
+- Objects get created at start, and then they just continually get recycled.
+- Each object tracks its alive state.

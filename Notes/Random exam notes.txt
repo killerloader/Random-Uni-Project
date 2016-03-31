@@ -1,0 +1,8 @@
+THe size of a struct wont actually be the sum of the ints in the struct. FOr performance.
+structs get 4 byte aligned.
+Two chars next to each other wont use 8 bytes, they will both fit into a 2 byte slot.
+but one char and one int will use 8 bytes, as an int can't start directly after.
+chars among ints will be given a 4 bytes slot.
+
+Can find size of stack array, but not heap array.
+

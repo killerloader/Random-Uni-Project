@@ -1,0 +1,8 @@
+- Can't index like an array ([2]) you only have the start, the end and the legnth, then you loop through them all.
+- node_ptr = node_ptr->next (used with iteration)
+- New nodes can be created by nodes on the heap.
+- Designed to be added to and removed from easily.
+- Everything takes up more memory (downside)
+- Singly linked only goes forward, double linked goes forward and backward (has a next and previous per node)
+- A node is an item in the list which holds data, and the next and prev pointer.
+- Don't hold in an array, pretty much makes it have no point.

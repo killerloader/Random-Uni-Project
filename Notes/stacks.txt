@@ -1,0 +1,26 @@
+- Can only add to the top of the stack.
+- Can onlyu remove from the top of the stack.
+- "Last In First Out" (LIFO) concept.
+- How a call stack works technically, new functions get added to the call stack, and only the newest one can be removed.
+- Good way to call rooms. For example, the menu is below the game, so if you go back to the menu, it has not been altered.
+And can just update the screen on the top of the stack.
+- Usually use a dynamic array (but a custom one, for efficiency)
+- Common functions: 
+	- Empty - returns if it is empty
+	- Size - returns the size of the stack
+	- Push - adds new to the top
+	- Pop - removes top item
+	- peak/top - returns pointer to the top
+- Set the amount of items on creation.
+- set the top to -1 (when it is empty, as -1 is out of bounds)
+- Storage classes not in charge of deleting pointer.
+
+- Should be array of pointer according to the exercise.
+
+
+- Can use linked list, but maybe slightly slower due to pointer overhead, also:
+
+- The linked-list approach has worst-case O(1) guarantees on each operation; the dynamic array has amortized O(1) guarantees.
+- The locality of the linked list is not as good as the locality of the dynamic array.
+- The total overhead of the dynamic array is likely to be smaller than the total overhead of the linked list, assuming both store pointers to their elements.
+- The total overhead of the dynamic array is likely to be greater than that of the linked list if the elements are stored directly.

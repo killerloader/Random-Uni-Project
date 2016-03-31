@@ -1,0 +1,35 @@
+- Run using FIFO concept.
+- First object pushed onto the queue is the first one out.
+- Like stacks, we can only push and pop an object on and off the queue from a specific place.
+(Can only pop first, and only push onto last)
+- Only have to access the top element (first one added)
+- You can not iterate or access any other elements.
+- New objects added onto the end.
+- Can be a singly linked list.
+
+Operations: (Similar to stack)
+- Empty, Size, Push, Pop (removes the frtont element (dequeue), Top
+
+Usually implemented using linked lists, as we have to add and remove from different ends, which would require resizing or shifting in an array.
+- Easy to remove the head element from a linked list than from other forms of basic data structure.
+
+A deque is a double-ended queue, which allows items to be inserted and removed from both sides.
+
+- Can be used to find plindrome (words that are the same backswards and forwards) by checking if what comes out on both sides is the same.
+(when you reach a single letter then it is a plindrome)
+
+- Good for scheduling algorithms (messages in online games etc)
+
+- Deque has:
+- PushBack, PopBack, PushFront, PopFront.
+- Doubly linked list.
+
+- Better than vectors because we don't need to move and copy items.
+
+- Basically when we need to operatate on items in the order they were inserted in.
+
+
+Dequeue: Removing from the end.
+Deque: Double ended queue (pronounced as deck, oterwise would sound same as dequeue)
+
+- Node can be inside queue class.

@@ -1,0 +1,23 @@
+union
+{
+	int a;
+	int b;
+};
+
+All variables in the union point to the same memory address.
+Don't need to keep the types the same, but it wont convert the types like with a cast.
+
+	struct RGB
+	{
+		unsigned char r;
+		unsigned char g;
+		unsigned char b;
+		unsigned char a;
+	}
+
+union
+{
+	unsigned int colour;
+
+	RGB colorRGB;
+}
