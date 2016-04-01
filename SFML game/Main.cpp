@@ -149,7 +149,7 @@ int main()
 			{
 				MapMkr.MapMakrView.setSize(window.getSize().x, window.getSize().y);
 				obj_Player.PlayerView.setSize(window.getSize().x, window.getSize().y);
-				window.setSize(sf::Vector2u(floorf(window.getSize().x/2)*2, floorf(window.getSize().y / 2) * 2));
+				window.setSize(sf::Vector2u((int)(window.getSize().x/2)*2, (int)(window.getSize().y / 2) * 2));
 			}
 		}
 		//Get player controls.

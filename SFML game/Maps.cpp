@@ -133,10 +133,10 @@ void Map::SetObject(int x, int y, int ID, int TID, int TSID, bool PP, int NoSend
 	WCR.LimitVariable(0, MapWidth - 1, x);
 	WCR.LimitVariable(0, MapHeight - 1, y);
 	if(!Player)
-		if (x<floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
-			|| x > ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
-			|| y < floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
-			|| y > ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
+		if (x< (int)((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+			|| x >(int)((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+			|| y < (int)((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
+			|| y > (int)((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
 			return;
 	MapMatrix[x][y].objectType = ID;
 	MapMatrix[x][y].tileID = TID;
@@ -169,10 +169,10 @@ void Map::SetBG(int x, int y, int TID, int TSID, int LID, int NoSend, bool Playe
 	WCR.LimitVariable(0, MapWidth - 1, x);
 	WCR.LimitVariable(0, MapHeight - 1, y);
 	if(!Player)
-		if (x<floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
-			|| x > ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
-			|| y < floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
-			|| y > ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
+		if (x<(int)((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+			|| x >(int)((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / 32)
+			|| y < (int)((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32)
+			|| y >(int)((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / 32))
 			return;
 	BackgroundMatrix[LID][x][y].tileID = TID;
 	BackgroundMatrix[LID][x][y].tileSetID = TSID;
@@ -201,17 +201,17 @@ void Map::Drawbackground(sf::View& ViewRef, E_Ground Ground)
 	int MinX, MaxX, MinY, MaxY;
 	if (WCR.inMapMaker)
 	{
-		MinX = floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
-		MaxX = ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
-		MinY = floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
-		MaxY = ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
+		MinX = (int)((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
+		MaxX = (int)((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
+		MinY = (int)((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
+		MaxY = (int)((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
 	}
 	else
 	{
-		MinX = floor((ViewRef.getCenter().x - ViewRef.getSize().x / 2) / CellSize);
-		MaxX = ceil((ViewRef.getCenter().x + ViewRef.getSize().x / 2) / CellSize);
-		MinY = floor((ViewRef.getCenter().y - ViewRef.getSize().y / 2) / CellSize);
-		MaxY = ceil((ViewRef.getCenter().y + ViewRef.getSize().y / 2) / CellSize);
+		MinX = (int)((ViewRef.getCenter().x - ViewRef.getSize().x / 2) / CellSize);
+		MaxX = (int)((ViewRef.getCenter().x + ViewRef.getSize().x / 2) / CellSize);
+		MinY = (int)((ViewRef.getCenter().y - ViewRef.getSize().y / 2) / CellSize);
+		MaxY = (int)((ViewRef.getCenter().y + ViewRef.getSize().y / 2) / CellSize);
 	}
 	WCR.LimitVariable(0, MapWidth - 1, MinX);
 	WCR.LimitVariable(0, MapWidth - 1, MaxX);
@@ -258,17 +258,17 @@ void Map::DrawMap(sf::View& ViewRef)
 	int MinX, MaxX, MinY, MaxY;
 	if (WCR.inMapMaker)
 	{
-		MinX = floor((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
-		MaxX = ceil((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
-		MinY = floor((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
-		MaxY = ceil((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
+		MinX = (int)((WCR.MMPtr->MapMakrView.getCenter().x - (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
+		MaxX = (int)((WCR.MMPtr->MapMakrView.getCenter().x + (WCR.MMPtr->MapMakrView.getSize().x / 2)) / CellSize);
+		MinY = (int)((WCR.MMPtr->MapMakrView.getCenter().y - (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
+		MaxY = (int)((WCR.MMPtr->MapMakrView.getCenter().y + (WCR.MMPtr->MapMakrView.getSize().y / 2)) / CellSize);
 	}
 	else
 	{
-		MinX = floor((ViewRef.getCenter().x - ViewRef.getSize().x / 2) / CellSize);
-		MaxX = ceil((ViewRef.getCenter().x + ViewRef.getSize().x / 2) / CellSize);
-		MinY = floor((ViewRef.getCenter().y - ViewRef.getSize().y / 2) / CellSize);
-		MaxY = ceil((ViewRef.getCenter().y + ViewRef.getSize().y / 2) / CellSize);
+		MinX = (int)((ViewRef.getCenter().x - ViewRef.getSize().x / 2) / CellSize);
+		MaxX = (int)((ViewRef.getCenter().x + ViewRef.getSize().x / 2) / CellSize);
+		MinY = (int)((ViewRef.getCenter().y - ViewRef.getSize().y / 2) / CellSize);
+		MaxY = (int)((ViewRef.getCenter().y + ViewRef.getSize().y / 2) / CellSize);
 	}
 	WCR.LimitVariable(0, MapWidth - 1, MinX);
 	WCR.LimitVariable(0, MapWidth - 1, MaxX);
@@ -334,10 +334,10 @@ namespace mmath
 
 int Map::CheckCollision(sf::Rect<int> CheckRect, int X, int Y, int CheckType)
 {
-	int Xmin = floor(X / CellSize);
-	int Xmax = floor((X + CheckRect.width) / CellSize);
-	int Ymin = floor(Y / CellSize);
-	int Ymax = floor((Y + CheckRect.height) / CellSize);
+	int Xmin = (int)(X / CellSize);
+	int Xmax = (int)((X + CheckRect.width) / CellSize);
+	int Ymin = (int)(Y / CellSize);
+	int Ymax = (int)((Y + CheckRect.height) / CellSize);
 	if(CheckType == 0)
 		if (X < 0 || Y < 0)
 			return 1;//0 returns 1....

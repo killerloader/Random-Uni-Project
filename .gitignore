@@ -24,3 +24,5 @@ game/Data/Fonts/optimusprinceps.zip
 *.tlog
 *.lastbuildstate
 *.pdb
+*.sdf
+*.exe

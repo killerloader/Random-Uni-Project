@@ -784,8 +784,8 @@ bool MapMaker::SaveMap(int MID)
 void MapMaker::Draw()
 {
 	mmWindow.clear(sf::Color(0,0,0,0));
-	int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
-	int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
+	int PlaceX = (int)((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
+	int PlaceY = (int)((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
 	WCR.LimitVariable(0, WCR.MapPtr->MapWidth - 1, PlaceX);
 	WCR.LimitVariable(0, WCR.MapPtr->MapWidth - 1, PlaceY);
 	sf::RectangleShape PlaceRect;
@@ -810,8 +810,8 @@ void MapMaker::Draw()
 	TilesetSelectedRect.setOutlineColor(sf::Color::Blue);
 	TilesetSelectedRect.setOutlineThickness(1);
 	TilesetSelectedRect.setSize(sf::Vector2f(32, 32));
-	int TssR_x = TileSets[curTileSet].xOffset + curTile * (32 + TileSets[curTileSet].GapW) - (floor(curTile / TileSets[curTileSet].CellsX) * (32+ TileSets[curTileSet].GapW) * TileSets[curTileSet].CellsX);
-	int TssR_y = TileSets[curTileSet].yOffset + floor(curTile / TileSets[curTileSet].CellsX) * (32 + TileSets[curTileSet].GapH);
+	int TssR_x = TileSets[curTileSet].xOffset + curTile * (32 + TileSets[curTileSet].GapW) - ((int)(curTile / TileSets[curTileSet].CellsX) * (32+ TileSets[curTileSet].GapW) * TileSets[curTileSet].CellsX);
+	int TssR_y = TileSets[curTileSet].yOffset + (int)(curTile / TileSets[curTileSet].CellsX) * (32 + TileSets[curTileSet].GapH);
 	TilesetSelectedRect.setPosition(TssR_x, TssR_y);
 	TileCanvas->Draw(TilesetSelectedRect);
 
@@ -822,8 +822,8 @@ void MapMaker::Draw()
 	if (WindowIsHovered[1])//If over tile window
 		if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().width && mousePos.y <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().height)
 		{
-			PlaceX = floor((mousePos.x - TileSets[curTileSet].xOffset) / (32 + TileSets[curTileSet].GapW));// -TileSets[curTileSet].xOffset;
-			PlaceY = floor((mousePos.y - TileSets[curTileSet].yOffset) / (32 + TileSets[curTileSet].GapH));// -TileSets[curTileSet].yOffset;
+			PlaceX = (int)((mousePos.x - TileSets[curTileSet].xOffset) / (32 + TileSets[curTileSet].GapW));// -TileSets[curTileSet].xOffset;
+			PlaceY = (int)((mousePos.y - TileSets[curTileSet].yOffset) / (32 + TileSets[curTileSet].GapH));// -TileSets[curTileSet].yOffset;
 			PlaceRect.setPosition(TileSets[curTileSet].xOffset + PlaceX * (32+ TileSets[curTileSet].GapW), TileSets[curTileSet].yOffset + PlaceY * (32+ TileSets[curTileSet].GapH));
 			TileCanvas->Draw(PlaceRect);
 			//cout << sf::Vector2i(absolutePosition.x, absolutePosition.y).x << "_" << sf::Vector2i(absolutePosition.x, absolutePosition.y).y << endl;
@@ -852,7 +852,7 @@ void MapMaker::Step()
 		if (event.type == sf::Event::Resized)
 		{
 			mmView.setSize(mmWindow.getSize().x, mmWindow.getSize().y);
-			mmWindow.setSize(sf::Vector2u(floorf(mmWindow.getSize().x / 2) * 2, floorf(mmWindow.getSize().y / 2) * 2));
+			mmWindow.setSize(sf::Vector2u((int)(mmWindow.getSize().x / 2) * 2, (int)(mmWindow.getSize().y / 2) * 2));
 		}
 	}
 
@@ -876,8 +876,8 @@ void MapMaker::Step()
 	{
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
-			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
-			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
+			int PlaceX = (int)((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
+			int PlaceY = (int)((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
 			if (!PlacingObjects->IsActive())
 			{
 				if (!WCR.MapPtr->isBg(PlaceX, PlaceY, curTileLayer))//If no object already here
@@ -892,8 +892,8 @@ void MapMaker::Step()
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
 		{
-			int PlaceX = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
-			int PlaceY = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
+			int PlaceX = (int)((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32);
+			int PlaceY = (int)((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32);
 			if (!PlacingObjects->IsActive())
 			{
 				if (WCR.MapPtr->isBg(PlaceX, PlaceY, curTileLayer))//If object is here
@@ -908,8 +908,8 @@ void MapMaker::Step()
 
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 		{
-			int Newx = floor((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32) * 32;
-			int Newy = floor((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32) * 32;
+			int Newx = (int)((sf::Mouse::getPosition(WCR.RenderRef).x + MapMakrView.getCenter().x - MapMakrView.getSize().x / 2) / 32) * 32;
+			int Newy = (int)((sf::Mouse::getPosition(WCR.RenderRef).y + MapMakrView.getCenter().y - MapMakrView.getSize().y / 2) / 32) * 32;
 			WCR.LimitVariable(0, WCR.MapPtr->MapWidth * 32, Newx);
 			WCR.LimitVariable(0, WCR.MapPtr->MapWidth * 32, Newy);
 			WCR.PlrPtr->x = Newx;
@@ -925,8 +925,8 @@ void MapMaker::Step()
 			/*
 			sf::Vector2f absolutePosition = TileCanvas->GetAbsolutePosition();
 			sf::Vector2i mousePos = sf::Mouse::getPosition(WCR.RenderRef) - sf::Vector2i(absolutePosition.x, absolutePosition.y);
-			PlaceX = floor(mousePos.x / 33);
-			PlaceY = floor(mousePos.y / 33);
+			PlaceX = flor(mousePos.x / 33);
+			PlaceY = flor(mousePos.y / 33);
 			//cout << sf::Vector2i(absolutePosition.x, absolutePosition.y).x << "_" << sf::Vector2i(absolutePosition.x, absolutePosition.y).y << endl;
 			PlaceRect.setPosition(PlaceX * 33, PlaceY * 33);
 			*/
@@ -936,7 +936,7 @@ void MapMaker::Step()
 			if (WindowIsHovered[1])//If over tile window
 				if (mousePos.x > 0 && mousePos.y > 0 && mousePos.x <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().width && mousePos.y <= TileSets[curTileSet].TileSheetSprite.getLocalBounds().height)
 				{
-					curTile = floor((mousePos.x -TileSets[curTileSet].xOffset)/(32+TileSets[curTileSet].GapW))+ floor((mousePos.y - TileSets[curTileSet].yOffset) /(32+TileSets[curTileSet].GapH))*TileSets[curTileSet].CellsX;
+					curTile = (int)((mousePos.x -TileSets[curTileSet].xOffset)/(32+TileSets[curTileSet].GapW))+ (int)((mousePos.y - TileSets[curTileSet].yOffset) /(32+TileSets[curTileSet].GapH))*TileSets[curTileSet].CellsX;
 					//curTileSet = 0;
 				}
 			//WCR.MapPtr->SetObject(PlaceX, PlaceY, CurBlock, curTile);

@@ -152,7 +152,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="BaseRoom.cpp" />
+    <ClCompile Include="MainFrame.cpp" />
+    <ClCompile Include="ResourceManager.cpp" />
+    <ClCompile Include="RoomManager.cpp" />
+    <ClCompile Include="Room_MainMenu.cpp" />
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaseRoom.h" />
+    <ClInclude Include="MainFrame.h" />
+    <ClInclude Include="ResourceManager.h" />
+    <ClInclude Include="RoomManager.h" />
+    <ClInclude Include="Room_MainMenu.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
