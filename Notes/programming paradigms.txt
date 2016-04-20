@@ -1,1 +1,79 @@
 programming paradigms
+
+"Styles of Programming"
+- A way of classifying different styles of languages.
+- Some languages are strictly one style, others use multiple styles.
+- Some paradigms are based on others.
+
+Lowest levels: 
+Imperative vs Declarative.
+then it keeps going:
+Procedural vs FUnctional
+Object oriented
+logic
+symbolic
+
+Extensive list on slides.
+
+Side effect: Something that changes the state of the program not based on its input. For example, if you had an add function that added two values, and it only had two variables for input (a and b, to return a+b)
+and the function also did something else (counting the amount of adds that happen) then that is a side effect.
+A game step event would do a lot of side effects, as it probably doesn't have much input/ output.
+
+A side effect is not when data goes in and data comes out, it is everything else.
+
+necessary in c++.
+
+Imperative vs Declarative.
+
+Imperative:
+- Imperative is the most common paradigm
+- Uses states to change the programs state.
+- Allows side effects.
+- C++, Java, C, Machine Code, A cooking recipe.
+- Pretty much "Step By Step" instructions.
+
+
+Declarative:
+- Opposite of imperative.
+- Describes the desired result, the rest is up to the compiler, no side effects (Usually).
+- SQL, Prolog, Regular Expression.
+- Pretty much sending in commands and it does the rest.
+- COuld be a shopping list, as it doesn't specify the order, or the shop to go to, or the isle to go down.
+- Don't really write languages with Declarative, you give something a desired result and it does everything.
+
+Is gamemaker A mix of the two? Each function does things which we do not know, but the actual language may be Imperative, and there are side effects.
+Probably only Imperative, because it's all step by step instructions.
+
+Procedural vs FUnctional
+
+Procedural:
+- For of imperative.
+- Treat programs as a series of procedures which contain step by step instructions.
+- Has side effects.
+- Procedures can be called in any order, any number of times.
+- Pascal, BASIC, C.
+
+Functional:
+- Step on top of declarative.
+- Output of a function is purely dependent on the input.
+- NO changable variables, no state changing, no side effects.
+- F#, Haskell, Hope
+
+
+Other:
+
+Object Oriented
+- Procedural and Imperative.
+- C++, python, Java, C#, PHP
+Logic Paradigm (often functional and declarative)
+- Based on formal logic.
+- Prolog and Datalog
+Symbolic (Functional and Declarative)
+- Program can modify its own formulas as iof they were data.
+- Everything is represented the same.
+- WOlfram language, LISP
+
+- FOr assignment:
+- Search up harvard referecning for adding references
+- References should not be wiki, or forums, make sure references are to a thesis or a detailed page.
+
