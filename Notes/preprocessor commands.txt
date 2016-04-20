@@ -1,0 +1,22 @@
+- Controlling the preprocessor.
+- Commands to the compiler rather than to be code that gets compiled.
+- Starts with a #
+- when using #include, using <> willsearch OS parts, the "" will search local files.
+- #include treats the contents of the specified file as if it appeared in the place of the #include.
+- #define <token> <value> (treaks the token as being the value, basically find and replace)
+	- Constants, Macros, Identifiers
+- #define can be used as a macro. "#define ADD(a,b) a + b"
+- #if #else #elif (else if) #endif
+- #if defined OR #ifdef
+- #ifndef OR #if !defined
+- Can define without a value (like #define debug), called an identifier.
+- #undef
+- define is used for include guards. Pragma once has the same effect. pragma once is the new way, and it does it to the whole file.
+- #error, forces compiler to show error.
+
+Some that don't have a #
+__FILE__, __LINE__, __DATA__, __TIME_, __TIMESTAMP__
+
+#pragma warning
+#pragma is reserved for compiler specific things
+#pragma warning (disable : 4244)

@@ -1,0 +1,7 @@
+- Add includes to a separate file.
+- cons outweigh pros most of the time.
+
+- Needs to compile twice. (slower compilation)
+- Everything always needs to recompile when one cahnge is made to a file in the precompiled header.
+
+- Easier and safer.

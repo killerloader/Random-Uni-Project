@@ -1,0 +1,9 @@
+- Remember 4 types of errors:
+	- Compiler, Linker, Runtim, Logical.
+
+- You write code to test code.
+
+- More specifically:
+	...
+
+Check if a functon returns something it should when something is input.

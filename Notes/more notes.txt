@@ -1,1 +1,4 @@
 primitive = basic data types (bool, int, float, char, int)
+
+- Method is a wrod for a function in a class.
+- Padding added to class/strut when bytes don't align.
