@@ -1,0 +1,17 @@
+- Don't want to go back to nodes that already went to, so keep an array of bools to make sure you don't. (Make sure only check each node once)
+- Could set all to false before going through each node.
+
+depth first
+- Search as far down a track before.
+- Push first node on stack.
+- While not empty
+	- Get top of stack and remove it.
+	- Process it.
+	- Mark it as traversed.
+	- Loop through its edges.
+		- If end node of edge not traversed or on the stack.
+			- Push end node onto the stack.
+
+Bredth first 
+- Uses queue, but same process.
+- Goes down multiple paths at the same time.

@@ -1,0 +1,48 @@
+Many types of trees, used for different situations.
+
+Red-Black trees:
+	- Self balancing tree, basically it balances itself to keep it efficient.
+	- Not perfectly balanced, but good enough.
+	- Root is always black.
+	- Leaves, which are null pointers, are always black (conceptual)
+	- Children of red nodes are alwyas black.
+	- Any path to the leaves have the same amount of black nodes.
+	- Wost case, one path can be twice as long as another.
+	- O(log(n))
+
+spacial - tree: 
+	- physical space in a tree structure.
+	- Useful for games, as it partitions the map.
+	- Quad-Trees come under this
+		- Fairly easy to implement, and good for top-down/ 2D games.
+	- Binary Search Partition Trees (BSP trees)
+		- Used less now. (Used in portal, and some popular games)
+	- Octrees
+		- Good when objects are clustered in 3D space.
+		- Most common in 3D games.
+	- K-D Trees
+		- Hybrid of BSP and Quad trees.
+
+Quadtrees
+	- Root node holds whole map.
+	- Split root node into 4.
+	- Keep subdividing if there is a need.
+	- Each node holds a list of enemies/ objects.
+	- Search is pretty much O(log(n))
+	- Finding neighbouring cells is no very efficient.
+	- Memory fragmentation.
+
+BSP tree:
+	- Splits space in two, instead of 4, usually along walls.
+	- A bunch of lines, put into a tree, when inserting or searching, check if node is on either side of all lines, until at the bottom of the tree.
+	- No good way to split planes.
+	- Not used often, quadtrees and octrees are usually better.
+
+K-D trees:
+	- Hybrid of BSP and Quad trees.
+	- Nodes are split in two parts, but is split long one axis.
+	- Splits along an objct (the most middle (median) enemy)
+	- Alternates which direction it splits (horizontally and vertically)
+	- Makes rectangles instead of squares.
+
+Use the tree that fits the situation. Most liekly quadtrees and octtrees.

@@ -1,0 +1,26 @@
+- A data structure for storing the relationship between data points. (how data is connected)
+- Two parts to a graph: verticies and edges. Verticies are the data, edges are the connections.
+- verticies can be called nodes (often)
+- edges contain two nodes that connect them.
+- edges can be one way or two way.
+- two way are undirected edges, a graph that only has these is a non-directed graph.
+Otherwise is called a digraph (directed graph)
+- Cyclic = graph that goes around one way.
+- Connected graph = a path between all points, from one point you can get to any other.
+- Unconncted = can't get to all points.
+- the "degree" of a vertex, is the amount of connections it has.
+- Weighted graph, each edge has a weight, which can be used to find which path is the best.
+- Two ways to store graphs:
+	- Adjacency matrix (2D array): 1D array to store nodes, 2D array to store edges. 1st dimension(rows) = node IDs, 2nd dimension(columns) = if it has a connection to that node ID.
+		- Costly to add/ remove nodes.
+		- Cache friendly.
+		- Cheap to operate on.
+		- Can't have more than one connection between nodes.
+	- Adjacency array: Each node contains a list of connections to the nodes it connects to.
+		- Less memory.
+		- Slow to find values.
+
+- Array of nodes.
+- Node object contains node data and edges.
+- When removing a node, need to remove edges that connect to it, to do this we must loop through every node to find which edges connect to the removed one.
+- Don't need to search through to find if it is a non directed graph.
