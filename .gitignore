@@ -26,3 +26,8 @@ game/Data/Fonts/optimusprinceps.zip
 *.pdb
 *.sdf
 *.exe
+*.iobj
+*.ipdb
+*.bin
+*.opendb
+*.idb
